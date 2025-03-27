@@ -3,7 +3,6 @@ require('dotenv').config();
 
 const authenticateJWT = (req, res, next) => {
     const token = req.header('Authorization')?.split(' ')[1];
-
     if (!token) {
         return res.status(401).json({ message: 'Không có quyền truy cập' });
     }

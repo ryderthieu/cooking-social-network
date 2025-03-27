@@ -19,7 +19,7 @@ const login = async (req, res) => {
 
     res.status(200).json({ email, token });
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
     res.status(400).json({ message: error.message });
   }
 };
@@ -28,12 +28,19 @@ const register = async (req, res) => {
   const { email, password, lastName, firstName, gender, birthDay } = req.body;
 
   try {
-    const user = await User.register(email, password, lastName, firstName, gender, birthDay);
+    const user = await User.register(
+      email,
+      password,
+      lastName,
+      firstName,
+      gender,
+      birthDay
+    );
     res
       .status(200)
       .json({ message: "Đăng ký thành công! Vui lòng đăng nhập để tiếp tục." });
   } catch (error) {
-    console.log(error.message)
+    console.log(error.message);
 
     res.status(400).json({ error: error.message });
   }
@@ -94,7 +101,7 @@ const confirmOtp = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "Người dùng không tồn tại!" });
     }
-    console.log(otp)
+    console.log(otp);
 
     if (user.otp !== otp) {
       return res.status(400).json({ error: "Mã OTP không đúng!" });
@@ -111,7 +118,7 @@ const confirmOtp = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
   }
-}
+};
 const resetPassword = async (req, res) => {
   const { email, newPassword } = req.body;
 
@@ -134,10 +141,115 @@ const resetPassword = async (req, res) => {
     user.otpExpire = undefined;
     await user.save();
 
-    return res.status(200).json({ message: "Mật khẩu đã được cập nhật thành công!" });
+    return res
+      .status(200)
+      .json({ message: "Mật khẩu đã được cập nhật thành công!" });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 };
 
-module.exports = {login, register, forgotPassword, resetPassword, confirmOtp}
+const getUserById = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: "ID người dùng không hợp lệ!" });
+    }
+
+    const user = await User.findById(userId)
+      .select("-password -otp -otpExpire -email")
+      .populate("followers", "firstName lastName avatar _id")
+      .populate("following", "firstName lastName avatar _id");
+
+    if (!user) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Lỗi khi lấy người dùng:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+
+const getUserInfo = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId)
+      .select("-password -otp -otpExpire")
+      .populate("followers", "firstName lastName avatar _id")
+      .populate("following", "firstName lastName avatar _id")
+      .populate("savedRecipe", "title thumbnail");
+
+    if (!user) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("Lỗi khi lấy người dùng:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+
+const searchUser = async (req, res) => {
+  try {
+    const { key, page = 1, limit = 10 } = req.query;
+    if (!key) {
+      return res.status(400).json({ error: "Vui lòng nhập từ khóa tìm kiếm!" });
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const keywords = key.trim().split(/\s+/); 
+    const regexPatterns = keywords.map((word) => new RegExp(word, "i")); 
+
+    const query = {
+      $or: [
+        { email: { $in: regexPatterns } },
+        { firstName: { $in: regexPatterns } },
+        { lastName: { $in: regexPatterns } },
+        {
+          $expr: {
+            $regexMatch: {
+              input: { $concat: ["$lastName", " ", "$firstName"] },
+              regex: keywords.join(".*"), 
+              options: "i",
+            },
+          },
+        },
+      ],
+    };
+
+    const users = await User.find(query)
+      .select("-password -otp -otpExpire -email")
+      .skip(skip)
+      .limit(Number(limit));
+
+    const totalUsers = await User.countDocuments(query);
+
+    res.status(200).json({
+      totalUsers,
+      totalPages: Math.ceil(totalUsers / limit),
+      currentPage: Number(page),
+      users,
+    });
+  } catch (error) {
+    console.error("Lỗi khi tìm kiếm người dùng:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+
+
+
+module.exports = {
+  login,
+  register,
+  forgotPassword,
+  resetPassword,
+  confirmOtp,
+  getUserById,
+  getUserInfo,
+  searchUser,
+};
