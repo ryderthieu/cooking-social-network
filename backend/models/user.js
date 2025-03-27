@@ -16,19 +16,23 @@ const userSchema = new Schema(
     savedPost: [{ type: Schema.Types.ObjectId, ref: "Video", default: [] }],
     followers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     following: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
+    birthday: {type: Date},
+    avatar : {type: String}
   },
   {
     timestamps: true,
   }
 );
 
-userSchema.statics.signup = async function (
+userSchema.statics.register = async function (
   email,
   password,
   lastName,
-  firstName
+  firstName,
+  gender,
+  birthDay
 ) {
-  if (!email || !password || lastName || firstName) {
+  if (!email || !password || lastName || firstName || gender || birthDay) {
     throw Error("Bạn chưa điền hết thông tin!");
   }
 
@@ -50,6 +54,8 @@ userSchema.statics.signup = async function (
     password: hash,
     lastName,
     firstName,
+    gender,
+    birthday
   });
 
   return user;
