@@ -10,6 +10,7 @@ const app = express();
 db.connect();
 app.use(express.json());
 app.use(cors());
+app.use("/api/users", require("./routes/userRoute"));
 app.use("/api/posts", require("./routes/postRoute"));
 app.use("/api/videos", require("./routes/videoRoute"));
 app.use("/api/users", require("./routes/userRoute"));

@@ -97,8 +97,7 @@ const addVideo = async (req, res) => {
     }
 
     const newVideo = new Video({
-      //author: req.user._id,
-      author: "67d7d3258dec3a639c0321eb",
+      author: req.user._id,
       caption,
       recipe,
       videoUri,
@@ -191,7 +190,7 @@ const commentVideo = async (req, res) => {
   try {
     const { id } = req.params;
     const { comment } = req.body;
-    const userId = req.user ? req.user._id : "67d7d3258dec3a639c0321eb";
+    const userId = req.user._id;
     const video = await Video.findById(id);
 
     if (!video) {

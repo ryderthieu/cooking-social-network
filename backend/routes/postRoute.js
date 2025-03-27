@@ -1,6 +1,5 @@
 const express = require("express");
-const router = express.Router();
-const middlewares = require("../middlewares/authMiddleware");
+const { authenticateJWT } = require("../middlewares/authMiddleware");
 const {
   addPost,
   editPost,
@@ -13,14 +12,16 @@ const {
   getPostById,
 } = require("../controllers/postController");
 
+const router = express.Router();
+
 router.get("/", getAllPosts);
-router.put("/edit-post/:id", editPost);
-router.delete("/delete-post/:id", deletePost);
-router.patch("/like-post/:id", likePost);
-router.patch("/comment-post/:id", commentPost);
-router.patch("/share-post/:id", sharePost);
+router.put("/edit-post/:id", authenticateJWT, editPost);
+router.delete("/delete-post/:id", authenticateJWT, deletePost);
+router.patch("/like-post/:id", authenticateJWT, likePost);
+router.patch("/comment-post/:id", authenticateJWT, commentPost);
+router.patch("/share-post/:id", authenticateJWT, sharePost);
 router.get("/search", searchPosts);
 router.get("/:id", getPostById);
-router.post("/add-post", addPost);
+router.post("/add-post", authenticateJWT, addPost);
 
 module.exports = router;

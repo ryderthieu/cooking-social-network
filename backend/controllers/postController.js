@@ -30,8 +30,7 @@ const addPost = async (req, res) => {
     }
 
     const newPost = new Post({
-      //author: req.user._id,
-      author: "67d7d3258dec3a639c0321eb",
+      author: req.user._id,
       caption,
       recipe,
       media,
@@ -198,7 +197,7 @@ const commentPost = async (req, res) => {
   try {
     const { id } = req.params;
     const { comment } = req.body;
-    const userId = req.user ? req.user._id : "67d7d3258dec3a639c0321eb";
+    const userId = req.user._id;
     const post = await Post.findById(id);
 
     if (!post) {

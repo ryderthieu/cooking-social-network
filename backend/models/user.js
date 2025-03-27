@@ -17,8 +17,8 @@ const userSchema = new Schema(
     savedVideo: [{ type: Schema.Types.ObjectId, ref: "Video", default: [] }],
     followers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     following: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
-    birthday: {type: Date},
-    avatar : {type: String}
+    birthday: { type: Date },
+    avatar: { type: String },
   },
   {
     timestamps: true,
