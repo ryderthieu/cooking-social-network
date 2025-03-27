@@ -32,7 +32,7 @@ userSchema.statics.register = async function (
   gender,
   birthDay
 ) {
-  if (!email || !password || lastName || firstName || gender || birthDay) {
+  if (!email || !password || !lastName || !firstName || !gender || !birthDay) {
     throw Error("Bạn chưa điền hết thông tin!");
   }
 
@@ -55,7 +55,7 @@ userSchema.statics.register = async function (
     lastName,
     firstName,
     gender,
-    birthday
+    birthDay
   });
 
   return user;

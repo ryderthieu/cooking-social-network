@@ -12,5 +12,5 @@ app.use(express.json());
 app.use(cors());
 app.use("/api/posts", require("./routes/postRoute"));
 app.use("/api/videos", require("./routes/videoRoute"));
-
+app.use("/api/users", require("./routes/userRoute"));
 app.listen(PORT, () => console.log(`App listening ${PORT}`));
