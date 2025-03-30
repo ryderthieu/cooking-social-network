@@ -386,13 +386,13 @@ const getFollowing = async (req, res) => {
   }
 };
 
-const follow = async (req, res) => {
+const toggleFollow = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { followingId } = req.body;
+    const { followingId, action } = req.body; 
 
-    if (!followingId) {
-      return res.status(400).json({ error: "Thiếu ID người dùng cần follow!" });
+    if (!["follow", "unfollow"].includes(action)) {
+      return res.status(400).json({ error: "Hành động không hợp lệ!" });
     }
 
     const user = await User.findById(userId).select("following");
@@ -402,56 +402,30 @@ const follow = async (req, res) => {
       return res.status(404).json({ error: "Người dùng không tồn tại!" });
     }
 
-    if (user.following.includes(followingId)) {
-      return res.status(400).json({ error: "Bạn đã follow người này rồi!" });
+    if (action === "follow") {
+      if (user.following.includes(followingId)) {
+        return res.status(400).json({ error: "Bạn đã follow người này!" });
+      }
+      user.following.push(followingId);
+      followingUser.followers.push(userId);
+    } else {
+      if (!user.following.includes(followingId)) {
+        return res.status(400).json({ error: "Bạn chưa follow người này!" });
+      }
+      user.following = user.following.filter(id => id.toString() !== followingId);
+      followingUser.followers = followingUser.followers.filter(id => id.toString() !== userId);
     }
-
-    user.following.push(followingId);
-    followingUser.followers.push(userId);
 
     await user.save();
     await followingUser.save();
 
-    res.status(200).json({ message: "Follow thành công!" });
+    res.status(200).json({ message: `${action} thành công!` });
   } catch (error) {
-    console.error("Lỗi khi follow:", error.message);
+    console.error(error.message);
     res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
   }
 };
 
-const unfollow = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const { followingId } = req.body;
-
-    if (!followingId) {
-      return res.status(400).json({ error: "Thiếu ID người dùng cần unfollow!" });
-    }
-
-    const user = await User.findById(userId).select("following");
-    const followingUser = await User.findById(followingId).select("followers");
-
-    if (!user || !followingUser) {
-      return res.status(404).json({ error: "Người dùng không tồn tại!" });
-    }
-
-    if (!user.following.includes(followingId)) {
-      return res.status(400).json({ error: "Bạn chưa follow người này!" });
-    }
-
-    user.following = user.following.filter(id => id.toString() !== followingId);
-
-    followingUser.followers = followingUser.followers.filter(id => id.toString() !== userId);
-
-    await user.save();
-    await followingUser.save();
-
-    res.status(200).json({ message: "Unfollow thành công!" });
-  } catch (error) {
-    console.error("Lỗi khi unfollow:", error.message);
-    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
-  }
-};
 
 module.exports = {
   login,
@@ -469,6 +443,5 @@ module.exports = {
   getSavedPost,
   getFollowers,
   getFollowing,
-  follow,
-  unfollow
+  toggleFollow
 };

@@ -1,5 +1,5 @@
 const express = require('express')
-const {login, register, forgotPassword, resetPassword, confirmOtp, getUserById, getUserInfo, searchUser, editProfile, deleteSavedRecipe, getSavedRecipe, getSavedPost, getFollowers, getFollowing, follow, unfollow} = require('../controllers/userController')
+const {login, register, forgotPassword, resetPassword, confirmOtp, getUserById, getUserInfo, searchUser, editProfile, deleteSavedRecipe, getSavedRecipe, getSavedPost, getFollowers, getFollowing, toggleFollow} = require('../controllers/userController')
 const { authenticateJWT } = require('../middlewares/authMiddleware')
 
 const router = express.Router()
@@ -9,8 +9,7 @@ router.post('/register', register)
 router.post('/forgot-password', forgotPassword)
 router.post('/reset-password', resetPassword)
 router.post('/confirm-otp', confirmOtp)
-router.post('/follow', authenticateJWT, follow)
-router.post('/unfollow', authenticateJWT, unfollow)
+router.post('/toggle-follow', authenticateJWT, toggleFollow)
 
 router.get('/get-info', authenticateJWT, getUserInfo)
 router.get('/search', searchUser)
