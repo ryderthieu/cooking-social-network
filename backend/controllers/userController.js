@@ -241,7 +241,217 @@ const searchUser = async (req, res) => {
   }
 };
 
+const editProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { firstName, lastName, gender, birthDay, avatar } = req.body;
 
+    const user = await User.findById(userId).select("-password -otp -otpExpire");
+    if (!user) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (gender) user.gender = gender;
+    if (birthDay) user.birthDay = birthDay;
+    if (avatar) user.avatar = avatar;
+
+    await user.save();
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+
+const saveRecipe = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { recipeId } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    if (!user.savedRecipe.includes(recipeId)) {
+      user.savedRecipe.push(recipeId);
+      await user.save();
+    }
+
+    res.status(200).json({ message: "Đã lưu công thức thành công!", savedRecipe: user.savedRecipe });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+
+const deleteSavedRecipe = async (req, res) => {
+  try {
+    const userId = req.user._id
+    const {recipeId} = req.body
+    const user = await User.findById(userId)
+    if (!user){
+      return res.status(404).json({error: "Nguời dùng không tồn tại!"})
+    }
+  
+   if (!user.savedRecipe.includes(recipeId)) {
+      return res.status(404).json({error: "Công thức chưa được lưu!"})
+   }
+  
+   user.savedRecipe = user.savedRecipe.filter((v) => v != recipeId)
+   await user.save()
+  
+   res.status(200).json({message: "Đã xóa khỏi công thức đã lưu thành công!", savedRecipe: user.savedRecipe})
+  } catch (error) {
+    console.log(error.message)
+    res.status(500).json({error: "Đã xảy ra lỗi, vui lòng thử lại!"})
+  }
+  
+}
+
+const getSavedRecipe = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId)
+      .select("savedRecipe _id")
+      .populate("savedRecipe"); 
+
+    if (!user) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    res.status(200).json({ savedRecipes: user.savedRecipe });
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách công thức đã lưu:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+
+const getSavedPost = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId)
+      .select("savedPost _id")
+      .populate("savedPost"); 
+
+    if (!user) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    res.status(200).json({ getSavedPost: user.savedPost });
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách bài viết đã lưu:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+
+const getFollowers = async (req, res) => {
+  try {
+    const {userId} = req.body;
+    const user = await User.findById(userId)
+      .select("followers")
+      .populate("followers", "firstName lastName avatar _id");
+
+    if (!user) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    res.status(200).json({ followers: user.followers });
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách followers:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+
+const getFollowing = async (req, res) => {
+  try {
+    const {userId} = req.body;
+    const user = await User.findById(userId)
+      .select("following")
+      .populate("following", "firstName lastName avatar _id");
+
+    if (!user) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    res.status(200).json({ following: user.following });
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách following:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+
+const follow = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { followingId } = req.body;
+
+    if (!followingId) {
+      return res.status(400).json({ error: "Thiếu ID người dùng cần follow!" });
+    }
+
+    const user = await User.findById(userId).select("following");
+    const followingUser = await User.findById(followingId).select("followers");
+
+    if (!user || !followingUser) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    if (user.following.includes(followingId)) {
+      return res.status(400).json({ error: "Bạn đã follow người này rồi!" });
+    }
+
+    user.following.push(followingId);
+    followingUser.followers.push(userId);
+
+    await user.save();
+    await followingUser.save();
+
+    res.status(200).json({ message: "Follow thành công!" });
+  } catch (error) {
+    console.error("Lỗi khi follow:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+
+const unfollow = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { followingId } = req.body;
+
+    if (!followingId) {
+      return res.status(400).json({ error: "Thiếu ID người dùng cần unfollow!" });
+    }
+
+    const user = await User.findById(userId).select("following");
+    const followingUser = await User.findById(followingId).select("followers");
+
+    if (!user || !followingUser) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    if (!user.following.includes(followingId)) {
+      return res.status(400).json({ error: "Bạn chưa follow người này!" });
+    }
+
+    user.following = user.following.filter(id => id.toString() !== followingId);
+
+    followingUser.followers = followingUser.followers.filter(id => id.toString() !== userId);
+
+    await user.save();
+    await followingUser.save();
+
+    res.status(200).json({ message: "Unfollow thành công!" });
+  } catch (error) {
+    console.error("Lỗi khi unfollow:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
 
 module.exports = {
   login,
@@ -252,4 +462,13 @@ module.exports = {
   getUserById,
   getUserInfo,
   searchUser,
+  editProfile,
+  saveRecipe,
+  deleteSavedRecipe,
+  getSavedRecipe,
+  getSavedPost,
+  getFollowers,
+  getFollowing,
+  follow,
+  unfollow
 };
