@@ -13,10 +13,12 @@ const client = new MongoClient(uri, {
 
 async function connect() {
   try {
-    await mongoose.connect(uri);
+    const conn = await mongoose.connect(uri);
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`)
   } catch {
-    console.log("Error connecting to MongoDB");
+    console.error(`❌ Error: ${error.message}`);
+    process.exit(1);
   }
 }
-connect().catch(console.dir);
+
 module.exports = { connect };
