@@ -13,16 +13,16 @@ const router = express.Router();
 
 // GET
 router.get("/", authenticateJWT, getAllIngredients);
-router.get("/:id", getIngredientsById);
 router.get("/search", authenticateJWT, searchIngredient);
+router.get("/:id", getIngredientsById);
 
 // CREATE
-router.post("add-ingredient/:id", authenticateJWT, addIngredient);
+router.post("/add-ingredient/", authenticateJWT, addIngredient);
 
 // UPDATE
-router.patch("edit-ingredient/:id", authenticateJWT, editIngredient);
+router.patch("/edit-ingredient/:id", authenticateJWT, editIngredient);
 
 // DELETE
-router.delete("delete-ingredient/:id", authenticateJWT, deleteIngredient);
+router.delete("/delete-ingredient/:id", authenticateJWT, deleteIngredient);
 
 module.exports = router;
