@@ -127,11 +127,10 @@ const editRecipe = async (req, res) => {
         if(!recipe){
             return res.status(404).json({ 
                 success: false, 
-                message: "Không tìm thấy nguyên liệu", 
+                message: "Không tìm thấy công thức", 
                 error: "Công thức không tồn tại"
             })
         }
-
         if(updates.name){
             updates.slug = slugify(updates.name, { lower: true, locale: 'vi' });
         }
