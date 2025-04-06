@@ -38,7 +38,7 @@ const searchIngredient = async (req, res) => {
     try {
         const { keyword } = req.query;
 
-        if (!keyword) {
+        if (!keyword ) {
             return res.status(400).json({
                  success: false, 
                  message: "Vui lòng nhập từ khóa tìm kiếm" 
@@ -97,7 +97,7 @@ const deleteIngredient = async (req, res) => {
             })
         }
 
-        return res.status(200).json({
+        res.status(200).json({
             success: true,
             message: "Xóa nguyên liệu thành công",
             data: ingredient.name
@@ -119,10 +119,7 @@ const editIngredient = async (req, res) => {
     const updates = req.body;
 
     if(!mongoose.Types.ObjectId.isValid(id)){
-        return res.status(400).json({
-            success: false,
-            message: "Invalid Id"
-        })
+        return res.status(400).json({ success: false, message: "Invalid Id" })
     }
 
     try {
@@ -138,14 +135,12 @@ const editIngredient = async (req, res) => {
             updates.slug = slugify(updates.name, {lower: true, locale: 'vi'});
         }
 
-        await Ingredient.findByIdAndUpdate(id, updates, { new: true, runValidators: true })
-
-
+        const updatedIngredient = await Ingredient.findByIdAndUpdate(id, updates, { new: true, runValidators: true })
 
         res.status(200).json({
             success: true,
             message: "Cập nhật nguyên liệu thành công",
-            data: ingredient
+            data: updatedIngredient
         })
     } catch (error) {
         console.error("❌ Error updating ingredient: ", error);

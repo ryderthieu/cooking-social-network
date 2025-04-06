@@ -8,14 +8,15 @@ const {
     editRecipe,
     deleteRecipe
 } = require('../controllers/recipeController');
+const router = express.Router();
 
 // GET
 router.get('/', getAllRecipes);
-router.get('/:id', getRecipeById);
 router.get('/search', authenticateJWT, searchRecipe);
+router.get('/:id', getRecipeById);
 
 // CREATE
-router.post('/add-recipe/:id', authenticateJWT, addRecipe);
+router.post('/add-recipe', authenticateJWT, addRecipe);
 
 // UPDATE
 router.patch('/edit-recipe/:id', authenticateJWT, editRecipe);
