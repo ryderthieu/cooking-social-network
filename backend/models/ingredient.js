@@ -3,7 +3,8 @@ const Schema = mongoose.Schema;
 
 const ingredientSchema = new Schema({
     name: { type: String, required: true, unique: true },
-    unit: { type: String },  
+    slug: { type: String },
+    unit: { type: String },  // Đơn vị đo lường (quả, kg,...)
     nutrition: {
         calories: { type: Number, default: 0 },  // Lượng calo (kcal)
         protein: { type: Number, default: 0 },   // Chất đạm (g)
