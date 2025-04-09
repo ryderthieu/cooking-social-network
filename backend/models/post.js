@@ -6,7 +6,7 @@ const postSchema = new Schema(
     author: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     caption: { type: String },
     recipe: { type: Schema.Types.ObjectId, required: true, ref: "Recipe" },
-    likes: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", default: [] }],
     likeCount: { type: Number, default: 0 },
     comments: [
       {

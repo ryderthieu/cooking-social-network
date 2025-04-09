@@ -50,7 +50,8 @@ const addPost = async (req, res) => {
       caption,
       recipe,
       media,
-      likes: 0,
+      likes: [],
+      likeCount: 0,
       comments: [],
       shares: 0,
       captionSlug,
@@ -236,7 +237,7 @@ const commentPost = async (req, res) => {
       return res.status(404).json({ message: "Post không tồn tại" });
     }
 
-    post.comments.push({ userId, comment });
+    post.comments.push({ userId, comment, createdAt: new Date() });
     await post.save();
 
     const updatePost = await Post.findById(id).populate(
