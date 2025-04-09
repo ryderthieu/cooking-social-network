@@ -6,7 +6,8 @@ const postSchema = new Schema(
     author: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     caption: { type: String },
     recipe: { type: Schema.Types.ObjectId, required: true, ref: "Recipe" },
-    likes: { type: Number, default: 0 },
+    likes: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
+    likeCount: { type: Number, default: 0 },
     comments: [
       {
         userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
@@ -21,6 +22,9 @@ const postSchema = new Schema(
         type: { type: String, enum: ["image", "video"], required: true },
       },
     ],
+    captionSlug: { type: String },
+    recipeSlug: { type: String },
+    authorSlug: { type: String },
   },
   {
     timestamps: true,
