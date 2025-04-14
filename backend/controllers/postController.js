@@ -203,7 +203,6 @@ const commentPost = async (req, res) => {
     if (!post) {
       return res.status(404).json({ message: "Post không tồn tại" });
     }
-
     post.comments.push({ userId, comment });
     await post.save();
     res.status(200).json({ message: "Bình luận thành công", post });

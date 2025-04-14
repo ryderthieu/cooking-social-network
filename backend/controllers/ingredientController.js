@@ -116,7 +116,6 @@ const deleteIngredient = async (req, res) => {
 const editIngredient = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
-
     if(!mongoose.Types.ObjectId.isValid(id)){
         return res.status(400).json({ success: false, message: "Invalid Id" })
     }

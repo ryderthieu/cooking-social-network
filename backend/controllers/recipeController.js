@@ -45,10 +45,45 @@ const getRecipeById = async (req, res) => {
     }
 }
 
-// ✅ GET: Tìm công thức
+// ✅ GET: Tìm công thức, search va filter
 const searchRecipe = async (req, res) => {
-    
-}
+  try {
+    const { key, page = 1, limit = 10 } = req.query;
+
+    if (!key) {
+      return res.status(400).json({ error: "Vui lòng nhập từ khóa tìm kiếm!" });
+    }
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const regex = new RegExp(key.trim(), "i"); 
+
+    const query = {
+      name: { $regex: regex }
+    };
+
+    const recipes = await Recipe.find(query)
+      .populate('author', 'fullname')
+      .populate('ingredients.ingredient', 'name')
+      .skip(skip)
+      .limit(Number(limit));
+
+    const totalRecipes = await Recipe.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      totalRecipes,
+      totalPages: Math.ceil(totalRecipes / limit),
+      currentPage: Number(page),
+      data: recipes,
+    });
+
+  } catch (error) {
+    console.error("Lỗi khi tìm công thức:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại sau!" });
+  }
+};
+
 
 // ✅ POST: Thêm công thức
 const addRecipe = async (req, res) => {
