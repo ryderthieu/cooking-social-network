@@ -236,12 +236,9 @@ const commentPost = async (req, res) => {
     if (!post) {
       return res.status(404).json({ message: "Post không tồn tại" });
     }
-<<<<<<< HEAD
-    post.comments.push({ userId, comment });
-=======
+
 
     post.comments.push({ userId, comment, createdAt: new Date() });
->>>>>>> c7e3556f9919c00739efc97cf45679c535e4705c
     await post.save();
 
     const updatePost = await Post.findById(id).populate(
