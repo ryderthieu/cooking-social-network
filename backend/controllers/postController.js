@@ -1,6 +1,8 @@
+const mongoose = require("mongoose");
 const Post = require("../models/post");
 const User = require("../models/user");
 const Recipe = require("../models/recipe");
+const slugify = require("slugify");
 
 const addPost = async (req, res) => {
   try {
@@ -11,6 +13,20 @@ const addPost = async (req, res) => {
         .status(400)
         .json({ message: "Vui lòng nhập đầy đủ thông tin" });
     }
+
+    const captionSlug = slugify(caption, { lower: true, locale: "vi" });
+    const recipeDoc = await Recipe.findById(recipe);
+    if (!recipeDoc) {
+      return res.status(404).json({ message: "Công thức không tồn tại" });
+    }
+
+    const recipeSlug = slugify(recipeDoc.name, { lower: true, locale: "vi" });
+    const user = await User.findById(req.user._id);
+    const authorName = `${user.firstName} ${user.lastName}`;
+    const authorSlug = slugify(authorName, {
+      lower: true,
+      locale: "vi",
+    });
 
     let media = [];
     if (videoUri && typeof videoUri === "string") {
@@ -34,13 +50,20 @@ const addPost = async (req, res) => {
       caption,
       recipe,
       media,
-      likes: 0,
+      likes: [],
+      likeCount: 0,
       comments: [],
       shares: 0,
+      captionSlug,
+      recipeSlug,
+      authorSlug,
     });
 
     await newPost.save();
-    const post = await Post.find();
+    const post = await Post.findById(newPost._id)
+      .populate("author", "email firstName lastName")
+      .populate("recipe", "name");
+
     res.status(201).json({ message: "Post upload thành công", post });
   } catch (error) {
     console.error("Lỗi khi upload post:", error);
@@ -53,6 +76,10 @@ const addPost = async (req, res) => {
 const editPost = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "ID không hợp lệ" });
+    }
+
     const { caption, recipe, videoUri, imgUri } = req.body;
 
     const post = await Post.findById(id);
@@ -99,6 +126,9 @@ const editPost = async (req, res) => {
 const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "ID không hợp lệ" });
+    }
     const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ message: "Post không tồn tại" });
@@ -116,46 +146,20 @@ const deletePost = async (req, res) => {
 
 const searchPosts = async (req, res) => {
   try {
-    const { keyword, userName, recipeName } = req.query;
+    const keyword = req.query.keyword;
 
-    if (!keyword && !userName && !recipeName) {
+    if (!keyword || keyword.trim() === "") {
       return res.status(400).json({ message: "Vui lòng nhập từ khóa" });
     }
 
-    let filter = {};
-
-    if (keyword) {
-      filter.caption = { $regex: keyword, $options: "i" };
-    }
-
-    if (userName) {
-      const users = await User.find({
-        $or: [
-          { firstName: { $regex: userName, $options: "i" } },
-          { lastName: { $regex: userName, $options: "i" } },
-        ],
-      });
-
-      if (users.length > 0) {
-        const userIds = users.map((user) => user._id);
-        filter.author = { $in: userIds };
-      } else {
-        return res.status(404).json({ message: "Không tìm thấy người dùng" });
-      }
-    }
-
-    if (recipeName) {
-      const recipes = await Recipe.find({
-        name: { $regex: recipeName, $options: "i" },
-      });
-
-      if (recipes.length > 0) {
-        const recipeIds = recipes.map((recipe) => recipe._id);
-        filter.recipe = { $in: recipeIds };
-      } else {
-        return res.status(404).json({ message: "Không tìm thấy công thức" });
-      }
-    }
+    const slug = slugify(keyword, { lower: true, locale: "vi" });
+    const filter = {
+      $or: [
+        { captionSlug: { $regex: slug, $options: "i" } },
+        { recipeSlug: { $regex: slug, $options: "i" } },
+        { authorSlug: { $regex: slug, $options: "i" } },
+      ],
+    };
 
     const posts = await Post.find(filter)
       .sort({ createdAt: -1 })
@@ -177,14 +181,35 @@ const searchPosts = async (req, res) => {
 const likePost = async (req, res) => {
   try {
     const { id } = req.params;
+    const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "ID không hợp lệ" });
+    }
+
     const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ message: "Post không tồn tại" });
     }
 
-    post.likes += 1;
+    if (!post.likes) {
+      post.likes = [];
+    }
+    const isAlreadyLiked = post.likes.some((like) => like.equals(userId));
+
+    if (isAlreadyLiked) {
+      post.likes = post.likes.filter((like) => !like.equals(userId));
+      post.likeCount = Math.max(post.likeCount - 1, 0);
+    } else {
+      post.likes.push(userId);
+      post.likeCount += 1;
+    }
     await post.save();
-    res.status(200).json({ message: "Post đã được like", post });
+    res.status(200).json({
+      message: isAlreadyLiked ? "Đã bỏ like" : "Đã like bài viết",
+      likeCount: post.likeCount,
+      post,
+    });
   } catch (error) {
     console.error("Lỗi khi like post:", error);
     res
@@ -198,14 +223,33 @@ const commentPost = async (req, res) => {
     const { id } = req.params;
     const { comment } = req.body;
     const userId = req.user._id;
-    const post = await Post.findById(id);
 
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "ID không hợp lệ" });
+    }
+
+    if (!comment || comment.trim() === "") {
+      return res.status(400).json({ message: "Vui lòng nhập bình luận" });
+    }
+
+    const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ message: "Post không tồn tại" });
     }
+<<<<<<< HEAD
     post.comments.push({ userId, comment });
+=======
+
+    post.comments.push({ userId, comment, createdAt: new Date() });
+>>>>>>> c7e3556f9919c00739efc97cf45679c535e4705c
     await post.save();
-    res.status(200).json({ message: "Bình luận thành công", post });
+
+    const updatePost = await Post.findById(id).populate(
+      "comments.userId",
+      "firstName lastName"
+    );
+
+    res.status(200).json({ message: "Bình luận thành công", updatePost });
   } catch (error) {
     console.error("Lỗi khi bình luận post:", error);
     res
@@ -217,6 +261,9 @@ const commentPost = async (req, res) => {
 const sharePost = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "ID không hợp lệ" });
+    }
     const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ message: "Post không tồn tại" });
@@ -246,6 +293,9 @@ const getAllPosts = async (req, res) => {
 const getPostById = async (req, res) => {
   try {
     const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "ID không hợp lệ" });
+    }
     const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ message: "Post không được tìm thấy" });

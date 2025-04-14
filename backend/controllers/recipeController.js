@@ -47,43 +47,103 @@ const getRecipeById = async (req, res) => {
 
 // ✅ GET: Tìm công thức, search va filter
 const searchRecipe = async (req, res) => {
-  try {
-    const { key, page = 1, limit = 10 } = req.query;
+    try {
+        const { 
+            keyword, 
+            mealType, 
+            cuisine, 
+            occasions, 
+            timeBased, 
+            difficultyLevel, 
+            ingredient, 
+            utensils, 
+            page = 1, 
+            limit = 10 
+        } = req.query;
+        
+        const filter = {};
 
-    if (!key) {
-      return res.status(400).json({ error: "Vui lòng nhập từ khóa tìm kiếm!" });
+        // Tìm kiếm theo từ khóa (tên công thức)
+        if(keyword){
+            const slug = slugify(keyword, { lower: true, locale: 'vi', remove: /[*+~.()'"!:@]/g });
+            filter.slug = {$regex: slug, $options: "i"};
+        }
+
+         // Tìm kiếm theo categories (mealType, cuisine, occasions,...)
+        
+        if (mealType){
+            filter['categories.mealType'] = mealType;
+        }
+
+        if (cuisine){
+            filter['categories.cuisine'] = cuisine;
+        }
+
+        if (occasions){
+            filter['categories.occasions'] = occasions;
+        }
+
+        if (timeBased){
+            filter['categories.timeBased'] = timeBased;
+        }
+        
+        if (difficultyLevel){
+            filter['categories.difficultyLevel'] = difficultyLevel;
+        }
+
+        // Tìm kiếm theo dụng cụ nấu
+        if (utensils){
+            filter.utensils = utensils;
+        }
+
+        // Tìm kiếm theo nguyên liệu
+        if (ingredient) {
+            filter['ingredients.ingredient'] = ingredient;
+        }
+
+        // Kiểm tra nếu không có điều kiện tìm kiếm nào
+        if (Object.keys(filter).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Vui lòng nhập ít nhất một điều kiện tìm kiếm"
+            });
+        }
+
+        // Tính số lượng document khi chuyển sang các trang (trang 1 - skip 0, trang 2 - skip 10,...)
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
+        // Đếm tổng document thỏa mãn điều kiện
+        const total = await Recipe.countDocuments(filter);
+
+        // Tổng số trang cần thiết để hiện thị kết quả, dùng ceil để làm tròn lên
+        const totalPages = Math.ceil(total / parseInt(limit));
+    
+        const recipes = await Recipe.find(filter)
+            .sort({createdAt: -1})
+            .skip(skip)
+            .limit(parseInt(limit));
+
+        res.status(200).json({
+            success: true,
+            message: "Kết quả tìm kiếm",
+            pagination: {
+                total: total,
+                currentPage: parseInt(page),
+                totalPages: totalPages,
+                limit: parseInt(limit)
+            },
+            count: recipes.length,
+            data: recipes
+        });
+    } catch (error) {
+        console.error("❌ Error searching recipe: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: "Đã xảy ra lỗi tìm kiếm công thức. Xin vui lòng thử lại."
+        })
     }
-
-    const skip = (Number(page) - 1) * Number(limit);
-
-    const regex = new RegExp(key.trim(), "i"); 
-
-    const query = {
-      name: { $regex: regex }
-    };
-
-    const recipes = await Recipe.find(query)
-      .populate('author', 'fullname')
-      .populate('ingredients.ingredient', 'name')
-      .skip(skip)
-      .limit(Number(limit));
-
-    const totalRecipes = await Recipe.countDocuments(query);
-
-    res.status(200).json({
-      success: true,
-      totalRecipes,
-      totalPages: Math.ceil(totalRecipes / limit),
-      currentPage: Number(page),
-      data: recipes,
-    });
-
-  } catch (error) {
-    console.error("Lỗi khi tìm công thức:", error.message);
-    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại sau!" });
-  }
-};
-
+}
 
 // ✅ POST: Thêm công thức
 const addRecipe = async (req, res) => {
