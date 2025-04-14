@@ -5,6 +5,7 @@ const recipeSchema = new Schema({
     author: {type: Schema.Types.ObjectId, ref: 'User'}, // Id của người tạo công thức, có liên kết với model User
     name: {type: String, required: true}, // tên món ăn
     slug: {type: String},
+    description: {type: String},
     ingredients: [
         {
             ingredient: {type: Schema.Types.ObjectId, ref: 'Ingredient'}, // Liên kết với model Ingredient
