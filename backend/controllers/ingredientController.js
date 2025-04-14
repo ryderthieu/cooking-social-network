@@ -54,8 +54,7 @@ const searchIngredient = async (req, res) => {
         };
 
         // Thực hiện tìm kiếm và sắp xếp kết quả
-        const ingredients = await Ingredient.find(filter).sort({createAt: -1});
-
+        const ingredients = await Ingredient.find(filter).sort({createdAt: -1});
         res.status(200).json({ 
             success: true, 
             message: "Kết quả tìm kiếm", 
