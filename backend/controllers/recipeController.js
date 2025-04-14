@@ -69,7 +69,7 @@ const searchRecipe = async (req, res) => {
             filter.slug = {$regex: slug, $options: "i"};
         }
 
-         // Tìm kiếm theo categories (mealType, cusine, occasions,...)
+         // Tìm kiếm theo categories (mealType, cuisine, occasions,...)
         
         if (mealType){
             filter['categories.mealType'] = mealType;
