@@ -35,7 +35,7 @@ const HomePage = () => {
         </div>
         <Menu />
         <Explore />
-        <VideoShorts />
+        {/* <VideoShorts /> */}
         <div className="mt-[100px]">
           <div className="flex justify-between items-center">
             <p className="font-bold text-[40px]">
@@ -43,7 +43,7 @@ const HomePage = () => {
             </p>
             <p className="text-[#A46000] text-[28px] font-medium">Xem tất cả</p>
           </div>
-          <div className="grid grid-cols-3 gap-4 mt-8 mb-8">
+          <div className="grid grid-cols-4 gap-2 mt-8 mb-8">
             <Recipe />
             <Recipe />
             <Recipe />

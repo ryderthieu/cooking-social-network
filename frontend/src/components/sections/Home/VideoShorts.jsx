@@ -1,10 +1,10 @@
 import React from "react";
-
+import video from "../../../assets/Home/video.mp4";
 const VideoShorts = () => {
   return (
     <div>
       <div>
-        <video src=""></video>
+        <video src={video} className="w-[600px] h-[400px] "></video>
 
         <div>icon</div>
       </div>

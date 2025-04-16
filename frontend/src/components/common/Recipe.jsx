@@ -10,7 +10,7 @@ const Recipe = () => {
     setIsLiked(!isLike);
   };
   return (
-    <div className="bg-[#FEF1DF] max-w-[400px] p-4 rounded-3xl">
+    <div className="bg-[#FEF1DF] max-w-[310px] p-4 rounded-3xl">
       <div className="relative">
         <img src={recipe} alt="" />
         <div
@@ -18,9 +18,9 @@ const Recipe = () => {
           className="absolute top-4 right-4 bg-white rounded-full p-2 transition-transform active:scale-90 cursor-pointer"
         >
           {isLike ? (
-            <GoHeartFill className="text-[#FF6363] size-8" />
+            <GoHeartFill className="text-[#FF6363] size-6" />
           ) : (
-            <GoHeartFill className="text-gray-300 size-8" />
+            <GoHeartFill className="text-gray-300 size-6" />
           )}
         </div>
       </div>
