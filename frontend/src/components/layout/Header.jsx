@@ -185,7 +185,9 @@ const Header = () => {
                         <span className="text-gray-400">No image</span>
                       )}
                     </div>
-                    <p className="text-[18px] font-medium">{item.name}</p>
+                    <p className="text-[18px] font-medium text-gray-700">
+                      {item.name}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -215,10 +217,13 @@ const Header = () => {
             setIsSupportOpen(!isSupportOpen);
             setIsSearchOpen(false);
             setIsExploreOpen(false);
+            setActive("Hỗ trợ");
           }}
-          className="flex cursor-pointer relative "
+          className={`flex cursor-pointer relative items-center ${
+            active === "Hỗ trợ" ? "text-[#FF6363]" : "text-[#211E2E]"
+          }`}
         >
-          <p className="font-semibold text-[20px] text-[#211E2E]">Hỗ trợ</p>
+          <p className="font-semibold text-[20px]">Hỗ trợ</p>
           <FaAngleDown className="my-auto ml-2" />
           {isSupportOpen && (
             <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
@@ -258,7 +263,9 @@ const Header = () => {
                         <span className="text-gray-400">No image</span>
                       )}
                     </div>
-                    <p className="text-[18px] font-medium">{item.name}</p>
+                    <p className="text-[18px] font-medium text-gray-700">
+                      {item.name}
+                    </p>
                   </div>
                 ))}
               </div>
