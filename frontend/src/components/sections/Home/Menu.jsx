@@ -8,7 +8,7 @@ import Thit from "../../../assets/Home/Thit.png";
 
 const Menu = () => {
   return (
-    <div className="grid grid-cols-6 gap-1 place-items-center mb-[100px]">
+    <div className="grid grid-cols-6 gap-1 place-items-center mb-[60px]">
       <div className="bg-gradient-to-b from-white to-[#d9dbd3] w-[180px] p-4 rounded-[30px]">
         <img className="mx-auto" src={BS} alt="" />
         <p className="font-semibold text-center mt-[40px] text-[18px]">

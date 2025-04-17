@@ -88,9 +88,48 @@ const Header = () => {
         <div>
           <p className="font-semibold text-[22px] text-[#211E2E]">Về SHISHA</p>
         </div>
-        <div className="flex">
+        <div
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex cursor-pointer relative "
+        >
           <p className="font-semibold text-[22px] text-[#211E2E]">Hỗ trợ</p>
           <FaAngleDown className="my-auto ml-2" />
+          {isOpen && (
+            <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-[100%] h-[390px] rounded-lg overflow-hidden">
+              <div className="w-[20%] p-4  ml-[110px]">
+                <ul className="space-y-2 text-sm text-gray-700 font-medium">
+                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
+                    Món mặn
+                  </li>
+                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
+                    Món chay
+                  </li>
+                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
+                    Món Âu
+                  </li>
+                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
+                    Thức uống
+                  </li>
+                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
+                    Ăn vặt
+                  </li>
+                </ul>
+              </div>
+
+              <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-gradient-to-br from-[#fef2f2] to-[#fff7ed]">
+                {Array(3)
+                  .fill()
+                  .map((_, index) => (
+                    <div key={index} className="text-center">
+                      <div className="bg-pink-100 h-[280px] rounded-2xl mb-4"></div>
+                      <p className="text-[18px] font-medium">
+                        Sườn xào chua ngọt
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
