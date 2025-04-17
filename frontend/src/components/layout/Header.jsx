@@ -136,8 +136,8 @@ const Header = () => {
         {/* TÌM KIẾM */}
         <div
           onClick={() => {
-            setIsExploreOpen(!isExploreOpen);
-            setIsSearchOpen(false);
+            setIsExploreOpen(false);
+            setIsSearchOpen(!isSearchOpen);
             setIsSupportOpen(false);
             setActive("Tìm kiếm");
           }}
