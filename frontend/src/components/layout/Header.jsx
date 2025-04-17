@@ -4,9 +4,30 @@ import avatar from "../../assets/avatar.png";
 import { FaAngleDown, FaChevronDown } from "react-icons/fa";
 import { BiSolidEdit } from "react-icons/bi";
 import { FiBookmark } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 const Header = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const categories = [
+    { name: "Món chính", path: "/main-dish" },
+    { name: "Món phụ", path: "/side-dish" },
+    { name: "Tráng miệng", path: "/dessert" },
+  ];
+  const search = [
+    { name: "Công thức", path: "/recipe" },
+    { name: "Nguyên liệu", path: "/ingredient" },
+    { name: "Địa điểm", path: "/location" },
+    { name: "Blog", path: "/blog" },
+    { name: "Video", path: "/video" },
+  ];
+  const supports = [
+    { name: "Điều kiện điều khoản", path: "/terms" },
+    { name: "Hướng dẫn sử dụng", path: "/guide" },
+    { name: "Câu hỏi thường gặp", path: "/questions" },
+  ];
+
+  const [isExploreOpen, setIsExploreOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
 
@@ -14,10 +35,14 @@ const Header = () => {
   const dropdownRef = useRef(null);
 
   const handleClickOutside = (event) => {
-    if (navRef.current && !navRef.current.contains(event.target)) {
-      setIsOpen(false);
+    const target = event.target;
+    if (!navRef.current?.contains(target)) {
+      setIsExploreOpen(false);
+      setIsSearchOpen(false);
+      setIsSupportOpen(false);
     }
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+
+    if (!dropdownRef.current?.contains(target)) {
       setIsDropdownOpen(false);
     }
   };
@@ -35,32 +60,29 @@ const Header = () => {
 
       <div className="flex items-center gap-12 ml-[100px]" ref={navRef}>
         <div
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            setIsExploreOpen(!isExploreOpen);
+            setIsSearchOpen(false);
+            setIsSupportOpen(false);
+          }}
           className="flex cursor-pointer relative "
         >
-          <p className="font-semibold text-[22px] text-[#211E2E]">
+          <p className="font-semibold text-[20px] text-[#211E2E]">
             Khám phá công thức
           </p>
           <FaAngleDown className="my-auto ml-2" />
-          {isOpen && (
+          {isExploreOpen && (
             <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-[100%] h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4  ml-[110px]">
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
-                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
-                    Món mặn
-                  </li>
-                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
-                    Món chay
-                  </li>
-                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
-                    Món Âu
-                  </li>
-                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
-                    Thức uống
-                  </li>
-                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
-                    Ăn vặt
-                  </li>
+                  {categories.map((item, index) => (
+                    <li
+                      key={index}
+                      className="hover:text-orange-500 cursor-pointer text-[18px] pb-4"
+                    >
+                      {item.name}
+                    </li>
+                  ))}
                 </ul>
               </div>
 
@@ -79,40 +101,75 @@ const Header = () => {
             </div>
           )}
         </div>
-        <div>
-          <p className="font-semibold text-[22px] text-[#211E2E]">Lướt tin</p>
-        </div>
-        <div>
-          <p className="font-semibold text-[22px] text-[#211E2E]">Tìm kiếm</p>
-        </div>
-        <div>
-          <p className="font-semibold text-[22px] text-[#211E2E]">Về SHISHA</p>
-        </div>
+        <Link to="/" className="cursor-pointer">
+          <p className="font-semibold text-[20px] text-[#211E2E]">Lướt tin</p>
+        </Link>
         <div
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            setIsSearchOpen(!isSearchOpen);
+            setIsSupportOpen(false);
+            setIsExploreOpen(false);
+          }}
           className="flex cursor-pointer relative "
         >
-          <p className="font-semibold text-[22px] text-[#211E2E]">Hỗ trợ</p>
+          <p className="font-semibold text-[20px] text-[#211E2E]">Tìm kiếm</p>
           <FaAngleDown className="my-auto ml-2" />
-          {isOpen && (
+          {isSearchOpen && (
             <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-[100%] h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4  ml-[110px]">
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
-                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
-                    Món mặn
-                  </li>
-                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
-                    Món chay
-                  </li>
-                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
-                    Món Âu
-                  </li>
-                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
-                    Thức uống
-                  </li>
-                  <li className="hover:text-orange-500 cursor-pointer text-[18px] pb-4">
-                    Ăn vặt
-                  </li>
+                  {search.map((item, index) => (
+                    <li
+                      key={index}
+                      className="hover:text-orange-500 cursor-pointer text-[18px] pb-4"
+                    >
+                      <Link to={item.path}>{item.name}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-gradient-to-br from-[#fef2f2] to-[#fff7ed]">
+                {Array(3)
+                  .fill()
+                  .map((_, index) => (
+                    <div key={index} className="text-center">
+                      <div className="bg-pink-100 h-[280px] rounded-2xl mb-4"></div>
+                      <p className="text-[18px] font-medium">
+                        Sườn xào chua ngọt
+                      </p>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <Link to="" className="cursor-pointer">
+          <p className="font-semibold text-[20px] text-[#211E2E]">Về SHISHA</p>
+        </Link>
+        <div
+          onClick={() => {
+            setIsSupportOpen(!isSupportOpen);
+            setIsSearchOpen(false);
+            setIsExploreOpen(false);
+          }}
+          className="flex cursor-pointer relative "
+        >
+          <p className="font-semibold text-[20px] text-[#211E2E]">Hỗ trợ</p>
+          <FaAngleDown className="my-auto ml-2" />
+          {isSupportOpen && (
+            <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-[100%] h-[390px] rounded-lg overflow-hidden">
+              <div className="w-[20%] p-4  ml-[110px]">
+                <ul className="space-y-2 text-sm text-gray-700 font-medium">
+                  {supports.map((item, index) => (
+                    <li
+                      key={index}
+                      className="hover:text-orange-500 cursor-pointer text-[18px] pb-4"
+                    >
+                      <Link to={item.path}>{item.name}</Link>
+                    </li>
+                  ))}
                 </ul>
               </div>
 
@@ -175,7 +232,7 @@ const Header = () => {
           <div>
             <button
               onClick={() => setIsLoggedIn(!isLoggedIn)}
-              className="font-semibold text-[18px] text-white bg-[#04043F] py-2 px-6 rounded-[30px] ml-[100px]"
+              className="font-semibold text-[16px] text-white bg-[#04043F] py-2 px-6 rounded-[30px] ml-[100px]"
             >
               Đăng nhập
             </button>

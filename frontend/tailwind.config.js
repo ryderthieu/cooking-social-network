@@ -5,6 +5,7 @@ export default {
     extend: {
       fontFamily: {
         birthstone: ['"Birthstone Bounce"', "cursive"],
+        sans: ['"Be Vietnam Pro"', "sans-serif"],
       },
     },
   },
