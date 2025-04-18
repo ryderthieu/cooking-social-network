@@ -1,4 +1,3 @@
-import { FaAngleDown } from "react-icons/fa";
 import suonXao from "../../assets/Header/suon-xao.jpg";
 import gaRan from "../../assets/Header/ga-ran.jpg";
 import banhMi from "../../assets/Header/banh-mi.jpg";
@@ -157,32 +156,4 @@ const supports = [
   },
 ];
 
-const navItems = [
-  {
-    name: "Khám phá công thức",
-    icon: <FaAngleDown />,
-    subNav: categories,
-  },
-  {
-    name: "Lướt tin",
-    icon: null,
-    subNav: null,
-  },
-  {
-    name: "Tìm kiếm",
-    icon: <FaAngleDown />,
-    subNav: search,
-  },
-  {
-    name: "Về SHISHA",
-    icon: null,
-    subNav: null,
-  },
-  {
-    name: "Hỗ trợ",
-    icon: <FaAngleDown />,
-    subNav: supports,
-  },
-];
-
-export { categories, search, supports, navItems };
+export { categories, search, supports };
