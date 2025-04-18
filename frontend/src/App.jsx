@@ -25,6 +25,7 @@ function App() {
         />
       ))}
       <Route path="*" element={<HomePage />} />
+      <Route path="/login" />
     </Routes>
   );
 }
