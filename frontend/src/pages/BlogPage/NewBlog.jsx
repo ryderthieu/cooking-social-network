@@ -6,7 +6,7 @@ import avatar from "../../assets/avatar.png";
 import Contact from "../../components/sections/Home/Contact";
 import Recipe from "../../components/common/Recipe";
 
-const BlogPage = () => {
+const NewBlog = () => {
   return (
     <div className="px-[110px] pt-[140px] pb-[50px]">
       <h1 className="font-semibold text-center text-[50px]">
@@ -98,4 +98,4 @@ const BlogPage = () => {
   );
 };
 
-export default BlogPage;
+export default NewBlog;

@@ -95,7 +95,7 @@ const Header = () => {
 
               <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-gradient-to-br from-[#fef2f2] to-[#fff7ed]">
                 {selectedCategory.items.map((item) => (
-                  <div key={item.name} className="text-center">
+                  <Link to={item.path} key={item.name} className="text-center">
                     <div className="h-[280px] rounded-2xl mb-4 overflow-hidden bg-pink-100 flex items-center justify-center">
                       {item.src ? (
                         <img
@@ -107,10 +107,10 @@ const Header = () => {
                         <span className="text-gray-400">No image</span>
                       )}
                     </div>
-                    <p className="text-[18px] font-medium text-gray-700">
+                    <p className="text-[18px] font-medium text-gray-700 hover:text-[#FF6363] transition-all duration-200">
                       {item.name}
                     </p>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -173,7 +173,7 @@ const Header = () => {
 
               <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-gradient-to-br from-[#fef2f2] to-[#fff7ed]">
                 {selectedSearch.items.map((item) => (
-                  <div key={item.name} className="text-center">
+                  <Link to={item.path} key={item.name} className="text-center">
                     <div className="h-[280px] rounded-2xl mb-4 overflow-hidden bg-pink-100 flex items-center justify-center">
                       {item.src ? (
                         <img
@@ -185,10 +185,10 @@ const Header = () => {
                         <span className="text-gray-400">No image</span>
                       )}
                     </div>
-                    <p className="text-[18px] font-medium text-gray-700">
+                    <p className="text-[18px] font-medium text-gray-700 hover:text-[#FF6363] transition-all duration-200">
                       {item.name}
                     </p>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -251,7 +251,7 @@ const Header = () => {
 
               <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-gradient-to-br from-[#fef2f2] to-[#fff7ed]">
                 {selectedSupport.items.map((item) => (
-                  <div key={item.name} className="text-center">
+                  <Link to={item.path} key={item.name} className="text-center">
                     <div className="h-[280px] rounded-2xl mb-4 overflow-hidden bg-pink-100 flex items-center justify-center">
                       {item.src ? (
                         <img
@@ -263,10 +263,10 @@ const Header = () => {
                         <span className="text-gray-400">No image</span>
                       )}
                     </div>
-                    <p className="text-[18px] font-medium text-gray-700">
+                    <p className="text-[18px] font-medium text-gray-700 hover:text-[#FF6363] transition-all duration-200">
                       {item.name}
                     </p>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

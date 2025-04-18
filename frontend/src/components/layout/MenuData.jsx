@@ -16,6 +16,12 @@ import sinhTo from "../../assets/Header/sinh-to.jpg";
 import traSua from "../../assets/Header/tra-sua.jpg";
 import banhTrang from "../../assets/Header/banh-trang.jpg";
 import khoaiTayChien from "../../assets/Header/khoai-tay-chien.jpg";
+import vietNam from "../../assets/Header/viet-nam.jpg";
+import trungQuoc from "../../assets/Header/trung-quoc.jpg";
+import nhatBan from "../../assets/Header/nhat-ban.jpg";
+import baiVietMoi from "../../assets/Header/bai-viet-moi.jpg";
+import baiVietNoiBat from "../../assets/Header/bai-viet-noi-bat.jpg";
+import baiVietPhoBien from "../../assets/Header/bai-viet-pho-bien.jpg";
 
 const categories = [
   {
@@ -80,17 +86,25 @@ const search = [
   {
     name: "Nền ẩm thực",
     items: [
-      { name: "Việt Nam", path: "/vietnam" },
-      { name: "Trung Quốc", path: "/trung-quoc" },
-      { name: "Nhật Bản", path: "/nhat-ban" },
+      { name: "Việt Nam", path: "/vietnam", src: vietNam },
+      { name: "Trung Quốc", path: "/trung-quoc", src: trungQuoc },
+      { name: "Nhật Bản", path: "/nhat-ban", src: nhatBan },
     ],
   },
   {
     name: "Blog",
     items: [
-      { name: "Bài viết mới", path: "/bai-viet-moi" },
-      { name: "Bài viết nổi bật", path: "/bai-viet-noi-bat" },
-      { name: "Bài viết phổ biến", path: "/bai-viet-pho-bien" },
+      { name: "Bài viết mới", path: "/blog/bai-viet-moi", src: baiVietMoi },
+      {
+        name: "Bài viết nổi bật",
+        path: "/blog/bai-viet-noi-bat",
+        src: baiVietNoiBat,
+      },
+      {
+        name: "Bài viết phổ biến",
+        path: "/blog/bai-viet-pho-bien",
+        src: baiVietPhoBien,
+      },
     ],
   },
 
