@@ -50,7 +50,9 @@ const Header = () => {
 
   return (
     <div className="flex justify-between px-[110px] py-[30px] fixed bg-white z-50 right-0 left-0">
-      <img src={logo} alt="Oshisha" />
+      <Link to="/">
+        <img src={logo} alt="Oshisha" />
+      </Link>
 
       <div className="flex items-center gap-12 ml-[100px]" ref={navRef}>
         {/* KHÁM PHÁ CÔNG THỨC */}
