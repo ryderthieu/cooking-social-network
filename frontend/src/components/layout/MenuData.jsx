@@ -129,8 +129,8 @@ const supports = [
   {
     name: "Điều kiện điều khoản",
     items: [
-      { name: "Điều kiện", path: "/dieu-kien" },
-      { name: "Điều khoản", path: "/dieu-khoan" },
+      { name: "Điều kiện", path: "/support/dieu-kien" },
+      { name: "Điều khoản", path: "/support/dieu-khoan" },
     ],
   },
   {

@@ -6,6 +6,8 @@ import HighlightBlog from "./pages/BlogPage/HighlightBlog";
 import TopBlog from "./pages/BlogPage/TopBlog";
 import LayoutRoute from "./routes/LayoutRoute";
 import { Routes, Route } from "react-router";
+import TermsPage from "./pages/SupportPage/TermsAndConditions/TermsPage";
+import ConditionsPage from "./pages/SupportPage/TermsAndConditions/ConditionsPage";
 
 function App() {
   const routes = [
@@ -13,6 +15,8 @@ function App() {
     { path: "/blog/bai-viet-moi", element: <NewBlog /> },
     { path: "/blog/bai-viet-noi-bat", element: <HighlightBlog /> },
     { path: "/blog/bai-viet-pho-bien", element: <TopBlog /> },
+    { path: "/support/dieu-khoan", element: <TermsPage /> },
+    { path: "/support/dieu-kien", element: <ConditionsPage /> },
   ];
 
   return (
