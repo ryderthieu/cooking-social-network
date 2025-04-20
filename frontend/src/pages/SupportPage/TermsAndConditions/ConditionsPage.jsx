@@ -8,13 +8,6 @@ import {
   TbCircleNumber4Filled,
 } from "react-icons/tb";
 
-const conditionItems = [
-  "Đối tượng sử dụng",
-  "Mục đích sử dụng",
-  "Yêu cầu về truy cập và thiết bị",
-  "Bảo mật thông tin cá nhân",
-];
-
 const conditionContent = [
   {
     icon: <TbCircleNumber1Filled className="h-10 w-10" />,
@@ -158,7 +151,7 @@ const ConditionsPage = () => {
       <div className="mx-[110px] my-[40px] flex gap-10">
         <div className="max-w-[35%]">
           <h2 className="text-[28px] font-bold pb-2">Danh mục</h2>
-          {conditionItems.map((item, index) => (
+          {conditionContent.map((item, index) => (
             <div
               key={index}
               className={`flex gap-4 mt-4 pb-4 border-b-2 cursor-pointer ${
@@ -169,7 +162,7 @@ const ConditionsPage = () => {
               onClick={() => setActiveIndex(index)}
             >
               <FaPlay className="my-auto w-5 h-5" />
-              <span className="ml-1 text-[18px] font-medium">{item}</span>
+              <span className="ml-1 text-[18px] font-medium">{item.title}</span>
             </div>
           ))}
         </div>
