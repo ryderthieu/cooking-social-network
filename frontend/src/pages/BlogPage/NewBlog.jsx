@@ -15,10 +15,10 @@ const NewBlog = () => {
       <div className="flex justify-center items-center gap-10 mt-[20px]">
         <div className="flex items-center gap-4">
           <img className="w-12 h-12" src={avatar} alt="" />
-          <p className="text-[16px] font-bold">John Smith</p>
+          <p className="text-[16px] font-bold">Huỳnh Văn Thiệu</p>
         </div>
         <div className="text-[16px] text-[rgba(0,0,0,0.6)] border-l-2 border-gray-200 pl-8 font-medium">
-          15 March 2022
+          Ngày 15 tháng 3 năm 2022
         </div>
       </div>
       <p className="my-[20px] text-[22px] text-center text-[rgba(0,0,0,0.6)]">

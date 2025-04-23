@@ -54,7 +54,7 @@ const Header = () => {
         <img src={logo} alt="Oshisha" />
       </Link>
 
-      <div className="flex items-center gap-12 ml-[100px]" ref={navRef}>
+      <div className="flex items-center gap-10" ref={navRef}>
         {/* KHÁM PHÁ CÔNG THỨC */}
         <div
           onClick={() => {
@@ -69,7 +69,7 @@ const Header = () => {
               : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Khám phá công thức</p>
+          <p className="font-semibold text-[20px]">Khám phá</p>
           <FaAngleDown className="my-auto ml-2" />
           {isExploreOpen && (
             <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
@@ -135,6 +135,22 @@ const Header = () => {
           <p className="font-semibold text-[20px]">Lướt tin</p>
         </Link>
 
+        {/* Bài đăng */}
+        <Link
+          to="/"
+          onClick={() => {
+            setIsExploreOpen(false);
+            setIsSearchOpen(false);
+            setIsSupportOpen(false);
+            setActive("Bài đăng");
+          }}
+          className={`flex cursor-pointer relative items-center ${
+            active === "Bài đăng" ? "text-[#FF6363]" : "text-[#211E2E]"
+          }`}
+        >
+          <p className="font-semibold text-[20px]">Bài đăng</p>
+        </Link>
+
         {/* TÌM KIẾM */}
         <div
           onClick={() => {
@@ -155,19 +171,21 @@ const Header = () => {
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
                   {search.map((item, index) => (
                     <li key={item.name}>
-                      <div
-                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
-                          index === selectedSearchIndex
-                            ? "text-[#FF6363]"
-                            : "hover:text-[#FF6363]"
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedSearchIndex(index);
-                        }}
-                      >
-                        {item.name}
-                      </div>
+                      <Link to={item.path}>
+                        <div
+                          className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
+                            index === selectedSearchIndex
+                              ? "text-[#FF6363]"
+                              : "hover:text-[#FF6363]"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedSearchIndex(index);
+                          }}
+                        >
+                          {item.name}
+                        </div>
+                      </Link>
                     </li>
                   ))}
                 </ul>

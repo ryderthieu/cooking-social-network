@@ -73,6 +73,7 @@ const search = [
       { name: "Gà rán", path: "/ga-ran", src: gaRan },
       { name: "Bánh mì", path: "/banh-mi", src: banhMi },
     ],
+    path: "/cong-thuc",
   },
   {
     name: "Nguyên liệu",
@@ -129,29 +130,29 @@ const supports = [
   {
     name: "Điều kiện điều khoản",
     items: [
-      { name: "Điều kiện", path: "/dieu-kien" },
-      { name: "Điều khoản", path: "/dieu-khoan" },
+      { name: "Điều kiện", path: "/support/dieu-kien" },
+      { name: "Điều khoản", path: "/support/dieu-khoan" },
     ],
   },
   {
     name: "Hướng dẫn sử dụng",
     items: [
-      { name: "Hướng dẫn", path: "/huong-dan" },
-      { name: "Cách sử dụng", path: "/cach-su-dung" },
+      { name: "Hướng dẫn sử dụng", path: "/support/huong-dan" },
+      { name: "Chức năng tiêu biểu", path: "/support/chuc-nang" },
     ],
   },
   {
     name: "Câu hỏi thường gặp",
     items: [
-      { name: "Câu hỏi", path: "/cau-hoi" },
-      { name: "Thường gặp", path: "/thuong-gap" },
+      { name: "Câu hỏi", path: "/support/cau-hoi" },
+      { name: "Feedback", path: "/support/phan-hoi" },
     ],
   },
   {
     name: "Liên hệ",
     items: [
-      { name: "Liên hệ", path: "/lien-he" },
-      { name: "Hỗ trợ", path: "/ho-tro" },
+      { name: "Liên hệ", path: "/support/lien-he" },
+      { name: "Hỗ trợ", path: "/support/ho-tro" },
     ],
   },
 ];
