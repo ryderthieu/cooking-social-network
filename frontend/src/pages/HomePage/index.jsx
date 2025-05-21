@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Explore from "../../components/sections/Home/Explore.jsx";
 import Recipe from "../../components/common/Recipe.jsx";
 import Menu from "../../components/sections/Home/Menu.jsx";
+import Contact from "../../components/sections/Home/Contact.jsx";
 import { IoSearchSharp } from "react-icons/io5";
 import Hero from "../../components/sections/Home/Hero.jsx";
 import VideoShorts from "../../components/sections/Home/VideoShorts.jsx";
@@ -51,6 +52,7 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+      <Contact />
     </div>
   );
 };

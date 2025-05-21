@@ -4,6 +4,7 @@ import nl2 from "../../../assets/Home/Nglieu2.png";
 import nl3 from "../../../assets/Home/Nglieu3.png";
 import nl4 from "../../../assets/Home/Nglieu4.png";
 import BunQuay from "../../../assets/Home/Bunquay.png";
+import { Link } from "react-router-dom";
 
 const Explore = () => {
   return (
@@ -71,12 +72,16 @@ const Explore = () => {
         </div>
 
         <div className="mt-[40px] flex gap-10 mb-4">
-          <button className="rounded-3xl bg-[#592500] text-white font-semibold py-3 px-10 hover:bg-[#7A3D00] transition duration-300 ease-in-out">
-            Đăng nhập
-          </button>
-          <button className="rounded-3xl border-[#592500] border-2 text-[#592500] font-semibold py-3 px-10 hover:bg-white transition duration-300 ease-in-out">
-            Xem thêm
-          </button>
+          <Link to="/login">
+            <button className="rounded-3xl bg-[#592500] text-white font-semibold py-3 px-10 hover:bg-[#7A3D00] transition duration-300 ease-in-out">
+              Đăng nhập
+            </button>
+          </Link>
+          <Link to="/">
+            <button className="rounded-3xl border-[#592500] border-2 text-[#592500] font-semibold py-3 px-10 hover:bg-white transition duration-300 ease-in-out">
+              Xem thêm
+            </button>
+          </Link>
         </div>
       </div>
 
