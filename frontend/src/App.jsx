@@ -12,7 +12,6 @@ import FeedbacksPage from "./pages/SupportPage/Questions/FeedbacksPage";
 import InstructionsPage from "./pages/SupportPage/UserGuide/InstructionsPage";
 import FunctionsPage from "./pages/SupportPage/UserGuide/FunctionsPage";
 
-import { Routes, Route } from "react-router";
 import Login from "./pages/Auth/Login"
 import Register from "./pages/Auth/Register"
 import ForgotPassword from "./pages/Auth/ForgotPassword";
