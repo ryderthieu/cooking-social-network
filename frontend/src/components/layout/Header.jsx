@@ -72,8 +72,8 @@ const Header = () => {
           <p className="font-semibold text-[20px]">Khám phá công thức</p>
           <FaAngleDown className="my-auto ml-2" />
           {isExploreOpen && (
-            <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
-              <div className="w-[20%] p-4 ml-[110px]">
+            <div className="fixed left-0 top-[100px] z-20 flex shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
+              <div className="w-[20%] bg-white  p-4 pl-[120px]">
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
                   {categories.map((category, index) => (
                     <li key={category.name}>
@@ -95,7 +95,7 @@ const Header = () => {
                 </ul>
               </div>
 
-              <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-gradient-to-br from-[#fef2f2] to-[#fff7ed]">
+              <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-white/70 backdrop-blur-3xl">
                 {selectedCategory.items.map((item) => (
                   <Link to={item.path} key={item.name} className="text-center">
                     <div className="h-[280px] rounded-2xl mb-4 overflow-hidden bg-pink-100 flex items-center justify-center">
@@ -282,9 +282,11 @@ const Header = () => {
             <div className="border-2 rounded-full p-2 border-[#04043F]">
               <BiSolidEdit className="w-6 h-6 text-[#04043F]" />
             </div>
-            <div className="border-2 rounded-full p-2 border-[#04043F]">
-              <FiBookmark className="w-6 h-6 text-[#04043F]" />
-            </div>
+            <Link to="/saved-recipes" className="block">
+              <div className="border-2 rounded-full p-2 border-[#04043F]">
+                <FiBookmark className="w-6 h-6 text-[#04043F]" />
+              </div>
+            </Link>
             <div
               className="relative cursor-pointer"
               onClick={() => setIsDropdownOpen((prev) => !prev)}

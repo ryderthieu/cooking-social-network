@@ -6,6 +6,10 @@ import HighlightBlog from "./pages/BlogPage/HighlightBlog";
 import TopBlog from "./pages/BlogPage/TopBlog";
 import LayoutRoute from "./routes/LayoutRoute";
 import { Routes, Route } from "react-router";
+import Recipes from "./pages/RecipesPage/Recipe";
+import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
+import RecipeCategories from "./pages/RecipesPage/Recipes";
+
 
 function App() {
   const routes = [
@@ -26,6 +30,13 @@ function App() {
       ))}
       <Route path="*" element={<HomePage />} />
       <Route path="/login" />
+
+
+      <Route path="/recipes" element={<RecipeCategories />} />
+      <Route path="/saved-recipes" element={<SavedRecipes />} />
+      <Route path="/recipes/:categoryType/:item" element={<Recipes />} />
+
+      <Route path="/recipes" element={<RecipeCategories />} />
     </Routes>
   );
 }
