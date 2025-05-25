@@ -69,10 +69,10 @@ const Header = () => {
               : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[16px]">Khám phá</p>
+          <p className="font-semibold text-[18px]">Khám phá</p>
           <FaAngleDown className="my-auto ml-2" />
           {isExploreOpen && (
-            <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
+            <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4 ml-[110px]">
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
                   {categories.map((category, index) => (
@@ -132,7 +132,7 @@ const Header = () => {
             active === "Lướt tin" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[16px]">Lướt tin</p>
+          <p className="font-semibold text-[18px]">Lướt tin</p>
         </Link>
 
         {/* Bài đăng */}
@@ -148,7 +148,7 @@ const Header = () => {
             active === "Bài đăng" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[16px]">Bài đăng</p>
+          <p className="font-semibold text-[18px]">Bài đăng</p>
         </Link>
 
         {/* TÌM KIẾM */}
@@ -163,10 +163,10 @@ const Header = () => {
             active === "Tìm kiếm" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[16px]">Tìm kiếm</p>
+          <p className="font-semibold text-[18px]">Tìm kiếm</p>
           <FaAngleDown className="my-auto ml-2" />
           {isSearchOpen && (
-            <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
+            <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4 ml-[110px]">
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
                   {search.map((item, index) => (
@@ -228,7 +228,7 @@ const Header = () => {
             active === "Về OSHISHA" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[16px]">Về OSHISHA</p>
+          <p className="font-semibold text-[18px]">Về OSHISHA</p>
         </Link>
 
         {/* HỖ TRỢ */}
@@ -243,10 +243,10 @@ const Header = () => {
             active === "Hỗ trợ" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[16px]">Hỗ trợ</p>
+          <p className="font-semibold text-[18px]">Hỗ trợ</p>
           <FaAngleDown className="my-auto ml-2" />
           {isSupportOpen && (
-            <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
+            <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4 ml-[110px]">
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
                   {supports.map((item, index) => (
@@ -313,11 +313,11 @@ const Header = () => {
               </div>
             </div>
             {isDropdownOpen && (
-              <div className="absolute top-[90px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[16px] z-10">
+              <div className="absolute top-[90px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10">
                 <Link to="">
                   <div
                     to="/"
-                    className="text-[#04043F] font-semibold text-[16px] mb-2 cursor-pointer mx-6 my-3"
+                    className="text-[#04043F] font-semibold text-[18px] mb-2 cursor-pointer mx-6 my-3"
                   >
                     Đã lưu
                   </div>
@@ -325,7 +325,7 @@ const Header = () => {
                 <Link to="">
                   <div
                     to="/tai-khoan"
-                    className="text-[#04043F] font-semibold text-[16px] mb-2 cursor-pointer mx-6 my-3"
+                    className="text-[#04043F] font-semibold text-[18px] mb-2 cursor-pointer mx-6 my-3"
                   >
                     Tài khoản
                   </div>
@@ -337,7 +337,7 @@ const Header = () => {
                         setIsLoggedIn(false);
                         setIsDropdownOpen(false);
                       }}
-                      className="text-[#FF6363] font-semibold text-[16px] mb-3 cursor-pointer mx-6 mt-3"
+                      className="text-[#FF6363] font-semibold text-[18px] mb-3 cursor-pointer mx-6 mt-3"
                     >
                       Đăng xuất
                     </p>
@@ -351,7 +351,7 @@ const Header = () => {
             <div>
               <button
                 onClick={() => setIsLoggedIn(!isLoggedIn)}
-                className="font-semibold text-[16px] text-white bg-[#04043F] py-2 px-6 rounded-[30px] ml-[80px]"
+                className="font-semibold text-[18px] text-white bg-[#04043F] py-2 px-6 rounded-[30px] ml-[80px]"
               >
                 Đăng nhập
               </button>
