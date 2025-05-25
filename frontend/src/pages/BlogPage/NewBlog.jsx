@@ -8,8 +8,8 @@ import Recipe from "../../components/common/Recipe";
 
 const NewBlog = () => {
   return (
-    <div className="px-[110px] pt-[140px] pb-[50px]">
-      <h1 className="font-semibold text-center text-[50px]">
+    <div className="px-[300px] pt-[30px] pb-[50px]">
+      <h1 className="font-semibold text-center text-[35px]">
         Phong phú khẩu vị riêng của người Huế
       </h1>
       <div className="flex justify-center items-center gap-10 mt-[20px]">
@@ -21,7 +21,7 @@ const NewBlog = () => {
           Ngày 15 tháng 3 năm 2022
         </div>
       </div>
-      <p className="my-[20px] text-[22px] text-center text-[rgba(0,0,0,0.6)]">
+      <p className="my-[20px] text-[18px] text-center text-[rgba(0,0,0,0.6)]">
         Nét Văn Hóa Ẩm Thực Của Người Huế
       </p>
       <img className="mb-[30px]" src={blog1} alt="" />
@@ -87,8 +87,7 @@ const NewBlog = () => {
         <h1 className="text-center text-[32px] font-semibold ">
           Gợi ý các món ăn
         </h1>
-        <div className="grid grid-cols-4 gap-2 mt-8 mb-8">
-          <Recipe />
+        <div className="grid grid-cols-3 gap-2 mt-8 mb-8">
           <Recipe />
           <Recipe />
           <Recipe />

@@ -313,11 +313,11 @@ const Header = () => {
               </div>
             </div>
             {isDropdownOpen && (
-              <div className="absolute top-[90px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10">
+              <div className="absolute top-[87px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10">
                 <Link to="">
                   <div
                     to="/"
-                    className="text-[#04043F] font-semibold text-[18px] mb-2 cursor-pointer mx-6 my-3"
+                    className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-6 my-3"
                   >
                     Đã lưu
                   </div>
@@ -325,19 +325,19 @@ const Header = () => {
                 <Link to="">
                   <div
                     to="/tai-khoan"
-                    className="text-[#04043F] font-semibold text-[18px] mb-2 cursor-pointer mx-6 my-3"
+                    className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-6 my-3"
                   >
                     Tài khoản
                   </div>
                 </Link>
-                <Link to="">
+                <Link to="/login">
                   <div className="border-t-[1px] border-[#FBDCB0] my-3">
                     <p
                       onClick={() => {
                         setIsLoggedIn(false);
                         setIsDropdownOpen(false);
                       }}
-                      className="text-[#FF6363] font-semibold text-[18px] mb-3 cursor-pointer mx-6 mt-3"
+                      className="text-[#FF6363] font-medium text-[18px] mb-3 cursor-pointer mx-6 mt-3"
                     >
                       Đăng xuất
                     </p>
@@ -351,7 +351,7 @@ const Header = () => {
             <div>
               <button
                 onClick={() => setIsLoggedIn(!isLoggedIn)}
-                className="font-semibold text-[18px] text-white bg-[#04043F] py-2 px-6 rounded-[30px] ml-[80px]"
+                className="font-medium text-[18px] text-white bg-[#04043F] py-2 px-6 rounded-[30px] ml-[80px]"
               >
                 Đăng nhập
               </button>

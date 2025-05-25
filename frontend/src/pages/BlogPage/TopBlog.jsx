@@ -9,9 +9,9 @@ import Recipe from "../../components/common/Recipe";
 
 const TopBlog = () => {
   return (
-    <div className="px-[110px] pt-[140px] pb-[50px]">
-      <h1 className="font-semibold text-center text-[50px]">
-        Gỏi cuốn kèm nước chấm <br /> tương đen
+    <div className="px-[300px] pt-[30px] pb-[50px]">
+      <h1 className="font-semibold text-center text-[35px]">
+        Gỏi cuốn kèm nước chấm tương đen
       </h1>
       <div className="flex justify-center items-center gap-10 mt-[20px]">
         <div className="flex items-center gap-4">
@@ -22,7 +22,7 @@ const TopBlog = () => {
           Ngày 15 tháng 3 năm 2022
         </div>
       </div>
-      <p className="my-[20px] text-[22px] text-center text-[rgba(0,0,0,0.6)]">
+      <p className="my-[20px] text-[18px] text-center text-[rgba(0,0,0,0.6)]">
         Ẩm thực Việt Nam
       </p>
       <img className="mb-[30px]" src={blog9} alt="" />
@@ -44,8 +44,8 @@ const TopBlog = () => {
             đống ảnh đồ ăn hay chụp để viết bài.
           </p>
           <div className="flex gap-4 mb-4 justify-center">
-            <img src={blog4} alt="" />
-            <img src={blog5} alt="" />
+            <img className="w-[49%] h-[49%]" src={blog4} alt="" />
+            <img className="w-[49%] h-[49%]" src={blog5} alt="" />
           </div>
           <p className="text-[rgba(0,0,0,0.6)] mb-4 leading-7 text-justify">
             Bài mở màn năm mới thực ra không có gì đặc biệt, chủ yếu trong bài
@@ -76,8 +76,7 @@ const TopBlog = () => {
         <h1 className="text-center text-[32px] font-semibold ">
           Gợi ý các món ăn
         </h1>
-        <div className="grid grid-cols-4 gap-2 mt-8 mb-8">
-          <Recipe />
+        <div className="grid grid-cols-3 gap-2 mt-8 mb-8">
           <Recipe />
           <Recipe />
           <Recipe />
