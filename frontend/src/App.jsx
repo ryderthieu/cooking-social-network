@@ -15,6 +15,9 @@ import FunctionsPage from "./pages/SupportPage/UserGuide/FunctionsPage";
 import Login from "./pages/Auth/Login"
 import Register from "./pages/Auth/Register"
 import ForgotPassword from "./pages/Auth/ForgotPassword";
+import SearchPage from "./pages/SearchPage";
+import PostPage from "./pages/PostPage";
+import PostDetail from "./pages/PostPage/PostDetail";
 function App() {
   const routes = [
     { path: "/", element: <HomePage /> },
@@ -26,6 +29,9 @@ function App() {
     { path: "/support/huong-dan", element: <InstructionsPage /> },
     { path: "/support/chuc-nang", element: <FunctionsPage /> },
     { path: "/support/phan-hoi", element: <FeedbacksPage /> },
+    { path: "/search", element: <SearchPage />},
+    { path: "/posts", element: <PostPage />},
+    // { path: "/posts/:id", element: <PostDetail />}
   ];
 
   return (
@@ -38,10 +44,10 @@ function App() {
         />
       ))}
       <Route path="*" element={<HomePage />} />
-      <Route path="/login" />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="forgot-password" element = {<ForgotPassword />} />
+      <Route path="/posts/:id" element={<PostDetail />} />
     </Routes>
   );
 }

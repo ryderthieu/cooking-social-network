@@ -33,7 +33,7 @@ const Hero = () => {
   return (
     <div className="relative flex justify-center items-center">
       <img
-        className="pt-[120px] transition-all duration-500"
+        className="pt-[20px] transition-all duration-500"
         src={images[currentIndex].src}
         alt={images[currentIndex].alt}
       />

@@ -49,7 +49,7 @@ const Header = () => {
   }, []);
 
   return (
-    <div className="flex justify-between px-[110px] py-[30px] fixed bg-white z-50 right-0 left-0">
+    <div className="flex justify-between px-[110px] py-[20px] fixed bg-white z-50 right-0 left-0">
       <Link to="/">
         <img src={logo} alt="Oshisha" />
       </Link>
@@ -69,7 +69,7 @@ const Header = () => {
               : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Khám phá</p>
+          <p className="font-semibold text-[16px]">Khám phá</p>
           <FaAngleDown className="my-auto ml-2" />
           {isExploreOpen && (
             <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
@@ -132,12 +132,12 @@ const Header = () => {
             active === "Lướt tin" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Lướt tin</p>
+          <p className="font-semibold text-[16px]">Lướt tin</p>
         </Link>
 
         {/* Bài đăng */}
         <Link
-          to="/"
+          to="/posts"
           onClick={() => {
             setIsExploreOpen(false);
             setIsSearchOpen(false);
@@ -148,7 +148,7 @@ const Header = () => {
             active === "Bài đăng" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Bài đăng</p>
+          <p className="font-semibold text-[16px]">Bài đăng</p>
         </Link>
 
         {/* TÌM KIẾM */}
@@ -163,7 +163,7 @@ const Header = () => {
             active === "Tìm kiếm" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Tìm kiếm</p>
+          <p className="font-semibold text-[16px]">Tìm kiếm</p>
           <FaAngleDown className="my-auto ml-2" />
           {isSearchOpen && (
             <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
@@ -228,7 +228,7 @@ const Header = () => {
             active === "Về OSHISHA" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Về OSHISHA</p>
+          <p className="font-semibold text-[16px]">Về OSHISHA</p>
         </Link>
 
         {/* HỖ TRỢ */}
@@ -243,7 +243,7 @@ const Header = () => {
             active === "Hỗ trợ" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Hỗ trợ</p>
+          <p className="font-semibold text-[16px]">Hỗ trợ</p>
           <FaAngleDown className="my-auto ml-2" />
           {isSupportOpen && (
             <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
@@ -313,7 +313,7 @@ const Header = () => {
               </div>
             </div>
             {isDropdownOpen && (
-              <div className="absolute top-[90px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[20px] z-10">
+              <div className="absolute top-[90px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[16px] z-10">
                 <Link to="">
                   <div
                     to="/"

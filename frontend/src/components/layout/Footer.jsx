@@ -8,7 +8,7 @@ import linkedin from "../../assets/IconSocial/linkedin.png";
 
 const Footer = () => {
   return (
-    <div className="bg-[#03051A] ">
+    <div className="bg-[#03051A]">
       <img src={logo} alt="logo" className="py-[50px] px-[110px]" />
 
       <div className="grid grid-cols-4 gap-6 text-white pb-8 px-[110px]">
