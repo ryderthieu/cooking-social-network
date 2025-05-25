@@ -12,6 +12,8 @@ import FeedbacksPage from "./pages/SupportPage/Questions/FeedbacksPage";
 import InstructionsPage from "./pages/SupportPage/UserGuide/InstructionsPage";
 import FunctionsPage from "./pages/SupportPage/UserGuide/FunctionsPage";
 import QuestionsPage from "./pages/SupportPage/Questions/QuestionsPage";
+import ContactsPage from "./pages/SupportPage/Contact/ContactsPage";
+import SupportsPage from "./pages/SupportPage/Contact/SupportsPage";
 
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
@@ -31,6 +33,8 @@ function App() {
     { path: "/support/chuc-nang", element: <FunctionsPage /> },
     { path: "/support/cau-hoi", element: <QuestionsPage /> },
     { path: "/support/phan-hoi", element: <FeedbacksPage /> },
+    { path: "/support/lien-he", element: <ContactsPage /> },
+    { path: "/support/ho-tro", element: <SupportsPage /> },
     { path: "/search", element: <SearchPage />},
     { path: "/posts", element: <PostPage />},
     // { path: "/posts/:id", element: <PostDetail />}
