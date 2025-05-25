@@ -11,9 +11,10 @@ import ConditionsPage from "./pages/SupportPage/TermsAndConditions/ConditionsPag
 import FeedbacksPage from "./pages/SupportPage/Questions/FeedbacksPage";
 import InstructionsPage from "./pages/SupportPage/UserGuide/InstructionsPage";
 import FunctionsPage from "./pages/SupportPage/UserGuide/FunctionsPage";
+import QuestionsPage from "./pages/SupportPage/Questions/QuestionsPage";
 
-import Login from "./pages/Auth/Login"
-import Register from "./pages/Auth/Register"
+import Login from "./pages/Auth/Login";
+import Register from "./pages/Auth/Register";
 import ForgotPassword from "./pages/Auth/ForgotPassword";
 import SearchPage from "./pages/SearchPage";
 import PostPage from "./pages/PostPage";
@@ -28,6 +29,7 @@ function App() {
     { path: "/support/dieu-kien", element: <ConditionsPage /> },
     { path: "/support/huong-dan", element: <InstructionsPage /> },
     { path: "/support/chuc-nang", element: <FunctionsPage /> },
+    { path: "/support/cau-hoi", element: <QuestionsPage /> },
     { path: "/support/phan-hoi", element: <FeedbacksPage /> },
     { path: "/search", element: <SearchPage />},
     { path: "/posts", element: <PostPage />},
