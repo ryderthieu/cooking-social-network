@@ -73,7 +73,6 @@ const search = [
       { name: "Gà rán", path: "/ga-ran", src: gaRan },
       { name: "Bánh mì", path: "/banh-mi", src: banhMi },
     ],
-    path: "/cong-thuc",
   },
   {
     name: "Nguyên liệu",

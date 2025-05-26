@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import logo from "../../assets/logo.png";
 import avatar from "../../assets/avatar.png";
 import { FaAngleDown, FaChevronDown } from "react-icons/fa";
-import { BiSolidEdit } from "react-icons/bi";
 import { FiBookmark } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { categories, search, supports } from "./MenuData";
+import { IoNotifications } from "react-icons/io5";
+import { MdMessage } from "react-icons/md";
 
 const Header = () => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
@@ -171,21 +172,19 @@ const Header = () => {
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
                   {search.map((item, index) => (
                     <li key={item.name}>
-                      <Link to={item.path}>
-                        <div
-                          className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
-                            index === selectedSearchIndex
-                              ? "text-[#FF6363]"
-                              : "hover:text-[#FF6363]"
-                          }`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedSearchIndex(index);
-                          }}
-                        >
-                          {item.name}
-                        </div>
-                      </Link>
+                      <div
+                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
+                          index === selectedSearchIndex
+                            ? "text-[#FF6363]"
+                            : "hover:text-[#FF6363]"
+                        }`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedSearchIndex(index);
+                        }}
+                      >
+                        {item.name}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -217,7 +216,7 @@ const Header = () => {
 
         {/* VỀ OSHISHA */}
         <Link
-          to="/"
+          to="/about"
           onClick={() => {
             setIsExploreOpen(false);
             setIsSearchOpen(false);
@@ -298,10 +297,10 @@ const Header = () => {
         {isLoggedIn ? (
           <div className="flex items-center gap-4">
             <div className="border-2 rounded-full p-2 border-[#04043F]">
-              <BiSolidEdit className="w-6 h-6 text-[#04043F]" />
+              <IoNotifications className="w-6 h-6 text-[#04043F]" />
             </div>
             <div className="border-2 rounded-full p-2 border-[#04043F]">
-              <FiBookmark className="w-6 h-6 text-[#04043F]" />
+              <MdMessage className="w-6 h-6 text-[#04043F]" />
             </div>
             <div
               className="relative cursor-pointer"
