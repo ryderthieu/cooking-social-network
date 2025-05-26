@@ -7,7 +7,7 @@ const Hero = () => {
     {
       src: Banner1,
       alt: "Image 1",
-      title: "Khám phá công thức ngon chia sẻ niềm vui nấu nướng",
+      title: "Điều kiện và điều khoản khi sử dụng OSHISHA",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore ",
     },

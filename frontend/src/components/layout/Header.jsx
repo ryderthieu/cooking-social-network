@@ -49,12 +49,12 @@ const Header = () => {
   }, []);
 
   return (
-    <div className="flex justify-between px-[110px] py-[30px] fixed bg-white z-50 right-0 left-0">
+    <div className="flex justify-between px-[110px] py-[20px] fixed bg-white z-50 right-0 left-0">
       <Link to="/">
         <img src={logo} alt="Oshisha" />
       </Link>
 
-      <div className="flex items-center gap-12 ml-[100px]" ref={navRef}>
+      <div className="flex items-center gap-10" ref={navRef}>
         {/* KHÁM PHÁ CÔNG THỨC */}
         <div
           onClick={() => {
@@ -69,12 +69,12 @@ const Header = () => {
               : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Khám phá công thức</p>
+          <p className="font-semibold text-[18px]">Khám phá</p>
           <FaAngleDown className="my-auto ml-2" />
           {isExploreOpen && (
-            <div className="fixed left-0 top-[100px] z-20 flex shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
-              <div className="w-[20%] bg-white  p-4 pl-[120px]">
-                <ul className="space-y-2 text-sm text-gray-700 font-medium">
+            <div className="fixed left-0 top-[80px] z-20 flex shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
+              <div className="w-[20%] bg-white  p-4 pl-[120px] pr-[50px]">
+                <ul className="space-y-3 text-sm text-gray-700 font-medium">
                   {categories.map((category, index) => (
                     <li key={category.name}>
                       <div
@@ -132,7 +132,23 @@ const Header = () => {
             active === "Lướt tin" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Lướt tin</p>
+          <p className="font-semibold text-[18px]">Lướt tin</p>
+        </Link>
+
+        {/* Bài đăng */}
+        <Link
+          to="/posts"
+          onClick={() => {
+            setIsExploreOpen(false);
+            setIsSearchOpen(false);
+            setIsSupportOpen(false);
+            setActive("Bài đăng");
+          }}
+          className={`flex cursor-pointer relative items-center ${
+            active === "Bài đăng" ? "text-[#FF6363]" : "text-[#211E2E]"
+          }`}
+        >
+          <p className="font-semibold text-[18px]">Bài đăng</p>
         </Link>
 
         {/* TÌM KIẾM */}
@@ -147,27 +163,29 @@ const Header = () => {
             active === "Tìm kiếm" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Tìm kiếm</p>
+          <p className="font-semibold text-[18px]">Tìm kiếm</p>
           <FaAngleDown className="my-auto ml-2" />
           {isSearchOpen && (
-            <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
+            <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4 ml-[110px]">
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
                   {search.map((item, index) => (
                     <li key={item.name}>
-                      <div
-                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
-                          index === selectedSearchIndex
-                            ? "text-[#FF6363]"
-                            : "hover:text-[#FF6363]"
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedSearchIndex(index);
-                        }}
-                      >
-                        {item.name}
-                      </div>
+                      <Link to={item.path}>
+                        <div
+                          className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
+                            index === selectedSearchIndex
+                              ? "text-[#FF6363]"
+                              : "hover:text-[#FF6363]"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedSearchIndex(index);
+                          }}
+                        >
+                          {item.name}
+                        </div>
+                      </Link>
                     </li>
                   ))}
                 </ul>
@@ -210,7 +228,7 @@ const Header = () => {
             active === "Về OSHISHA" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Về OSHISHA</p>
+          <p className="font-semibold text-[18px]">Về OSHISHA</p>
         </Link>
 
         {/* HỖ TRỢ */}
@@ -225,10 +243,10 @@ const Header = () => {
             active === "Hỗ trợ" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[20px]">Hỗ trợ</p>
+          <p className="font-semibold text-[18px]">Hỗ trợ</p>
           <FaAngleDown className="my-auto ml-2" />
           {isSupportOpen && (
-            <div className="fixed left-0 top-[100px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
+            <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4 ml-[110px]">
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
                   {supports.map((item, index) => (
@@ -297,11 +315,11 @@ const Header = () => {
               </div>
             </div>
             {isDropdownOpen && (
-              <div className="absolute top-[90px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[20px] z-10">
+              <div className="absolute top-[87px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10">
                 <Link to="">
                   <div
                     to="/"
-                    className="text-[#04043F] font-semibold text-[16px] mb-2 cursor-pointer mx-6 my-3"
+                    className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-6 my-3"
                   >
                     Đã lưu
                   </div>
@@ -309,19 +327,19 @@ const Header = () => {
                 <Link to="">
                   <div
                     to="/tai-khoan"
-                    className="text-[#04043F] font-semibold text-[16px] mb-2 cursor-pointer mx-6 my-3"
+                    className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-6 my-3"
                   >
                     Tài khoản
                   </div>
                 </Link>
-                <Link to="">
+                <Link to="/login">
                   <div className="border-t-[1px] border-[#FBDCB0] my-3">
                     <p
                       onClick={() => {
                         setIsLoggedIn(false);
                         setIsDropdownOpen(false);
                       }}
-                      className="text-[#FF6363] font-semibold text-[16px] mb-3 cursor-pointer mx-6 mt-3"
+                      className="text-[#FF6363] font-medium text-[18px] mb-3 cursor-pointer mx-6 mt-3"
                     >
                       Đăng xuất
                     </p>
@@ -335,7 +353,7 @@ const Header = () => {
             <div>
               <button
                 onClick={() => setIsLoggedIn(!isLoggedIn)}
-                className="font-semibold text-[16px] text-white bg-[#04043F] py-2 px-6 rounded-[30px] ml-[80px]"
+                className="font-medium text-[18px] text-white bg-[#04043F] py-2 px-6 rounded-[30px] ml-[80px]"
               >
                 Đăng nhập
               </button>
