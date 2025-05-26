@@ -364,7 +364,7 @@ export default function RecipeCategories() {
                       slugMap[item.name] || encodeURIComponent(item.name)
                     }`}
                     className={`relative flex w-full max-w-[300px] ${category.background} py-8 px-6 h-[120px] rounded-2xl shadow-lg shadow-gray-300 ring-2 ring-white/50 hover:-translate-y-2 transition-transform ease-in-out duration-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
-                    aria-label={`Xem công thức ${item}`}
+                    aria-label={`Xem công thức ${item.name}`}
                   >
                     <div className="absolute right-6 bottom-3 rounded-full grid place-items-center size-[6em] shadow-lg border border-gray-100">
                       <img
