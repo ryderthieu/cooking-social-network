@@ -21,9 +21,10 @@ import ForgotPassword from "./pages/Auth/ForgotPassword";
 import SearchPage from "./pages/SearchPage";
 import PostPage from "./pages/PostPage";
 import PostDetail from "./pages/PostPage/PostDetail";
+
 import Recipes from "./pages/RecipesPage/Recipe";
 import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
-import RecipeCategories from "./pages/RecipesPage/Recipes";
+import RecipeCategories from "./pages/RecipesPage";
 
 
 function App() {

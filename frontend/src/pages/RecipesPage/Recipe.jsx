@@ -153,7 +153,7 @@ const Recipes = () => {
       <div className="mx-auto space-y-10 my-10">
         {/* Tin tức tổng hợp - Liên kết đến Blog*/}
         <div className="container mx-auto">
-          <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-6">
+          <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-black mb-6">
             Tin tức - kiến thức
           </h3>
 

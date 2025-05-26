@@ -72,9 +72,10 @@ const Header = () => {
           <p className="font-semibold text-[18px]">Khám phá</p>
           <FaAngleDown className="my-auto ml-2" />
           {isExploreOpen && (
-            <div className="fixed left-0 top-[80px] z-20 flex shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
-              <div className="w-[20%] bg-white  p-4 pl-[120px] pr-[50px]">
-                <ul className="space-y-3 text-sm text-gray-700 font-medium">
+
+            <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
+              <div className="w-[20%] p-4 ml-[110px]">
+                <ul className="space-y-2 text-sm text-gray-700 font-medium">
                   {categories.map((category, index) => (
                     <li key={category.name}>
                       <div
@@ -95,7 +96,7 @@ const Header = () => {
                 </ul>
               </div>
 
-              <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-white/70 backdrop-blur-3xl">
+              <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-gradient-to-br from-[#fef2f2] to-[#fff7ed]">
                 {selectedCategory.items.map((item) => (
                   <Link to={item.path} key={item.name} className="text-center">
                     <div className="h-[280px] rounded-2xl mb-4 overflow-hidden bg-pink-100 flex items-center justify-center">
