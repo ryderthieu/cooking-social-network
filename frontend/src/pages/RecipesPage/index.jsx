@@ -369,7 +369,7 @@ export default function RecipeCategories() {
                     <div className="absolute right-6 bottom-3 rounded-full grid place-items-center size-[6em] shadow-lg border border-gray-100">
                       <img
                         src={Korea1}
-                        alt={`Hình ảnh minh họa cho ${item}`}
+                        alt={`Hình ảnh minh họa cho ${item.name}`}
                         className="w-[90%] h-[90%] object-cover rounded-full"
                       />
                     </div>
