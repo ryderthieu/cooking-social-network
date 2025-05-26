@@ -359,7 +359,7 @@ export default function RecipeCategories() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {category.items.map((item) => (
                   <Link
-                    key={item}
+                    key={item.name}
                     to={`/recipes/${categoryType}/${
                       slugMap[item.name] || encodeURIComponent(item.name)
                     }`}
