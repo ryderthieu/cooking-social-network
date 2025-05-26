@@ -234,14 +234,9 @@ const Recipes = () => {
             Công thức phổ biến
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-10">
-            <Recipe />
-            <Recipe />
-            <Recipe />
-            <Recipe />
-            <Recipe />
-            <Recipe />
-            <Recipe />
-            <Recipe />
+            {[...Array(8)].map((_, index) => (
+              <Recipe key={index} />
+            ))}
           </div>
         </div>
 
