@@ -1,4 +1,3 @@
-import React from "react";
 import "./App.css";
 import { Routes, Route } from "react-router";
 import HomePage from "./pages/HomePage/index";
@@ -16,6 +15,7 @@ import ContactsPage from "./pages/SupportPage/Contact/ContactsPage";
 import SupportsPage from "./pages/SupportPage/Contact/SupportsPage";
 import AboutPage from "./pages/AboutPage";
 import NotificationPage from "./pages/NotificationPage";
+import MessagePage from "./pages/MessagePage";
 
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
@@ -27,6 +27,7 @@ import PostDetail from "./pages/PostPage/PostDetail";
 import Recipes from "./pages/RecipesPage/Recipe";
 import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
 import RecipeCategories from "./pages/RecipesPage";
+import HeaderLayout from "./components/layout/HeaderLayout";
 
 function App() {
   const routes = [
@@ -48,6 +49,8 @@ function App() {
     { path: "/explore/*", element: <PostPage /> },
   ];
 
+  const headeronlyRoutes = [{ path: "/messages", element: <MessagePage /> }];
+
   return (
     <Routes>
       {routes.map(({ path, element }) => (
@@ -67,6 +70,14 @@ function App() {
       <Route path="/saved-recipes" element={<SavedRecipes />} />
       <Route path="/recipes/:categoryType/:item" element={<Recipes />} />
       <Route path="/recipes" element={<RecipeCategories />} />
+
+      {headeronlyRoutes.map(({ path, element }) => (
+        <Route
+          key={path}
+          path={path}
+          element={<HeaderLayout>{element}</HeaderLayout>}
+        />
+      ))}
     </Routes>
   );
 }

@@ -26,7 +26,7 @@ const Header = () => {
   const navRef = useRef(null);
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const location = useLocation();
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -57,28 +57,21 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    const path = location.pathname
-    if (path === '/') {
-      setActive(0)
-    }
-    else if (path.startsWith('/recipes')) {
-      setActive(1)
-    }
-    else if (path.startsWith('/explore')) {
-      setActive(2)
-    }
-    else if (path.startsWith('/about')) {
-      setActive(3)
-    }
-    else if (path.startsWith('/support')) {
-      setActive(4)
-    }
-    else if (path.startsWith('/search')) {
-      setActive(5)
-    }
-    else
-      setActive('')
-  }, [location])
+    const path = location.pathname;
+    if (path === "/") {
+      setActive(0);
+    } else if (path.startsWith("/recipes")) {
+      setActive(1);
+    } else if (path.startsWith("/explore")) {
+      setActive(2);
+    } else if (path.startsWith("/about")) {
+      setActive(3);
+    } else if (path.startsWith("/support")) {
+      setActive(4);
+    } else if (path.startsWith("/search")) {
+      setActive(5);
+    } else setActive("");
+  }, [location]);
 
   return (
     <div className="flex justify-between px-[110px] py-[20px] fixed bg-white z-50 right-0 left-0">
@@ -93,8 +86,9 @@ const Header = () => {
             setIsSearchOpen(false);
             setIsSupportOpen(false);
           }}
-          className={`flex cursor-pointer relative items-center ${active == 0 ? "text-[#FF6363]" : "text-[#211E2E]"
-            }`}
+          className={`flex cursor-pointer relative items-center ${
+            active == 0 ? "text-[#FF6363]" : "text-[#211E2E]"
+          }`}
         >
           <p className="font-semibold text-[18px]">Trang chủ</p>
         </Link>
@@ -105,9 +99,8 @@ const Header = () => {
             setIsSearchOpen(false);
             setIsSupportOpen(false);
           }}
-          className={`flex cursor-pointer relative items-center ${active == 1
-              ? "text-[#FF6363]"
-              : "text-[#211E2E]"
+          className={`flex cursor-pointer relative items-center ${
+            active == 1 ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
           <p className="font-semibold text-[18px]">Công thức</p>
@@ -167,8 +160,9 @@ const Header = () => {
             setIsSearchOpen(false);
             setIsSupportOpen(false);
           }}
-          className={`flex cursor-pointer relative items-center ${active == 2 ? "text-[#FF6363]" : "text-[#211E2E]"
-            }`}
+          className={`flex cursor-pointer relative items-center ${
+            active == 2 ? "text-[#FF6363]" : "text-[#211E2E]"
+          }`}
         >
           <p className="font-semibold text-[18px]">Khám phá</p>
         </Link>
@@ -181,8 +175,9 @@ const Header = () => {
             setIsSearchOpen(false);
             setIsSupportOpen(false);
           }}
-          className={`flex cursor-pointer relative items-center ${active == 3 ? "text-[#FF6363]" : "text-[#211E2E]"
-            }`}
+          className={`flex cursor-pointer relative items-center ${
+            active == 3 ? "text-[#FF6363]" : "text-[#211E2E]"
+          }`}
         >
           <p className="font-semibold text-[18px]">Về OSHISHA</p>
         </Link>
@@ -193,9 +188,10 @@ const Header = () => {
             setIsSupportOpen(!isSupportOpen);
             setIsSearchOpen(false);
             setIsExploreOpen(false);
-            }}
-          className={`flex cursor-pointer relative items-center ${active == 4 ? "text-[#FF6363]" : "text-[#211E2E]"
-            }`}
+          }}
+          className={`flex cursor-pointer relative items-center ${
+            active == 4 ? "text-[#FF6363]" : "text-[#211E2E]"
+          }`}
         >
           <p className="font-semibold text-[18px]">Hỗ trợ</p>
           <FaAngleDown className="my-auto ml-2" />
@@ -307,7 +303,12 @@ const Header = () => {
 
             {/* Messages */}
             <div className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer">
-              <MdMessage className="w-6 h-6 text-[#04043F]" />
+              <Link
+                to="/messages"
+                className="flex items-center gap-2 hover:text-blue-600"
+              >
+                <MdMessage className="w-6 h-6 text-[#04043F]" />
+              </Link>
             </div>
 
             {/* User Avatar */}
