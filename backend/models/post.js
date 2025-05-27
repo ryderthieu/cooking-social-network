@@ -7,15 +7,8 @@ const postSchema = new Schema(
     caption: { type: String },
     recipe: { type: Schema.Types.ObjectId, required: true, ref: "Recipe" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", default: [] }],
-    likeCount: { type: Number, default: 0 },
-    comments: [
-      {
-        userId: { type: Schema.Types.ObjectId, required: true, ref: "User" },
-        comment: { type: String },
-        createdAt: { type: Date, default: Date.now },
-      },
-    ],
-    shares: { type: Number, default: 0 },
+    comments: [{type: Schema.Types.ObjectId, ref: "Comment", default: []}],
+    shares: { type: Schema.Types.ObjectId, ref: "User", default: [] },
     media: [
       {
         url: { type: String, required: true },
