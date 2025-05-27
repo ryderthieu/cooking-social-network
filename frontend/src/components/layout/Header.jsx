@@ -73,6 +73,7 @@ const Header = () => {
           <p className="font-semibold text-[18px]">Khám phá</p>
           <FaAngleDown className="my-auto ml-2" />
           {isExploreOpen && (
+
             <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4 ml-[110px]">
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">

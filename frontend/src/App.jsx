@@ -22,6 +22,12 @@ import ForgotPassword from "./pages/Auth/ForgotPassword";
 import SearchPage from "./pages/SearchPage";
 import PostPage from "./pages/PostPage";
 import PostDetail from "./pages/PostPage/PostDetail";
+
+import Recipes from "./pages/RecipesPage/Recipe";
+import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
+import RecipeCategories from "./pages/RecipesPage";
+
+
 function App() {
   const routes = [
     { path: "/", element: <HomePage /> },
@@ -56,6 +62,12 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="forgot-password" element={<ForgotPassword />} />
       <Route path="/posts/:id" element={<PostDetail />} />
+
+
+      <Route path="/recipes" element={<RecipeCategories />} />
+      <Route path="/saved-recipes" element={<SavedRecipes />} />
+      <Route path="/recipes/:categoryType/:item" element={<Recipes />} />
+      <Route path="/recipes" element={<RecipeCategories />} />
     </Routes>
   );
 }
