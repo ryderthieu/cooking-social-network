@@ -1,6 +1,23 @@
 import { FaUserFriends, FaFire, FaNewspaper, FaVideo, FaUser, FaBookmark, FaUtensils, FaPlus } from "react-icons/fa";
 import { MdLibraryAdd } from "react-icons/md";
-export const LeftSidebar = ({ data, activeTab, onTabChange }) => (
+import { Link } from "react-router-dom";
+
+const data = {
+  profile: {
+    name: 'Nguyễn Văn A',
+    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+    posts: 12,
+    followers: 340,
+  },
+  menu: [
+    { label: 'Bài viết', icon: <FaNewspaper/>, href: '/explore/posts' },
+    { label: 'Reels', icon: <FaVideo />, href: '/explore/reels/1'},
+    { label: 'Trang cá nhân', icon: <FaUser />, href: '/profile'},
+    { label: 'Bài viết đã lưu', icon: <FaBookmark />, href: '/saved'},
+    { label: 'Công thức của tôi', icon: <FaUtensils />, href: '/my-recipes'},
+  ]
+};
+export const LeftSidebar = ({activeTab, onTabChange }) => (
     <aside className="hidden lg:block w-72 pr-4 space-y-6 sticky top-24 h-fit">
         <div className="bg-white rounded-2xl shadow p-6 mb-2">
             {/* Profile Section */}
@@ -17,14 +34,8 @@ export const LeftSidebar = ({ data, activeTab, onTabChange }) => (
             <ul className="space-y-2">
                 {data.menu.map(item => (
                     <li key={item.label}>
-                        <a
-                            href={item.href}
-                            onClick={(e) => {
-                                e.preventDefault();
-                                if (item.label === 'Bài viết' || item.label === 'Reels') {
-                                    onTabChange(item.label === 'Bài viết' ? 'posts' : 'reels');
-                                }
-                            }}
+                        <Link
+                            to={item.href}
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
                                 (item.label === 'Bài viết' && activeTab === 'posts') || 
                                 (item.label === 'Reels' && activeTab === 'reels')
@@ -34,7 +45,7 @@ export const LeftSidebar = ({ data, activeTab, onTabChange }) => (
                         >
                             <span className="text-lg">{item.icon}</span>
                             {item.label}
-                        </a>
+                        </Link>
                     </li>
                 ))}
             </ul>

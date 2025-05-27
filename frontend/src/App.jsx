@@ -44,8 +44,7 @@ function App() {
     { path: "/support/lien-he", element: <ContactsPage /> },
     { path: "/support/ho-tro", element: <SupportsPage /> },
     { path: "/search", element: <SearchPage /> },
-    { path: "/posts", element: <PostPage /> },
-    // { path: "/posts/:id", element: <PostDetail />}
+    { path: "/explore/*", element: <PostPage /> },
   ];
 
   return (

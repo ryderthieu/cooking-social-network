@@ -3,7 +3,7 @@ import logo from "../../assets/logo.png";
 import avatar from "../../assets/avatar.png";
 import { FaAngleDown, FaChevronDown, FaSearch, FaTimes } from "react-icons/fa";
 import { FiBookmark } from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { categories, search, supports } from "./MenuData";
 import { IoNotifications, IoSearchOutline } from "react-icons/io5";
 import { MdMessage } from "react-icons/md";
@@ -26,6 +26,7 @@ const Header = () => {
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
   const navigate = useNavigate()
+  const location = useLocation();
   useEffect(() => {
     const handleClickOutside = (event) => {
       const target = event.target;
@@ -54,6 +55,30 @@ const Header = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const path = location.pathname
+    if (path === '/') {
+      setActive(0)
+    }
+    else if (path.startsWith('/recipes')) {
+      setActive(1)
+    }
+    else if (path.startsWith('/explore')) {
+      setActive(2)
+    }
+    else if (path.startsWith('/about')) {
+      setActive(3)
+    }
+    else if (path.startsWith('/support')) {
+      setActive(4)
+    }
+    else if (path.startsWith('/search')) {
+      setActive(5)
+    }
+    else
+      setActive('')
+  }, [location])
+
   return (
     <div className="flex justify-between px-[110px] py-[20px] fixed bg-white z-50 right-0 left-0">
       <Link to="/">
@@ -66,9 +91,8 @@ const Header = () => {
             setIsExploreOpen(false);
             setIsSearchOpen(false);
             setIsSupportOpen(false);
-            setActive("Lướt tin");
           }}
-          className={`flex cursor-pointer relative items-center ${active === "Lướt tin" ? "text-[#FF6363]" : "text-[#211E2E]"
+          className={`flex cursor-pointer relative items-center ${active == 0 ? "text-[#FF6363]" : "text-[#211E2E]"
             }`}
         >
           <p className="font-semibold text-[18px]">Trang chủ</p>
@@ -79,9 +103,8 @@ const Header = () => {
             setIsExploreOpen(!isExploreOpen);
             setIsSearchOpen(false);
             setIsSupportOpen(false);
-            setActive("Khám phá công thức");
           }}
-          className={`flex cursor-pointer relative items-center ${active === "Khám phá công thức"
+          className={`flex cursor-pointer relative items-center ${active == 1
               ? "text-[#FF6363]"
               : "text-[#211E2E]"
             }`}
@@ -136,16 +159,14 @@ const Header = () => {
           )}
         </div>
 
-        {/* Bài đăng */}
         <Link
-          to="/posts"
+          to="/explore"
           onClick={() => {
             setIsExploreOpen(false);
             setIsSearchOpen(false);
             setIsSupportOpen(false);
-            setActive("Bài đăng");
           }}
-          className={`flex cursor-pointer relative items-center ${active === "Bài đăng" ? "text-[#FF6363]" : "text-[#211E2E]"
+          className={`flex cursor-pointer relative items-center ${active == 2 ? "text-[#FF6363]" : "text-[#211E2E]"
             }`}
         >
           <p className="font-semibold text-[18px]">Khám phá</p>
@@ -158,9 +179,8 @@ const Header = () => {
             setIsExploreOpen(false);
             setIsSearchOpen(false);
             setIsSupportOpen(false);
-            setActive("Về OSHISHA");
           }}
-          className={`flex cursor-pointer relative items-center ${active === "Về OSHISHA" ? "text-[#FF6363]" : "text-[#211E2E]"
+          className={`flex cursor-pointer relative items-center ${active == 3 ? "text-[#FF6363]" : "text-[#211E2E]"
             }`}
         >
           <p className="font-semibold text-[18px]">Về OSHISHA</p>
@@ -172,9 +192,8 @@ const Header = () => {
             setIsSupportOpen(!isSupportOpen);
             setIsSearchOpen(false);
             setIsExploreOpen(false);
-            setActive("Hỗ trợ");
-          }}
-          className={`flex cursor-pointer relative items-center ${active === "Hỗ trợ" ? "text-[#FF6363]" : "text-[#211E2E]"
+            }}
+          className={`flex cursor-pointer relative items-center ${active == 4 ? "text-[#FF6363]" : "text-[#211E2E]"
             }`}
         >
           <p className="font-semibold text-[18px]">Hỗ trợ</p>
