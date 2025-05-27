@@ -15,6 +15,7 @@ import QuestionsPage from "./pages/SupportPage/Questions/QuestionsPage";
 import ContactsPage from "./pages/SupportPage/Contact/ContactsPage";
 import SupportsPage from "./pages/SupportPage/Contact/SupportsPage";
 import AboutPage from "./pages/AboutPage";
+import NotificationPage from "./pages/NotificationPage";
 
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
@@ -26,7 +27,6 @@ import PostDetail from "./pages/PostPage/PostDetail";
 import Recipes from "./pages/RecipesPage/Recipe";
 import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
 import RecipeCategories from "./pages/RecipesPage";
-
 
 function App() {
   const routes = [
@@ -43,6 +43,7 @@ function App() {
     { path: "/support/phan-hoi", element: <FeedbacksPage /> },
     { path: "/support/lien-he", element: <ContactsPage /> },
     { path: "/support/ho-tro", element: <SupportsPage /> },
+    { path: "/notification", element: <NotificationPage /> },
     { path: "/search", element: <SearchPage /> },
     { path: "/explore/*", element: <PostPage /> },
   ];
@@ -61,7 +62,6 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="forgot-password" element={<ForgotPassword />} />
       <Route path="/posts/:id" element={<PostDetail />} />
-
 
       <Route path="/recipes" element={<RecipeCategories />} />
       <Route path="/saved-recipes" element={<SavedRecipes />} />

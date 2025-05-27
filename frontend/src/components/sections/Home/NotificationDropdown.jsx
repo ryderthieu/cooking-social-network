@@ -90,7 +90,7 @@ export default function NotificationDropdown() {
           </div>
           <div className="p-4 text-center">
             <a
-              href="#"
+              href="/notification"
               className="text-sm text-orange-500 font-semibold hover:underline"
             >
               All Notification
