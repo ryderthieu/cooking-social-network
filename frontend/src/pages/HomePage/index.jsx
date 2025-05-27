@@ -37,12 +37,12 @@ const HomePage = () => {
         <Menu />
         <Explore />
         {/* <VideoShorts /> */}
-        <div className="mt-[100px]">
+        <div className="mt-[100px] ml-[70px]">
           <div className="flex justify-between items-center">
-            <p className="font-bold text-[40px]">
+            <p className="font-bold text-[30px]">
               Khám phá các công thức đỉnh cao
             </p>
-            <p className="text-[#A46000] text-[28px] font-medium">Xem tất cả</p>
+            <p className="text-[#A46000] text-[24px] font-medium">Xem tất cả</p>
           </div>
           <div className="grid grid-cols-4 gap-2 mt-8 mb-8">
             <Recipe />

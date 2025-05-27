@@ -1,4 +1,3 @@
-import React from "react";
 import "./App.css";
 import { Routes, Route } from "react-router";
 import HomePage from "./pages/HomePage/index";
@@ -15,6 +14,8 @@ import QuestionsPage from "./pages/SupportPage/Questions/QuestionsPage";
 import ContactsPage from "./pages/SupportPage/Contact/ContactsPage";
 import SupportsPage from "./pages/SupportPage/Contact/SupportsPage";
 import AboutPage from "./pages/AboutPage";
+import NotificationPage from "./pages/NotificationPage";
+import MessagePage from "./pages/MessagePage";
 
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
@@ -26,7 +27,7 @@ import PostDetail from "./pages/PostPage/PostDetail";
 import Recipes from "./pages/RecipesPage/Recipe";
 import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
 import RecipeCategories from "./pages/RecipesPage";
-
+import HeaderLayout from "./components/layout/HeaderLayout";
 
 function App() {
   const routes = [
@@ -43,9 +44,12 @@ function App() {
     { path: "/support/phan-hoi", element: <FeedbacksPage /> },
     { path: "/support/lien-he", element: <ContactsPage /> },
     { path: "/support/ho-tro", element: <SupportsPage /> },
+    { path: "/notification", element: <NotificationPage /> },
     { path: "/search", element: <SearchPage /> },
     { path: "/explore/*", element: <PostPage /> },
   ];
+
+  const headeronlyRoutes = [{ path: "/messages", element: <MessagePage /> }];
 
   return (
     <Routes>
@@ -62,11 +66,18 @@ function App() {
       <Route path="forgot-password" element={<ForgotPassword />} />
       <Route path="/posts/:id" element={<PostDetail />} />
 
-
       <Route path="/recipes" element={<RecipeCategories />} />
       <Route path="/saved-recipes" element={<SavedRecipes />} />
       <Route path="/recipes/:categoryType/:item" element={<Recipes />} />
       <Route path="/recipes" element={<RecipeCategories />} />
+
+      {headeronlyRoutes.map(({ path, element }) => (
+        <Route
+          key={path}
+          path={path}
+          element={<HeaderLayout>{element}</HeaderLayout>}
+        />
+      ))}
     </Routes>
   );
 }

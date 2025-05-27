@@ -5,8 +5,8 @@ import googlePlay from "../../../assets/Home/GooglePlay.png";
 
 const Contact = () => {
   return (
-    <div className="relative my-[40px] justify-center items-center flex">
-      <img src={contact} alt="" />
+    <div className="relative my-[40px] justify-center items-center flex mx-[30px]">
+      <img className="w-[80%]" src={contact} alt="" />
       <div className="max-w-[600px] absolute top-2 bottom-0 right-0 left-0 mx-auto text-center">
         <h2 className="mt-[40px] text-[35px] font-bold">
           Deliciousness to your inbox

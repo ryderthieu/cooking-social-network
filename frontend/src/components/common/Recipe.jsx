@@ -10,7 +10,7 @@ const Recipe = () => {
     setIsLiked(!isLike);
   };
   return (
-    <div className="bg-[#FEF1DF] max-w-[310px] p-4 rounded-3xl">
+    <div className="bg-[#FEF1DF] max-w-[260px] p-4 rounded-3xl">
       <div className="relative">
         <img src={recipe} alt="" />
         <div
@@ -24,15 +24,15 @@ const Recipe = () => {
           )}
         </div>
       </div>
-      <h2 className="font-semibold text-[24px] py-6">Bún đậu mắm tôm</h2>
+      <h2 className="font-semibold text-[18px] py-6">Bún đậu mắm tôm</h2>
       <div className="flex mt-4 mb-2">
         <div className="flex mr-4">
-          <img className="mr-1" src={timer} alt="" />
-          <span>30 Minutes</span>
+          <img className="mr-1 text-[14px]" src={timer} alt="" />
+          <span className="text-[14px] my-auto">30 Minutes</span>
         </div>
         <div className="flex">
-          <img className="mr-1" src={fork} alt="" />
-          <span>Snack</span>
+          <img className="mr-1 text-[14px]" src={fork} alt="" />
+          <span className="text-[14px]  my-auto">Snack</span>
         </div>
       </div>
     </div>
