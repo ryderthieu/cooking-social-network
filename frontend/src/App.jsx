@@ -14,6 +14,7 @@ import FunctionsPage from "./pages/SupportPage/UserGuide/FunctionsPage";
 import QuestionsPage from "./pages/SupportPage/Questions/QuestionsPage";
 import ContactsPage from "./pages/SupportPage/Contact/ContactsPage";
 import SupportsPage from "./pages/SupportPage/Contact/SupportsPage";
+import AboutPage from "./pages/AboutPage";
 
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
@@ -30,6 +31,7 @@ import RecipeCategories from "./pages/RecipesPage";
 function App() {
   const routes = [
     { path: "/", element: <HomePage /> },
+    { path: "/about", element: <AboutPage /> },
     { path: "/blog/bai-viet-moi", element: <NewBlog /> },
     { path: "/blog/bai-viet-noi-bat", element: <HighlightBlog /> },
     { path: "/blog/bai-viet-pho-bien", element: <TopBlog /> },
@@ -41,8 +43,8 @@ function App() {
     { path: "/support/phan-hoi", element: <FeedbacksPage /> },
     { path: "/support/lien-he", element: <ContactsPage /> },
     { path: "/support/ho-tro", element: <SupportsPage /> },
-    { path: "/search", element: <SearchPage />},
-    { path: "/posts", element: <PostPage />},
+    { path: "/search", element: <SearchPage /> },
+    { path: "/posts", element: <PostPage /> },
     // { path: "/posts/:id", element: <PostDetail />}
   ];
 
@@ -58,7 +60,7 @@ function App() {
       <Route path="*" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="forgot-password" element = {<ForgotPassword />} />
+      <Route path="forgot-password" element={<ForgotPassword />} />
       <Route path="/posts/:id" element={<PostDetail />} />
 
 
