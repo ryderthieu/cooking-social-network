@@ -7,6 +7,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { categories, search, supports } from "./MenuData";
 import { IoNotifications, IoSearchOutline } from "react-icons/io5";
 import { MdMessage } from "react-icons/md";
+import NotificationDropdown from "../sections/Home/NotificationDropdown";
 
 const Header = () => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
@@ -107,22 +108,22 @@ const Header = () => {
           className={`flex cursor-pointer relative items-center ${active == 1
               ? "text-[#FF6363]"
               : "text-[#211E2E]"
-            }`}
+          }`}
         >
           <p className="font-semibold text-[18px]">Công thức</p>
           <FaAngleDown className="my-auto ml-2" />
           {isExploreOpen && (
-
             <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4 ml-[110px]">
                 <ul className="space-y-2 text-sm text-gray-700 font-medium">
                   {categories.map((category, index) => (
                     <li key={category.name}>
                       <div
-                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${index === selectedCategoryIndex
+                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
+                          index === selectedCategoryIndex
                             ? "text-[#FF6363]"
                             : "hover:text-[#FF6363]"
-                          }`}
+                        }`}
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedCategoryIndex(index);
@@ -205,10 +206,11 @@ const Header = () => {
                   {supports.map((item, index) => (
                     <li key={item.name}>
                       <div
-                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${index === selectedSupportIndex
+                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
+                          index === selectedSupportIndex
                             ? "text-[#FF6363]"
                             : "hover:text-[#FF6363]"
-                          }`}
+                        }`}
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedSupportIndex(index);
@@ -252,13 +254,14 @@ const Header = () => {
           <div className="flex items-center gap-4">
             {/* Expandable Search */}
             <div
-              className={`flex items-center transition-all duration-300 ease-in-out ${isSearchOpen ? 'w-[300px]' : 'w-10'
-                }`}
+              className={`flex items-center transition-all duration-300 ease-in-out ${
+                isSearchOpen ? "w-[300px]" : "w-10"
+              }`}
               ref={searchRef}
             >
               {isSearchOpen ? (
                 <div className="flex items-center w-full bg-gray-50 rounded-full px-4 py-2 border border-gray-200 focus-within:border-[#FF6363] focus-within:shadow-md transition-all duration-200">
-                  <Link to={'/search'}>
+                  <Link to={"/search"}>
                     <IoSearchOutline className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
                   </Link>
                   <input
@@ -268,7 +271,9 @@ const Header = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 bg-transparent outline-none text-sm placeholder-gray-400"
                     autoFocus
-                    onKeyDown={(event) => {if (event.key === 'Enter') navigate('/search')}}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") navigate("/search");
+                    }}
                   />
                   {searchQuery && (
                     <div
@@ -296,8 +301,8 @@ const Header = () => {
             </div>
 
             {/* Notifications */}
-            <div className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer">
-              <IoNotifications className="w-6 h-6 text-[#04043F]" />
+            <div>
+              <NotificationDropdown />
             </div>
 
             {/* Messages */}
@@ -314,7 +319,11 @@ const Header = () => {
                 <span className="text-gray-600 font-semibold">U</span>
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-[20px] h-[20px] bg-[#E2E5E9] rounded-full flex items-center justify-center text-[12px]">
-                <FaChevronDown className={`text-center text-white transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                <FaChevronDown
+                  className={`text-center text-white transition-transform duration-200 ${
+                    isDropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
               </div>
             </div>
 
