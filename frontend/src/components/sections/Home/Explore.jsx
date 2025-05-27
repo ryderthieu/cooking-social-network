@@ -11,7 +11,7 @@ const Explore = () => {
     <div className="grid grid-cols-2 gap-4 p-6 bg-[#F8F5F2] rounded-2xl">
       <div className="pl-[70px]">
         <h1 className="font-birthstone text-[64px]">Khám phá</h1>
-        <p className="font-bold text-[45px]">Công thức bún quậy</p>
+        <p className="font-bold text-[34px]">Công thức bún quậy</p>
 
         <div className="pt-[40px] pl-4">
           <h3 className="text-[18px] font-medium">Nguyên liệu</h3>
