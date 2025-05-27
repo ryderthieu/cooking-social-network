@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import logo from "../../assets/logo.png";
 import avatar from "../../assets/avatar.png";
-import { FaAngleDown, FaChevronDown, FaSearch } from "react-icons/fa";
+import { FaAngleDown, FaChevronDown, FaSearch, FaTimes } from "react-icons/fa";
 import { FiBookmark } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { categories, search, supports } from "./MenuData";
 import { IoNotifications, IoSearchOutline } from "react-icons/io5";
 import { MdMessage } from "react-icons/md";
@@ -21,25 +21,30 @@ const Header = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [active, setActive] = useState("Khám phá công thức");
-
+  const [searchQuery, setSearchQuery] = useState("");
   const navRef = useRef(null);
   const dropdownRef = useRef(null);
-
+  const searchRef = useRef(null);
+  const navigate = useNavigate()
   useEffect(() => {
     const handleClickOutside = (event) => {
       const target = event.target;
 
       const isInsideNav = navRef.current?.contains(target);
       const isInsideDropdown = dropdownRef.current?.contains(target);
+      const isInsideSearch = searchRef.current?.contains(target);
 
       if (!isInsideNav) {
         setIsExploreOpen(false);
-        setIsSearchOpen(false);
         setIsSupportOpen(false);
       }
 
       if (!isInsideDropdown) {
         setIsDropdownOpen(false);
+      }
+
+      if (!isInsideSearch) {
+        setIsSearchOpen(false);
       }
     };
 
@@ -55,7 +60,7 @@ const Header = () => {
         <img src={logo} alt="Oshisha" />
       </Link>
       <div className="flex items-center gap-10" ref={navRef}>
-         <Link
+        <Link
           to="/"
           onClick={() => {
             setIsExploreOpen(false);
@@ -63,9 +68,8 @@ const Header = () => {
             setIsSupportOpen(false);
             setActive("Lướt tin");
           }}
-          className={`flex cursor-pointer relative items-center ${
-            active === "Lướt tin" ? "text-[#FF6363]" : "text-[#211E2E]"
-          }`}
+          className={`flex cursor-pointer relative items-center ${active === "Lướt tin" ? "text-[#FF6363]" : "text-[#211E2E]"
+            }`}
         >
           <p className="font-semibold text-[18px]">Trang chủ</p>
         </Link>
@@ -77,11 +81,10 @@ const Header = () => {
             setIsSupportOpen(false);
             setActive("Khám phá công thức");
           }}
-          className={`flex cursor-pointer relative items-center ${
-            active === "Khám phá công thức"
+          className={`flex cursor-pointer relative items-center ${active === "Khám phá công thức"
               ? "text-[#FF6363]"
               : "text-[#211E2E]"
-          }`}
+            }`}
         >
           <p className="font-semibold text-[18px]">Công thức</p>
           <FaAngleDown className="my-auto ml-2" />
@@ -93,11 +96,10 @@ const Header = () => {
                   {categories.map((category, index) => (
                     <li key={category.name}>
                       <div
-                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
-                          index === selectedCategoryIndex
+                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${index === selectedCategoryIndex
                             ? "text-[#FF6363]"
                             : "hover:text-[#FF6363]"
-                        }`}
+                          }`}
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedCategoryIndex(index);
@@ -143,9 +145,8 @@ const Header = () => {
             setIsSupportOpen(false);
             setActive("Bài đăng");
           }}
-          className={`flex cursor-pointer relative items-center ${
-            active === "Bài đăng" ? "text-[#FF6363]" : "text-[#211E2E]"
-          }`}
+          className={`flex cursor-pointer relative items-center ${active === "Bài đăng" ? "text-[#FF6363]" : "text-[#211E2E]"
+            }`}
         >
           <p className="font-semibold text-[18px]">Khám phá</p>
         </Link>
@@ -159,9 +160,8 @@ const Header = () => {
             setIsSupportOpen(false);
             setActive("Về OSHISHA");
           }}
-          className={`flex cursor-pointer relative items-center ${
-            active === "Về OSHISHA" ? "text-[#FF6363]" : "text-[#211E2E]"
-          }`}
+          className={`flex cursor-pointer relative items-center ${active === "Về OSHISHA" ? "text-[#FF6363]" : "text-[#211E2E]"
+            }`}
         >
           <p className="font-semibold text-[18px]">Về OSHISHA</p>
         </Link>
@@ -174,9 +174,8 @@ const Header = () => {
             setIsExploreOpen(false);
             setActive("Hỗ trợ");
           }}
-          className={`flex cursor-pointer relative items-center ${
-            active === "Hỗ trợ" ? "text-[#FF6363]" : "text-[#211E2E]"
-          }`}
+          className={`flex cursor-pointer relative items-center ${active === "Hỗ trợ" ? "text-[#FF6363]" : "text-[#211E2E]"
+            }`}
         >
           <p className="font-semibold text-[18px]">Hỗ trợ</p>
           <FaAngleDown className="my-auto ml-2" />
@@ -187,11 +186,10 @@ const Header = () => {
                   {supports.map((item, index) => (
                     <li key={item.name}>
                       <div
-                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
-                          index === selectedSupportIndex
+                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${index === selectedSupportIndex
                             ? "text-[#FF6363]"
                             : "hover:text-[#FF6363]"
-                        }`}
+                          }`}
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedSupportIndex(index);
@@ -229,72 +227,111 @@ const Header = () => {
         </div>
       </div>
 
-      <div ref={dropdownRef}>
+      {/* Right side - với search expandable */}
+      <div ref={dropdownRef} className="flex items-center">
         {isLoggedIn ? (
           <div className="flex items-center gap-4">
-            <div className=" rounded-full p-2">
-              <IoSearchOutline className="w-6 h-6 text-[#04043F]" />
-            </div> 
-            <div className="rounded-full p-2">
+            {/* Expandable Search */}
+            <div
+              className={`flex items-center transition-all duration-300 ease-in-out ${isSearchOpen ? 'w-[300px]' : 'w-10'
+                }`}
+              ref={searchRef}
+            >
+              {isSearchOpen ? (
+                <div className="flex items-center w-full bg-gray-50 rounded-full px-4 py-2 border border-gray-200 focus-within:border-[#FF6363] focus-within:shadow-md transition-all duration-200">
+                  <Link to={'/search'}>
+                    <IoSearchOutline className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
+                  </Link>
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent outline-none text-sm placeholder-gray-400"
+                    autoFocus
+                    onKeyDown={(event) => {if (event.key === 'Enter') navigate('/search')}}
+                  />
+                  {searchQuery && (
+                    <div
+                      onClick={() => setSearchQuery("")}
+                      className="p-1 hover:bg-gray-200 rounded-full transition-colors cursor-pointer ml-2"
+                    >
+                      <FaTimes className="w-3 h-3 text-gray-400" />
+                    </div>
+                  )}
+                  <div
+                    onClick={() => setIsSearchOpen(false)}
+                    className="p-1 hover:bg-gray-200 rounded-full transition-colors cursor-pointer ml-2"
+                  >
+                    <FaTimes className="w-4 h-4 text-gray-500" />
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
+                  onClick={() => setIsSearchOpen(true)}
+                >
+                  <IoSearchOutline className="w-6 h-6 text-[#04043F]" />
+                </div>
+              )}
+            </div>
+
+            {/* Notifications */}
+            <div className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer">
               <IoNotifications className="w-6 h-6 text-[#04043F]" />
             </div>
-            <div className="rounded-full p-2 ">
+
+            {/* Messages */}
+            <div className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer">
               <MdMessage className="w-6 h-6 text-[#04043F]" />
             </div>
+
+            {/* User Avatar */}
             <div
               className="relative cursor-pointer"
               onClick={() => setIsDropdownOpen((prev) => !prev)}
             >
-              <img className="w-[42px] h-[42px]" src={avatar} alt="" />
+              <div className="w-[42px] h-[42px] bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-gray-600 font-semibold">U</span>
+              </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-[20px] h-[20px] bg-[#E2E5E9] rounded-full flex items-center justify-center text-[12px]">
-                <FaChevronDown className="text-center text-white" />
+                <FaChevronDown className={`text-center text-white transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </div>
             </div>
+
             {isDropdownOpen && (
-              <div className="absolute top-[87px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10">
-                <Link to="">
-                  <div
-                    to="/"
-                    className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-6 my-3"
-                  >
+              <div className="absolute top-[87px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10 border border-gray-100 overflow-hidden">
+                <div className="p-2">
+                  <div className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
                     Đã lưu
                   </div>
-                </Link>
-                <Link to="">
-                  <div
-                    to="/tai-khoan"
-                    className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-6 my-3"
-                  >
+                  <div className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
                     Tài khoản
                   </div>
-                </Link>
-                <Link to="/login">
                   <div className="border-t-[1px] border-[#FBDCB0] my-3">
                     <p
                       onClick={() => {
                         setIsLoggedIn(false);
                         setIsDropdownOpen(false);
                       }}
-                      className="text-[#FF6363] font-medium text-[18px] mb-3 cursor-pointer mx-6 mt-3"
+                      className="text-[#FF6363] font-medium text-[18px] mb-3 cursor-pointer mx-4 mt-3 hover:text-red-600 transition-colors duration-200"
                     >
                       Đăng xuất
                     </p>
                   </div>
-                </Link>
+                </div>
               </div>
             )}
           </div>
         ) : (
-          <Link to="/login">
-            <div>
-              <button
-                onClick={() => setIsLoggedIn(!isLoggedIn)}
-                className="font-medium text-[18px] text-white bg-[#04043F] py-2 px-6 rounded-[30px] ml-[80px]"
-              >
-                Đăng nhập
-              </button>
-            </div>
-          </Link>
+          <div>
+            <button
+              onClick={() => setIsLoggedIn(!isLoggedIn)}
+              className="font-medium text-[18px] text-white bg-[#04043F] hover:bg-[#03032d] py-2 px-6 rounded-[30px] ml-[80px] transition-colors duration-200"
+            >
+              Đăng nhập
+            </button>
+          </div>
         )}
       </div>
     </div>
