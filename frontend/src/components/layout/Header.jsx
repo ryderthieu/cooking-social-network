@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import logo from "../../assets/logo.png";
 import avatar from "../../assets/avatar.png";
-import { FaAngleDown, FaChevronDown } from "react-icons/fa";
+import { FaAngleDown, FaChevronDown, FaSearch } from "react-icons/fa";
 import { FiBookmark } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import { categories, search, supports } from "./MenuData";
-import { IoNotifications } from "react-icons/io5";
+import { IoNotifications, IoSearchOutline } from "react-icons/io5";
 import { MdMessage } from "react-icons/md";
 
 const Header = () => {
@@ -54,8 +54,21 @@ const Header = () => {
       <Link to="/">
         <img src={logo} alt="Oshisha" />
       </Link>
-
       <div className="flex items-center gap-10" ref={navRef}>
+         <Link
+          to="/"
+          onClick={() => {
+            setIsExploreOpen(false);
+            setIsSearchOpen(false);
+            setIsSupportOpen(false);
+            setActive("Lướt tin");
+          }}
+          className={`flex cursor-pointer relative items-center ${
+            active === "Lướt tin" ? "text-[#FF6363]" : "text-[#211E2E]"
+          }`}
+        >
+          <p className="font-semibold text-[18px]">Trang chủ</p>
+        </Link>
         {/* KHÁM PHÁ CÔNG THỨC */}
         <div
           onClick={() => {
@@ -70,7 +83,7 @@ const Header = () => {
               : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[18px]">Khám phá</p>
+          <p className="font-semibold text-[18px]">Công thức</p>
           <FaAngleDown className="my-auto ml-2" />
           {isExploreOpen && (
 
@@ -121,22 +134,6 @@ const Header = () => {
           )}
         </div>
 
-        {/* LƯỚT TIN */}
-        <Link
-          to="/"
-          onClick={() => {
-            setIsExploreOpen(false);
-            setIsSearchOpen(false);
-            setIsSupportOpen(false);
-            setActive("Lướt tin");
-          }}
-          className={`flex cursor-pointer relative items-center ${
-            active === "Lướt tin" ? "text-[#FF6363]" : "text-[#211E2E]"
-          }`}
-        >
-          <p className="font-semibold text-[18px]">Lướt tin</p>
-        </Link>
-
         {/* Bài đăng */}
         <Link
           to="/posts"
@@ -150,70 +147,8 @@ const Header = () => {
             active === "Bài đăng" ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[18px]">Bài đăng</p>
+          <p className="font-semibold text-[18px]">Khám phá</p>
         </Link>
-
-        {/* TÌM KIẾM */}
-        <div
-          onClick={() => {
-            setIsExploreOpen(false);
-            setIsSearchOpen(!isSearchOpen);
-            setIsSupportOpen(false);
-            setActive("Tìm kiếm");
-          }}
-          className={`flex cursor-pointer relative items-center ${
-            active === "Tìm kiếm" ? "text-[#FF6363]" : "text-[#211E2E]"
-          }`}
-        >
-          <p className="font-semibold text-[18px]">Tìm kiếm</p>
-          <FaAngleDown className="my-auto ml-2" />
-          {isSearchOpen && (
-            <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
-              <div className="w-[20%] p-4 ml-[110px]">
-                <ul className="space-y-2 text-sm text-gray-700 font-medium">
-                  {search.map((item, index) => (
-                    <li key={item.name}>
-                      <div
-                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
-                          index === selectedSearchIndex
-                            ? "text-[#FF6363]"
-                            : "hover:text-[#FF6363]"
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedSearchIndex(index);
-                        }}
-                      >
-                        {item.name}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-gradient-to-br from-[#fef2f2] to-[#fff7ed]">
-                {selectedSearch.items.map((item) => (
-                  <Link to={item.path} key={item.name} className="text-center">
-                    <div className="h-[280px] rounded-2xl mb-4 overflow-hidden bg-pink-100 flex items-center justify-center">
-                      {item.src ? (
-                        <img
-                          src={item.src}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-gray-400">No image</span>
-                      )}
-                    </div>
-                    <p className="text-[18px] font-medium text-gray-700 hover:text-[#FF6363] transition-all duration-200">
-                      {item.name}
-                    </p>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* VỀ OSHISHA */}
         <Link
@@ -297,10 +232,13 @@ const Header = () => {
       <div ref={dropdownRef}>
         {isLoggedIn ? (
           <div className="flex items-center gap-4">
-            <div className="border-2 rounded-full p-2 border-[#04043F]">
+            <div className=" rounded-full p-2">
+              <IoSearchOutline className="w-6 h-6 text-[#04043F]" />
+            </div> 
+            <div className="rounded-full p-2">
               <IoNotifications className="w-6 h-6 text-[#04043F]" />
             </div>
-            <div className="border-2 rounded-full p-2 border-[#04043F]">
+            <div className="rounded-full p-2 ">
               <MdMessage className="w-6 h-6 text-[#04043F]" />
             </div>
             <div
