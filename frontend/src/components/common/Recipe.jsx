@@ -10,9 +10,9 @@ const Recipe = () => {
     setIsLiked(!isLike);
   };
   return (
-    <div className="bg-[#FEF1DF] max-w-[260px] p-4 rounded-3xl">
+    <div className="bg-[#FEF1DF] max-w-[300px] p-2 rounded-3xl">
       <div className="relative">
-        <img src={recipe} alt="" />
+        <img className="rounded-2xl" src={recipe} alt="" />
         <div
           onClick={toggleLike}
           className="absolute top-4 right-4 bg-white rounded-full p-2 transition-transform active:scale-90 cursor-pointer"
@@ -24,15 +24,15 @@ const Recipe = () => {
           )}
         </div>
       </div>
-      <h2 className="font-semibold text-[18px] py-6">Bún đậu mắm tôm</h2>
-      <div className="flex mt-4 mb-2">
+      <h2 className="font-semibold text-[16px] py-6 pl-2">Bún đậu mắm tôm</h2>
+      <div className="flex mt-4 mb-2 pl-2">
         <div className="flex mr-4">
-          <img className="mr-1 text-[14px]" src={timer} alt="" />
-          <span className="text-[14px] my-auto">30 Minutes</span>
+          <img className="mr-1 text-[8px]" src={timer} alt="" />
+          <span className="text-[13px] my-auto">30 Minutes</span>
         </div>
         <div className="flex">
-          <img className="mr-1 text-[14px]" src={fork} alt="" />
-          <span className="text-[14px]  my-auto">Snack</span>
+          <img className="mr-1 text-[8px]" src={fork} alt="" />
+          <span className="text-[13px]  my-auto">Snack</span>
         </div>
       </div>
     </div>

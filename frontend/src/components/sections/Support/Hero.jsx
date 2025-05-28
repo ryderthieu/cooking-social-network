@@ -1,18 +1,18 @@
 import React, { useState } from "react";
-import Banner1 from "../../../assets/Home/Banner1.png";
+import banner from "../../../assets/Home/banner.png";
 import { FaChevronCircleLeft, FaChevronCircleRight } from "react-icons/fa";
 
 const Hero = () => {
   const images = [
     {
-      src: Banner1,
+      src: banner,
       alt: "Image 1",
       title: "Điều kiện và điều khoản khi sử dụng OSHISHA",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore ",
     },
     {
-      src: Banner1,
+      src: banner,
       alt: "Image 2",
       title: "Khám phá công thức ngon chia sẻ niềm vui nấu nướng",
       description:
