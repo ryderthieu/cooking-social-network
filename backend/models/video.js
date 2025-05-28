@@ -13,6 +13,7 @@ const videoSchema = new Schema(
     captionSlug: { type: String },
     recipeSlug: { type: String },
     authorSlug: { type: String },
+    views: {type: Number, default: 0}
   },
   {
     timestamps: true,

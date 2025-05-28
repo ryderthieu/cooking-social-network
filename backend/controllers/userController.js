@@ -102,7 +102,7 @@ const confirmOtp = async (req, res) => {
       return res.status(404).json({ error: "Người dùng không tồn tại!" });
     }
     console.log(otp);
-
+    console.log(user.otp)
     if (user.otp !== otp) {
       return res.status(400).json({ error: "Mã OTP không đúng!" });
     }

@@ -1,10 +1,13 @@
 import React, { useState, useRef } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { useAuth } from '../../../context/AuthContext'
 import bgImage from '../../../assets/images/login/background.png'
 import bowl from '../../../assets/images/login/bowl.png'
-import { Link } from 'react-router-dom'
 import logo from '../../../assets/logo.svg'
 
 const Login = () => {
+    const navigate = useNavigate();
+    const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -12,6 +15,8 @@ const Login = () => {
 
     const [errors, setErrors] = useState({});
     const [shakeFields, setShakeFields] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [apiError, setApiError] = useState('');
 
     const emailRef = useRef(null);
     const passwordRef = useRef(null);
@@ -28,6 +33,7 @@ const Login = () => {
                 [name]: null
             }));
         }
+        setApiError('');
     };
 
     const validate = () => {
@@ -51,7 +57,7 @@ const Login = () => {
         return newErrors;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const validationErrors = validate();
         setErrors(validationErrors);
@@ -59,16 +65,33 @@ const Login = () => {
         if (Object.keys(validationErrors).length > 0) {
             if (validationErrors.email) emailRef.current.focus();
             else if (validationErrors.password) passwordRef.current.focus();
-
             setTimeout(() => setShakeFields([]), 500);
-        } else {
-            console.log("Dữ liệu đăng nhập hợp lệ:", formData);
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            setApiError('');
+            const result = await login(formData.email, formData.password);
+            console.log(result);
+            
+            if (result.success) {
+                navigate('/'); // Chuyển hướng về trang chủ sau khi đăng nhập thành công
+            } else {
+                setApiError(result.error || 'Đăng nhập thất bại. Vui lòng thử lại.');
+                setShakeFields(['email', 'password']);
+                setTimeout(() => setShakeFields([]), 500);
+            }
+        } catch (error) {
+            setApiError('Có lỗi xảy ra. Vui lòng thử lại sau.');
+            console.error('Login error:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
         <div className="min-h-screen flex items-center justify-center p-6 animated-bg">
-
             <div
                 className="w-full max-w-6xl flex flex-row rounded-3xl shadow-2xl overflow-hidden border border-white/30 p-6 gap-5 relative"
                 style={{
@@ -77,11 +100,9 @@ const Login = () => {
                     backgroundRepeat: 'no-repeat',
                 }}
             >
-
                 <div className="w-1/2 flex justify-center items-center p-6 min-h-[610px]">
                     <img src={bowl} alt="Fruit Bowl" className="max-w-[80%] md:max-w-[70%]" />
                 </div>
-
 
                 <div className="w-1/2 flex justify-center items-center p-6">
                     <div className="w-full max-w-md">
@@ -89,6 +110,12 @@ const Login = () => {
                             <img src={logo} alt="SHISHA Logo" className="h-10" />
                         </div>
                         <h2 className="text-3xl font-bold text-black mb-6 text-center">Đăng nhập</h2>
+
+                        {apiError && (
+                            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                                {apiError}
+                            </div>
+                        )}
 
                         <form className="space-y-4 flex flex-col mb-6" onSubmit={handleSubmit}>
                             <div>
@@ -102,6 +129,7 @@ const Login = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                     ref={emailRef}
+                                    disabled={isLoading}
                                 />
                                 {errors.email && <p className="text-red-600 text-xs italic ml-2 mt-1">{errors.email}</p>}
                             </div>
@@ -116,6 +144,7 @@ const Login = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     ref={passwordRef}
+                                    disabled={isLoading}
                                 />
                                 {errors.password && <p className="text-red-600 text-xs italic ml-2 mt-1">{errors.password}</p>}
                                 <div className="text-right mt-2">
@@ -126,9 +155,12 @@ const Login = () => {
                             </div>
                             <button
                                 type="submit"
-                                className="w-full bg-[#04043F] hover:bg-[#1a1a5f] text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg pt-4"
+                                className={`w-full bg-[#04043F] hover:bg-[#1a1a5f] text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg pt-4 ${
+                                    isLoading ? 'opacity-70 cursor-not-allowed' : ''
+                                }`}
+                                disabled={isLoading}
                             >
-                                Đăng nhập
+                                {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                             </button>
                         </form>
 
@@ -139,14 +171,20 @@ const Login = () => {
                         </div>
 
                         <div className="flex justify-center items-center gap-5 mb-6">
-                            <button className="w-11 h-11 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-110 shadow-sm">
+                            <button 
+                                className="w-11 h-11 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-110 shadow-sm"
+                                disabled={isLoading}
+                            >
                                 <img
                                     className="w-6 h-6"
                                     src="https://www.svgrepo.com/show/475656/google-color.svg"
                                     alt="Google"
                                 />
                             </button>
-                            <button className="w-11 h-11 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-110 shadow-sm">
+                            <button 
+                                className="w-11 h-11 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-110 shadow-sm"
+                                disabled={isLoading}
+                            >
                                 <img
                                     className="w-6 h-6"
                                     src="https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg"
