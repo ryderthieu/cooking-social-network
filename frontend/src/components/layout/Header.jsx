@@ -303,12 +303,6 @@ const Header = () => {
 
             {/* Messages */}
             <div>
-              {/* <Link
-                to="/messages"
-                className="flex items-center gap-2 hover:text-blue-600"
-              >
-                <MdMessage className="w-6 h-6 text-[#04043F]" />
-              </Link> */}
               <MessageDropdown />
             </div>
 

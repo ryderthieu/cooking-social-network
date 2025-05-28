@@ -77,10 +77,7 @@ const MessageDropdown = () => {
   };
 
   return (
-    <div
-      className="relative rounded-full hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
-      ref={dropdownRef}
-    >
+    <div className="relative" ref={dropdownRef}>
       {/* Message Icon Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}

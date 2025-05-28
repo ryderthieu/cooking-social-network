@@ -58,6 +58,8 @@ const HomePage = () => {
             <Recipe />
             <Recipe />
             <Recipe />
+            <Recipe />
+            <Recipe />
           </div>
         </div>
       </div>

@@ -40,27 +40,12 @@ const Contact = () => {
       <section className="w-full py-10 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="md:w-1/2 flex items-center">
-              <div className="relative">
-                <img
-                  src="/placeholder.svg?height=200&width=200"
-                  alt="Fresh ingredients"
-                  className="w-[200px] h-[200px] object-contain"
-                />
-                {/* Decorative elements */}
-                <div className="absolute -bottom-4 -right-4">
-                  <img
-                    src="/placeholder.svg?height=80&width=80"
-                    alt="Herb decoration"
-                    className="w-[80px] h-[80px] object-contain"
-                  />
-                </div>
-              </div>
-              <div className="ml-4">
+            <div className="md:w-1/2 flex items-center mr-4">
+              <div className="mr-4">
                 <h3 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-                  Deliciousness to your inbox
+                  Đăng ký nhận tin tức
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-4 text-justify">
                   Đăng ký để nhận những công thức nấu ăn tuyệt vời và cập nhật
                   mới nhất từ Oshisha
                 </p>
@@ -71,12 +56,12 @@ const Contact = () => {
                     onChange={(e) => setSubscribeEmail(e.target.value)}
                     placeholder="Email của bạn"
                     required
-                    className="px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="px-4 py-2 border w-full border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   />
                   <button
                     type="submit"
                     disabled={isSubscribing}
-                    className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-r-md transition-colors duration-300"
+                    className="bg-orange-500 w-[25%] hover:bg-orange-600 text-white px-4 py-2 rounded-r-md transition-colors duration-300"
                   >
                     {isSubscribing ? "Đang gửi..." : "Đăng ký"}
                   </button>
@@ -123,7 +108,7 @@ const Contact = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-white text-pink-500 hover:bg-gray-100 font-medium px-4 py-2 rounded-md transition-colors duration-300"
+                    className="w-full font-semibold bg-white text-pink-500 hover:bg-gray-100 font-medium px-4 py-2 rounded-md transition-colors duration-300"
                   >
                     {isSubmitting ? "Đang gửi..." : "Gửi tin nhắn"}
                   </button>

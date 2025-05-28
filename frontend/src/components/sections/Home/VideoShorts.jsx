@@ -16,7 +16,7 @@ const VideoShorts = () => {
   };
 
   return (
-    <div className="bg-white mx-[100px] p-4 mt-10">
+    <div className="bg-white mx-[120px] p-4 mt-10">
       <div className="flex flex-row gap-6">
         {/* Left side - Main content */}
         <div className="md:w-[55%] relative">
