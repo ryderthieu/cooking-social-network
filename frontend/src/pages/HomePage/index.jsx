@@ -6,6 +6,7 @@ import Contact from "../../components/sections/Home/Contact.jsx";
 import { IoSearchSharp } from "react-icons/io5";
 import Hero from "../../components/sections/Home/Hero.jsx";
 import VideoShorts from "../../components/sections/Home/VideoShorts.jsx";
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
   const [search, setSearch] = useState("");
@@ -36,15 +37,21 @@ const HomePage = () => {
         </div>
         <Menu />
         <Explore />
-        {/* <VideoShorts /> */}
-        <div className="mt-[100px] ml-[70px]">
+        <VideoShorts />
+        <div className="mt-[50px]">
           <div className="flex justify-between items-center">
-            <p className="font-bold text-[30px]">
+            <p className="font-bold text-[22px]">
               Khám phá các công thức đỉnh cao
             </p>
-            <p className="text-[#A46000] text-[24px] font-medium">Xem tất cả</p>
+            <Link
+              to="/recipes"
+              className="text-[#A46000] text-[16px] font-medium"
+            >
+              Xem tất cả
+            </Link>
           </div>
-          <div className="grid grid-cols-4 gap-2 mt-8 mb-8">
+          <div className="grid grid-cols-5 gap-2 mt-8 mb-8">
+            <Recipe />
             <Recipe />
             <Recipe />
             <Recipe />

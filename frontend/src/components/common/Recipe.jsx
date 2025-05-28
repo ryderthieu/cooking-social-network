@@ -10,7 +10,7 @@ const Recipe = () => {
     setIsLiked(!isLike);
   };
   return (
-    <div className="bg-[#FEF1DF] max-w-[260px] p-4 rounded-3xl">
+    <div className="bg-[#FEF1DF] max-w-[240px] p-4 rounded-3xl">
       <div className="relative">
         <img src={recipe} alt="" />
         <div
