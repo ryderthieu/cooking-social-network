@@ -6,7 +6,8 @@ import Contact from "../../components/sections/Home/Contact.jsx";
 import { IoSearchSharp } from "react-icons/io5";
 import Hero from "../../components/sections/Home/Hero.jsx";
 import VideoShorts from "../../components/sections/Home/VideoShorts.jsx";
-
+import { Link } from "react-router-dom";
+import CarouselPlugin from "../../components/sections/Home/CarouselHero.jsx"
 const HomePage = () => {
   const [search, setSearch] = useState("");
 
@@ -16,7 +17,8 @@ const HomePage = () => {
   };
   return (
     <div>
-      <Hero />
+      {/* <Hero /> */}
+      <CarouselPlugin />
       <div className="px-[110px] pt-[40px]">
         <div className="flex items-center max-w-[100%] bg-white border-2 border-[#FFA663] rounded-[30px] px-4 py-2 mb-[50px]">
           <IoSearchSharp className="w-6 h-6 mr-2 text-gray-400" />
@@ -29,22 +31,30 @@ const HomePage = () => {
           />
           <button
             onClick={handleSearch}
-            className="bg-[#FF37A5] text-white font-semibold py-2 px-6 rounded-[30px] ml-2"
+            className="bg-[#FF37A5] text-white font-semibold py-3 px-6 rounded-[30px] ml-2 text-[14px] hover:bg-[#FF2A8F] transition-colors duration-300"
           >
             TÌM KIẾM
           </button>
         </div>
         <Menu />
         <Explore />
-        {/* <VideoShorts /> */}
-        <div className="mt-[100px]">
+        <VideoShorts />
+        <div className="mt-[50px]">
           <div className="flex justify-between items-center">
-            <p className="font-bold text-[40px]">
+            <p className="font-bold text-[22px]">
               Khám phá các công thức đỉnh cao
             </p>
-            <p className="text-[#A46000] text-[28px] font-medium">Xem tất cả</p>
+            <Link
+              to="/recipes"
+              className="text-[#A46000] text-[16px] font-medium"
+            >
+              Xem tất cả
+            </Link>
           </div>
-          <div className="grid grid-cols-4 gap-2 mt-8 mb-8">
+          <div className="grid grid-cols-4 gap-6 mt-8 mb-8">
+            <Recipe />
+            <Recipe />
+            <Recipe />
             <Recipe />
             <Recipe />
             <Recipe />

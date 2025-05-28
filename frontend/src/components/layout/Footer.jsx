@@ -66,18 +66,30 @@ const Footer = () => {
 
         <div>
           <h1 className="text-[20px] font-bold">Hỗ trợ</h1>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
+          <a
+            href="/support/huong-dan"
+            className="block pt-4 font-semibold text-[#FFFFFF] text-opacity-50 hover:text-white"
+          >
             Hướng dẫn sử dụng
-          </p>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
+          </a>
+          <a
+            href="/support/dieu-kien"
+            className="block pt-4 font-semibold text-[#FFFFFF] text-opacity-50 hover:text-white"
+          >
             Điều kiện & điều khoản
-          </p>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
+          </a>
+          <a
+            href="/support/cau-hoi"
+            className="block pt-4 font-semibold text-[#FFFFFF] text-opacity-50 hover:text-white"
+          >
             Câu hỏi thường gặp
-          </p>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
+          </a>
+          <a
+            href="/support/lien-he"
+            className="block pt-4 font-semibold text-[#FFFFFF] text-opacity-50 hover:text-white"
+          >
             Liên hệ
-          </p>
+          </a>
         </div>
       </div>
 

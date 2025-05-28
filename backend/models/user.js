@@ -15,6 +15,7 @@ const userSchema = new Schema(
     savedRecipe: [{ type: Schema.Types.ObjectId, ref: "Recipe", default: [] }],
     savedPost: [{ type: Schema.Types.ObjectId, ref: "Post", default: [] }],
     savedVideo: [{ type: Schema.Types.ObjectId, ref: "Video", default: [] }],
+    ingredients: [{type: Schema.Types.ObjectId, ref: "Ingredient", default: []}],
     followers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     following: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     birthday: { type: Date },
@@ -34,6 +35,7 @@ userSchema.statics.register = async function (
   birthDay
 ) {
   if (!email || !password || !lastName || !firstName || !gender || !birthDay) {
+    console.log(email, password, lastName, firstName, gender, birthDay)
     throw Error("Bạn chưa điền hết thông tin!");
   }
 

@@ -26,7 +26,6 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
   const { email, password, lastName, firstName, gender, birthDay } = req.body;
-
   try {
     const user = await User.register(
       email,
@@ -102,7 +101,7 @@ const confirmOtp = async (req, res) => {
       return res.status(404).json({ error: "Người dùng không tồn tại!" });
     }
     console.log(otp);
-
+    console.log(user.otp)
     if (user.otp !== otp) {
       return res.status(400).json({ error: "Mã OTP không đúng!" });
     }
@@ -343,7 +342,7 @@ const getSavedPost = async (req, res) => {
       return res.status(404).json({ error: "Người dùng không tồn tại!" });
     }
 
-    res.status(200).json({ getSavedPost: user.savedPost });
+    res.status(200).json({ savedPost: user.savedPost });
   } catch (error) {
     console.error("Lỗi khi lấy danh sách bài viết đã lưu:", error.message);
     res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
@@ -426,7 +425,70 @@ const toggleFollow = async (req, res) => {
   }
 };
 
+const deleteSavedPost = async (req, res) => {
+  try {
+    const userId = req.user._id
+    const {postId} = req.body
+    const user = await User.findById(userId)
+    if (!user){
+      return res.status(404).json({error: "Nguời dùng không tồn tại!"})
+    }
+  
+   if (!user.savedPost.includes(postId)) {
+      return res.status(404).json({error: "Bài viết chưa được lưu!"})
+   }
+  
+   user.savedPost = user.savedPost.filter((v) => v != postId)
+   await user.save()
+  
+   res.status(200).json({message: "Đã xóa khỏi bài viết đã lưu thành công!", savedRecipe: user.savedRecipe})
+  } catch (error) {
+    console.log(error.message)
+    res.status(500).json({error: "Đã xảy ra lỗi, vui lòng thử lại!"})
+  }
+}
 
+const getSavedVideo = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const user = await User.findById(userId)
+      .select("savedVideo _id")
+      .populate("savedVideo"); 
+
+    if (!user) {
+      return res.status(404).json({ error: "Người dùng không tồn tại!" });
+    }
+
+    res.status(200).json({ savedVideo: user.savedVideo });
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách bài viết đã lưu:", error.message);
+    res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
+  }
+};
+const deleteSavedVideo = async (req, res) => {
+  try {
+    const userId = req.user._id
+    const {videoId} = req.body
+    const user = await User.findById(userId)
+    if (!user){
+      return res.status(404).json({error: "Nguời dùng không tồn tại!"})
+    }
+  
+   if (!user.savedVideo.includes(videoId)) {
+      return res.status(404).json({error: "Công thức chưa được lưu!"})
+   }
+  
+   user.savedVideo = user.savedVideo.filter((v) => v != videoId)
+   await user.save()
+  
+   res.status(200).json({message: "Đã xóa khỏi công thức đã lưu thành công!", savedVideo: user.savedVideo})
+  } catch (error) {
+    console.log(error.message)
+    res.status(500).json({error: "Đã xảy ra lỗi, vui lòng thử lại!"})
+  }
+  
+}
 module.exports = {
   login,
   register,
@@ -443,5 +505,8 @@ module.exports = {
   getSavedPost,
   getFollowers,
   getFollowing,
-  toggleFollow
+  toggleFollow,
+  deleteSavedPost,
+  getSavedVideo,
+  deleteSavedVideo
 };

@@ -3,12 +3,16 @@ import { FaRegThumbsUp, FaRegCommentDots, FaShare, FaUserFriends, FaTag, FaFire,
 import { LeftSidebar, RightSidebar } from '../../components/sections/Post/Sidebar';
 import { PostCard } from '../../components/common/Post';
 import PostDetail from './PostDetail';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import CommentList from '../../components/common/PostDetail/CommentList';
 import CommentForm from '../../components/common/PostDetail/CommentForm';
 import ReelCard from '../../components/common/ReelCard';
 import ReelCommentPanel from '../../components/common/ReelCommentPanel';
 import SharePopup from '../../components/common/SharePopup';
+import Posts from './Posts';
+import Reels from './Reels';
+import { leftSidebarData, rightSidebarData } from './mockData';
+import CreatePostModal from '../../components/common/CreatePostModal';
 
 export const mockPosts = [
   {
@@ -202,61 +206,17 @@ const mockHotDishes = [
   { name: 'Bánh mì chảo', image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=100&q=60', posts: 120 },
   { name: 'Phở bò', image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=100&q=60', posts: 98 },
 ];
-const leftSidebar = {
-  profile: {
-    name: 'Nguyễn Văn A',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    posts: 12,
-    followers: 340,
-  },
-  menu: [
-    { label: 'Bài viết', icon: <FaNewspaper />, href: '#', active: true },
-    { label: 'Reels', icon: <FaVideo />, href: '#', active: false },
-    { label: 'Trang cá nhân', icon: <FaUser />, href: '/profile', active: false },
-    { label: 'Bài viết đã lưu', icon: <FaBookmarkSolid />, href: '/saved', active: false },
-    { label: 'Công thức của tôi', icon: <FaUtensils />, href: '/my-recipes', active: false },
-  ]
-}
-
-const rightSidebar = {
-  suggestFollow: mockFollowed,
-  hotDishs: mockHotDishes
-}
 
 const PostPage = () => {
-  const [posts, setPosts] = useState(mockPosts);
-  const [reels, setReels] = useState(mockReels);
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   const [sharePopup, setSharePopup] = useState({ open: false, postId: null });
-  const [activeTab, setActiveTab] = useState('posts');
   const [showReelComment, setShowReelComment] = useState(false);
   const [selectedReel, setSelectedReel] = useState(null);
-  const navigate = useNavigate();
 
-  const handleLike = (id) => {
-    setPosts(posts => posts.map(post =>
-      post.id === id
-        ? { ...post, liked: !post.liked, likes: post.liked ? post.likes - 1 : post.likes + 1 }
-        : post
-    ));
-  };
-
-  const handleReelLike = (id) => {
-    setReels(reels => reels.map(reel =>
-      reel.id === id
-        ? { ...reel, liked: !reel.liked, likes: reel.liked ? reel.likes - 1 : reel.likes + 1 }
-        : reel
-    ));
-  };
-
-  const handleOpenReelComment = (reel) => {
-    if (selectedReel?.id === reel.id && showReelComment) {
-      setShowReelComment(false);
-      setTimeout(() => setSelectedReel(null), 500);
-    } else {
-      setSelectedReel(reel);
-      setShowReelComment(true);
-    }
-  };
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createType, setCreateType] = useState('post');
 
   const handleCloseReelComment = () => {
     setShowReelComment(false);
@@ -293,76 +253,24 @@ const PostPage = () => {
     }));
   };
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const reelId = parseInt(entry.target.dataset.reelId);
-            const currentReel = reels.find(r => r.id === reelId);
-            if (currentReel && showReelComment) {
-              setSelectedReel(currentReel);
-            }
-          }
-        });
-      },
-      {
-        threshold: 0.7
-      }
-    );
-
-    const reelElements = document.querySelectorAll('[data-reel-id]');
-    reelElements.forEach(el => observer.observe(el));
-
-    return () => {
-      reelElements.forEach(el => observer.unobserve(el));
-    };
-  }, [reels, showReelComment]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFF4D6] via-white to-[#FFF4D6] py-10 px-2 lg:px-8">
       <div className="max-w-7xl mx-auto flex gap-8 relative">
-        <LeftSidebar
-          data={leftSidebar}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-        />
+        <LeftSidebar activeTab={currentPath == '/explore/posts' ? 'posts' : 'reels'} onAdd={() => setShowCreateModal(true)}/>
 
-        {/* Main Content */}
         <div className="flex-1">
-          <div className="max-w-2xl">
-            {activeTab === 'posts' ? (
-              posts.map(post => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  onLike={() => handleLike(post.id)}
-                  onComment={() => navigate(`/posts/${post.id}`)}
-                  onShare={() => setSharePopup({ open: true, postId: post.id })}
-                />
-              ))
-            ) : (
-              <div className="h-[calc(100vh-120px)] overflow-y-auto snap-y snap-mandatory scrollbar-none">
-                {reels.map(reel => (
-                  <div key={reel.id} data-reel-id={reel.id} className="snap-start h-[calc(100vh-120px)] flex items-center justify-center">
-                    <ReelCard
-                      reel={reel}
-                      onLike={() => handleReelLike(reel.id)}
-                      onComment={() => handleOpenReelComment(reel)}
-                      onShare={() => setSharePopup({ open: true, postId: reel.id })}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <Routes>
+            <Route path='/' element={<Navigate to="posts" replace />} />
+            <Route path="/posts" element={<Posts />} />
+            <Route path="/reels/:id" element={<Reels />} />
+          </Routes>
         </div>
 
-        {/* Right Sidebar or Comment Panel */}
         <div className="w-80 flex-shrink-0 hidden lg:block">
           {!showReelComment && (
             <div className="sticky top-24">
-              <RightSidebar data={rightSidebar} />
+              <RightSidebar data={rightSidebarData} />
             </div>
           )}
           <ReelCommentPanel
@@ -389,6 +297,11 @@ const PostPage = () => {
           display: none;
         }
       `}</style>
+      <CreatePostModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        type={createType}
+      />
     </div>
   );
 };

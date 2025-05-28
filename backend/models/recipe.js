@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const recipeSchema = new Schema({
-    author: {type: Schema.Types.ObjectId, ref: 'User'}, // Id của người tạo công thức, có liên kết với model User
+    author: {type: Schema.Types.ObjectId, ref: 'User', default: 'Admin'}, // Id của người tạo công thức, có liên kết với model User
     name: {type: String, required: true}, // tên món ăn
     slug: {type: String},
     description: {type: String},
@@ -28,7 +28,8 @@ const recipeSchema = new Schema({
         difficultyLevel: { type: String, enum: ["Dễ", "Trung bình", "Khó"] }
     },
     utensils: [{type: String}],  // Dụng cụ nấu ăn cần thiết
-    time: {type: Number} // Thời gian nấu (đơn vị phút)
+    time: {type: Number}, // Thời gian nấu (đơn vị phút)
+    likes: [{type: Schema.Types.ObjectId, ref: 'User'}]
 }, {      
     timestamps: true
 });

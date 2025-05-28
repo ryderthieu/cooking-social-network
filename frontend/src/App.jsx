@@ -1,4 +1,3 @@
-import React from "react";
 import "./App.css";
 import { Routes, Route } from "react-router";
 import HomePage from "./pages/HomePage/index";
@@ -15,6 +14,8 @@ import QuestionsPage from "./pages/SupportPage/Questions/QuestionsPage";
 import ContactsPage from "./pages/SupportPage/Contact/ContactsPage";
 import SupportsPage from "./pages/SupportPage/Contact/SupportsPage";
 import AboutPage from "./pages/AboutPage";
+import NotificationPage from "./pages/NotificationPage";
+import MessagePage from "./pages/MessagePage";
 
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
@@ -28,8 +29,13 @@ import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
 import RecipeCategories from "./pages/RecipesPage";
 import CreateRecipe from "./pages/RecipesPage/CreateRecipe";
 import ProfilePage from "./pages/ProfilePage"
+import HeaderLayout from "./components/layout/HeaderLayout";
+import ChatPage from "./pages/ChatPage";
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { SocketProvider } from './context/SocketContext';
 
 function App() {
+  const {user} = useAuth()
   const routes = [
     { path: "/", element: <HomePage /> },
     { path: "/about", element: <AboutPage /> },
@@ -44,14 +50,19 @@ function App() {
     { path: "/support/phan-hoi", element: <FeedbacksPage /> },
     { path: "/support/lien-he", element: <ContactsPage /> },
     { path: "/support/ho-tro", element: <SupportsPage /> },
+    { path: "/notification", element: <NotificationPage /> },
     { path: "/search", element: <SearchPage /> },
     { path: "/posts", element: <PostPage /> },
     { path: "/profile/@:username", element: <ProfilePage /> },
-    {path: "/recipes/create", element: <CreateRecipe />}
+    {path: "/recipes/create", element: <CreateRecipe />},
     // { path: "/posts/:id", element: <PostDetail />}
+    { path: "/explore/*", element: <PostPage /> },
   ];
 
+  const headeronlyRoutes = [{ path: "/messages", element: <MessagePage /> }];
+
   return (
+
     <Routes>
       {routes.map(({ path, element }) => (
         <Route
@@ -72,7 +83,17 @@ function App() {
       <Route path="/recipes" element={<RecipeCategories />} />
       <Route path="/recipes" element={<RecipeCategories />} />
       <Route path="/recipes/create" element={<CreateRecipe />} />
+      <Route path="/chat" element={<ChatPage />} />
+
+      {headeronlyRoutes.map(({ path, element }) => (
+        <Route
+          key={path}
+          path={path}
+          element={<HeaderLayout>{element}</HeaderLayout>}
+        />
+      ))}
     </Routes>
+
   );
 }
 

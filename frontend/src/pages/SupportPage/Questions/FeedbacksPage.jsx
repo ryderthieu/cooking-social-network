@@ -1,7 +1,7 @@
 import Hero from "../../../components/sections/Support/Hero";
-import avatar1 from "../../../assets/avatar1.png";
-import avatar2 from "../../../assets/avatar2.png";
-import avatar from "../../../assets/avatar.png";
+import avatar1 from "../../../assets/avatar1.jpg";
+import avatar2 from "../../../assets/avatar2.jpg";
+import avatar from "../../../assets/avatar.jpg";
 
 const FeedbacksPage = () => {
   const testimonials = [

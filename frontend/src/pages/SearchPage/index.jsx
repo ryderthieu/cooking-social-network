@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
-import { FaSearch, FaFilter, FaNewspaper, FaVideo, FaBook, FaUser } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
+import { FaSearch, FaFilter, FaNewspaper, FaVideo, FaBook, FaUser, FaHeart } from 'react-icons/fa';
+import { Link, useNavigate } from 'react-router-dom';
+import { PostCard } from '../../components/common/Post';
+import ReelCard from '../../components/common/ReelCard';
+import SharePopup from '../../components/common/SharePopup';
 
 const SearchPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState('posts');
     const [isFilterOpen, setIsFilterOpen] = useState(true);
+    const [sharePopup, setSharePopup] = useState({ open: false, postId: null });
+    const navigate = useNavigate();
 
     // Sub-filter state
     const [postSort, setPostSort] = useState('recent');
@@ -14,205 +19,117 @@ const SearchPage = () => {
     const [recipeTime, setRecipeTime] = useState('all');
     const [recipeDifficulty, setRecipeDifficulty] = useState('all');
 
-    // Mock data - sẽ được thay thế bằng API call thực tế
-    const mockResults = {
-        posts: [
-            { 
-                id: 1, 
-                title: 'Cách làm bánh mì ngon', 
-                author: 'Chef A', 
-                date: '2024-03-20',
-                image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                excerpt: 'Khám phá bí quyết làm bánh mì thơm ngon, giòn rụm với công thức đơn giản...'
+    // Mock data cho posts và reels
+    const mockPosts = [
+        {
+            id: 1,
+            user: {
+                name: 'Chef A',
+                avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
             },
-            { 
-                id: 2, 
-                title: 'Bí quyết nấu phở', 
-                author: 'Chef B', 
-                date: '2024-03-19',
-                image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                excerpt: 'Học cách nấu nước dùng phở đậm đà, thơm ngon chuẩn vị...'
+            date: '2024-03-20',
+            content: 'Khám phá bí quyết làm bánh mì thơm ngon, giòn rụm với công thức đơn giản...',
+            images: [
+                'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'
+            ],
+            likes: 120,
+            comments: [
+                { id: 1, user: 'Lê Minh', avatar: 'https://randomuser.me/api/portraits/men/45.jpg', text: 'Nhìn ngon quá!' }
+            ],
+            shares: 15,
+            liked: false
+        },
+        {
+            id: 2,
+            user: {
+                name: 'Chef B',
+                avatar: 'https://randomuser.me/api/portraits/men/33.jpg',
             },
-        ],
-        videos: [
-            { 
-                id: 1, 
-                title: 'Hướng dẫn làm bánh mì', 
-                author: 'Chef A', 
-                views: 1000,
-                thumbnail: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                duration: '15:30'
+            date: '2024-03-19',
+            content: 'Học cách nấu nước dùng phở đậm đà, thơm ngon chuẩn vị...',
+            images: [
+                'https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'
+            ],
+            likes: 85,
+            comments: [
+                { id: 1, user: 'Mai Hương', avatar: 'https://randomuser.me/api/portraits/women/44.jpg', text: 'Tuyệt vời!' }
+            ],
+            shares: 8,
+            liked: false
+        }
+    ];
+
+    const mockReels = [
+        {
+            id: 1,
+            user: {
+                name: 'Chef Tony',
+                avatar: 'https://randomuser.me/api/portraits/men/50.jpg',
             },
-            { 
-                id: 2, 
-                title: 'Cách nấu phở chuẩn vị', 
-                author: 'Chef B', 
-                views: 2000,
-                thumbnail: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                duration: '20:15'
+            date: '2024-03-20',
+            title: 'Cách làm bánh mì Việt Nam tại nhà',
+            thumbnail: 'https://images.unsplash.com/photo-1509440159596-0249088772ff',
+            video: 'https://www.youtube.com/shorts/KSt9oH2CYus?feature=share',
+            likes: '1.7M',
+            comments: [
+                {
+                    id: 1,
+                    user: 'Lê Minh',
+                    avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
+                    text: 'Video hay quá!',
+                    likes: 5,
+                    time: '2 giờ trước',
+                    replies: []
+                }
+            ],
+            shares: 45,
+            liked: false
+        },
+        {
+            id: 2,
+            user: {
+                name: 'Chef Anna',
+                avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
             },
-        ],
-        recipes: [
-            { 
-                id: 1, 
-                title: 'Công thức bánh mì', 
-                author: 'Chef A', 
-                difficulty: 'Dễ',
-                image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                time: '45 phút'
+            date: '2024-03-19',
+            title: 'Bí quyết làm sushi ngon tại nhà',
+            thumbnail: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c',
+            video: 'https://www.youtube.com/shorts/abc123',
+            likes: '4.9K',
+            comments: [],
+            shares: 28,
+            liked: false
+        },
+        {
+            id: 3,
+            user: {
+                name: 'Chef Mike',
+                avatar: 'https://randomuser.me/api/portraits/men/35.jpg',
             },
-            { 
-                id: 2, 
-                title: 'Công thức phở bò', 
-                author: 'Chef B', 
-                difficulty: 'Trung bình',
-                image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                time: '120 phút'
-            },
-        ],
-        users: [
-            {
-                id: 1,
-                name: 'Nguyễn Văn A',
-                avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                role: 'Đầu bếp chuyên nghiệp',
-                followers: 1200,
-                recipes: 45
-            },
-            {
-                id: 2,
-                name: 'Trần Thị B',
-                avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
-                role: 'Food Blogger',
-                followers: 2500,
-                recipes: 78
-            }
-        ]
-    };
+            date: '2024-03-18',
+            title: 'Cách làm phở gà truyền thống',
+            thumbnail: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43',
+            video: 'https://www.youtube.com/shorts/xyz789',
+            likes: '7.1K',
+            comments: [],
+            shares: 56,
+            liked: false
+        }
+    ];
 
     const handleSearch = (e) => {
         e.preventDefault();
-        // TODO: Implement search logic
         console.log('Searching for:', searchQuery);
     };
 
-    const renderPostCard = (item) => (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex">
-                <div className="shrink-0">
-                    <img className="h-32 w-48 object-cover" src={item.image} alt={item.title} />
-                </div>
-                <div className="p-6 flex-1">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2 hover:text-[#FFB800] transition-colors">
-                        {item.title}
-                    </h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">{item.excerpt}</p>
-                    <div className="flex items-center justify-between">
-                        <p className="text-gray-500 text-sm">Tác giả: {item.author}</p>
-                        <p className="text-gray-500 text-sm">Ngày đăng: {item.date}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+    const handleLike = (id) => {
+        // Xử lý like post
+        console.log('Liked post:', id);
+    };
 
-    const renderVideoCard = (item) => (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex">
-                <div className="relative shrink-0">
-                    <img className="h-32 w-48 object-cover" src={item.thumbnail} alt={item.title} />
-                    <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white px-2 py-1 rounded text-sm">
-                        {item.duration}
-                    </div>
-                </div>
-                <div className="p-6 flex-1">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2 hover:text-[#FFB800] transition-colors">
-                        {item.title}
-                    </h3>
-                    <div className="flex items-center justify-between">
-                        <p className="text-gray-500 text-sm">Tác giả: {item.author}</p>
-                        <p className="text-gray-500 text-sm">{item.views} lượt xem</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-
-    const renderRecipeCard = (item) => (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex">
-                <div className="shrink-0">
-                    <img className="h-32 w-48 object-cover" src={item.image} alt={item.title} />
-                </div>
-                <div className="p-6 flex-1">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-2 hover:text-[#FFB800] transition-colors">
-                        {item.title}
-                    </h3>
-                    <div className="flex items-center space-x-4 mb-4">
-                        <span className="px-3 py-1 bg-[#FFF4D6] text-[#FFB800] rounded-full text-sm">
-                            {item.difficulty}
-                        </span>
-                        <span className="text-gray-500 text-sm">{item.time}</span>
-                    </div>
-                    <p className="text-gray-500 text-sm">Tác giả: {item.author}</p>
-                </div>
-            </div>
-        </div>
-    );
-
-    const renderUserCard = (item) => (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-center p-6">
-                <div className="shrink-0">
-                    <img 
-                        className="h-20 w-20 rounded-full object-cover border-2 border-[#FFB800]" 
-                        src={item.avatar} 
-                        alt={item.name} 
-                    />
-                </div>
-                <div className="ml-6 flex-1">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-1 hover:text-[#FFB800] transition-colors">
-                        {item.name}
-                    </h3>
-                    <p className="text-gray-600 mb-3">{item.role}</p>
-                    <div className="flex items-center space-x-6">
-                        <div className="flex items-center">
-                            <span className="text-[#FFB800] font-semibold mr-2">{item.followers}</span>
-                            <span className="text-gray-500 text-sm">người theo dõi</span>
-                        </div>
-                        <div className="flex items-center">
-                            <span className="text-[#FFB800] font-semibold mr-2">{item.recipes}</span>
-                            <span className="text-gray-500 text-sm">công thức</span>
-                        </div>
-                    </div>
-                </div>
-                <button className="px-6 py-2 bg-[#FFB800] text-white rounded-lg hover:bg-[#E6A600] transition-colors">
-                    Theo dõi
-                </button>
-            </div>
-        </div>
-    );
-
-    const renderResults = () => {
-        const results = mockResults[activeFilter];
-        return (
-            <div className="space-y-6">
-                {results.map(item => {
-                    switch (activeFilter) {
-                        case 'posts':
-                            return renderPostCard(item);
-                        case 'videos':
-                            return renderVideoCard(item);
-                        case 'recipes':
-                            return renderRecipeCard(item);
-                        case 'users':
-                            return renderUserCard(item);
-                        default:
-                            return null;
-                    }
-                })}
-            </div>
-        );
+    const handleReelLike = (id) => {
+        // Xử lý like reel
+        console.log('Liked reel:', id);
     };
 
     // Sub-filter UI cho sidebar
@@ -303,6 +220,82 @@ const SearchPage = () => {
             );
         }
         return null;
+    };
+
+    const renderResults = () => {
+        switch (activeFilter) {
+            case 'posts':
+                return (
+                    <div className="space-y-6">
+                        {mockPosts.map(post => (
+                            <PostCard
+                                key={post.id}
+                                post={post}
+                                onLike={() => handleLike(post.id)}
+                                onComment={() => navigate(`/posts/${post.id}`)}
+                                onShare={() => setSharePopup({ open: true, postId: post.id })}
+                            />
+                        ))}
+                    </div>
+                );
+            case 'videos':
+                return (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {mockReels.map(reel => (
+                            <div
+                                key={reel.id}
+                                className="relative group cursor-pointer"
+                                onClick={() => navigate(`/explore/reels/${reel.id}`)}
+                            >
+                                <div className="aspect-[9/16] relative overflow-hidden rounded-xl">
+                                    {/* Thumbnail */}
+                                    <img
+                                        src={reel.thumbnail}
+                                        alt={reel.title}
+                                        className="w-full h-full object-cover"
+                                    />
+                                    
+                                    {/* Video Preview on Hover */}
+                                    <video
+                                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                        src={reel.video}
+                                        loop
+                                        muted
+                                        playsInline
+                                        onMouseEnter={(e) => e.target.play()}
+                                        onMouseLeave={(e) => {
+                                            e.target.pause();
+                                            e.target.currentTime = 0;
+                                        }}
+                                    />
+
+                                    {/* Overlay with Info */}
+                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                                            <div className="flex items-center space-x-2 mb-2">
+                                                <img
+                                                    src={reel.user.avatar}
+                                                    alt={reel.user.name}
+                                                    className="w-8 h-8 rounded-full"
+                                                />
+                                                <span className="font-medium">{reel.user.name}</span>
+                                            </div>
+                                            <p className="text-sm line-clamp-2">{reel.title}</p>
+                                            <div className="flex items-center space-x-3 mt-2 text-sm">
+                                                <span className="flex items-center">
+                                                    <FaHeart className="mr-1" /> {reel.likes}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                );
+            default:
+                return null;
+        }
     };
 
     return (
@@ -418,6 +411,12 @@ const SearchPage = () => {
                     </div>
                 </div>
             </div>
+
+            <SharePopup
+                open={sharePopup.open}
+                postId={sharePopup.postId}
+                onClose={() => setSharePopup({ open: false, postId: null })}
+            />
         </div>
     );
 };
