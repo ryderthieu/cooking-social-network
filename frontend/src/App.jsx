@@ -29,10 +29,11 @@ import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
 import RecipeCategories from "./pages/RecipesPage";
 import HeaderLayout from "./components/layout/HeaderLayout";
 import ChatPage from "./pages/ChatPage";
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 
 function App() {
+  const {user} = useAuth()
   const routes = [
     { path: "/", element: <HomePage /> },
     { path: "/about", element: <AboutPage /> },
@@ -55,38 +56,36 @@ function App() {
   const headeronlyRoutes = [{ path: "/messages", element: <MessagePage /> }];
 
   return (
-    <AuthProvider>
-      <SocketProvider>
-        <Routes>
-          {routes.map(({ path, element }) => (
-            <Route
-              key={path}
-              path={path}
-              element={<LayoutRoute element={element} />}
-            />
-          ))}
-          <Route path="*" element={<HomePage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="forgot-password" element={<ForgotPassword />} />
-          <Route path="/posts/:id" element={<PostDetail />} />
 
-          <Route path="/recipes" element={<RecipeCategories />} />
-          <Route path="/saved-recipes" element={<SavedRecipes />} />
-          <Route path="/recipes/:categoryType/:item" element={<Recipes />} />
-          <Route path="/recipes" element={<RecipeCategories />} />
-          <Route path="/chat" element={<ChatPage />} />
+    <Routes>
+      {routes.map(({ path, element }) => (
+        <Route
+          key={path}
+          path={path}
+          element={<LayoutRoute element={element} />}
+        />
+      ))}
+      <Route path="*" element={<HomePage />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="forgot-password" element={<ForgotPassword />} />
+      <Route path="/posts/:id" element={<PostDetail />} />
 
-          {headeronlyRoutes.map(({ path, element }) => (
-            <Route
-              key={path}
-              path={path}
-              element={<HeaderLayout>{element}</HeaderLayout>}
-            />
-          ))}
-        </Routes>
-      </SocketProvider>
-    </AuthProvider>
+      <Route path="/recipes" element={<RecipeCategories />} />
+      <Route path="/saved-recipes" element={<SavedRecipes />} />
+      <Route path="/recipes/:categoryType/:item" element={<Recipes />} />
+      <Route path="/recipes" element={<RecipeCategories />} />
+      <Route path="/chat" element={<ChatPage />} />
+
+      {headeronlyRoutes.map(({ path, element }) => (
+        <Route
+          key={path}
+          path={path}
+          element={<HeaderLayout>{element}</HeaderLayout>}
+        />
+      ))}
+    </Routes>
+
   );
 }
 

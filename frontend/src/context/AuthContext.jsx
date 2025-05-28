@@ -1,4 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  login as loginUser,
+  register as registerUser,
+  getUserInfo,
+  editProfile,
+  forgotPassword,
+  resetPassword,
+  confirmOtp,
+} from '../services/UserService';
 
 const AuthContext = createContext();
 
@@ -18,21 +27,11 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  const fetchUserData = async (token) => {
+  const fetchUserData = async () => {
     try {
-        console.log(token);
-      const response = await fetch('http://localhost:8080/api/users/get-info', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch user data');
-      }
-
-      const userData = await response.json();
-      return userData;
+      const response = await getUserInfo();
+      setUser(response.data);
+      return response.data;
     } catch (error) {
       console.error('Error fetching user data:', error);
       throw error;
@@ -40,23 +39,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkAuth = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const userData = await fetchUserData(token);
-        setUser(userData);
-      } catch (error) {
-        console.error('Error checking auth:', error);
-        localStorage.removeItem('token');
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
+      await fetchUserData();
+    } catch {
       localStorage.removeItem('token');
     } finally {
       setLoading(false);
@@ -65,31 +55,11 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await fetch('http://localhost:8080/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, password })
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.token) {
-        localStorage.setItem('token', data.token);
-        
-        try {
-          const userData = await fetchUserData(data.token);
-          setUser(userData);
-          return { success: true };
-        } catch (error) {
-          console.error('Error fetching user data after login:', error);
-          localStorage.removeItem('token');
-          return { success: false, error: 'Không thể lấy thông tin người dùng' };
-        }
-      } else {
-        return { success: false, error: data.message || 'Đăng nhập thất bại' };
-      }
+      const response = await loginUser({ email, password });
+      const data = response.data;
+      localStorage.setItem('token', data.token);
+      await fetchUserData();
+      return { success: true };
     } catch (error) {
       console.error('Login failed:', error);
       return { success: false, error: 'Đăng nhập thất bại' };
@@ -98,24 +68,14 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(userData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        return { success: true };
-      } else {
-        return { success: false, error: data.message };
-      }
+      const response = await registerUser(userData);
+      return { success: true, data: response.data };
     } catch (error) {
       console.error('Registration failed:', error);
-      return { success: false, error: 'Đăng ký thất bại' };
+      throw new Error ({
+        success: false,
+        error: error?.response?.data?.message || 'Đăng ký thất bại',
+      });
     }
   };
 
@@ -126,31 +86,51 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = async (updateData) => {
     try {
-      const token = localStorage.getItem('token');
-      const decoded = jwt_decode(token);
-      
-      const response = await fetch(`http://localhost:8080/api/users/${decoded.id}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(updateData)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        // Fetch lại thông tin user sau khi cập nhật
-        const updatedUserData = await fetchUserData(decoded.id, token);
-        setUser(updatedUserData);
-        return { success: true };
-      } else {
-        return { success: false, error: data.message };
-      }
+      const response = await editProfile(updateData);
+      await fetchUserData();
+      return { success: true, data: response.data };
     } catch (error) {
       console.error('Profile update failed:', error);
-      return { success: false, error: 'Cập nhật thông tin thất bại' };
+      return {
+        success: false,
+        error: error?.response?.data?.message || 'Cập nhật thất bại',
+      };
+    }
+  };
+
+  const handleForgotPassword = async (email) => {
+    try {
+      await forgotPassword({ email });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error?.response?.data?.message || 'Gửi email thất bại',
+      };
+    }
+  };
+
+  const handleResetPassword = async (email, newPassword) => {
+    try {
+      await resetPassword({ email, newPassword });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error?.response?.data?.message || 'Đặt lại mật khẩu thất bại',
+      };
+    }
+  };
+
+  const handleConfirmOtp = async (email, otp) => {
+    try {
+      await confirmOtp({ email, otp });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error?.response?.data?.message || 'Xác thực OTP thất bại',
+      };
     }
   };
 
@@ -160,16 +140,15 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    updateProfile
+    updateProfile,
+    handleForgotPassword,
+    handleResetPassword,
+    handleConfirmOtp,
   };
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Đang tải...</div>;
   }
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

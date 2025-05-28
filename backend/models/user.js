@@ -35,6 +35,7 @@ userSchema.statics.register = async function (
   birthDay
 ) {
   if (!email || !password || !lastName || !firstName || !gender || !birthDay) {
+    console.log(email, password, lastName, firstName, gender, birthDay)
     throw Error("Bạn chưa điền hết thông tin!");
   }
 

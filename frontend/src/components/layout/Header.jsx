@@ -7,6 +7,7 @@ import { categories, search, supports } from "./MenuData";
 import { IoNotifications, IoSearchOutline } from "react-icons/io5";
 import { MdMessage } from "react-icons/md";
 import NotificationDropdown from "../sections/Home/NotificationDropdown";
+import { useAuth } from "../../context/AuthContext";
 
 const Header = () => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
@@ -19,14 +20,14 @@ const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [active, setActive] = useState("Khám phá công thức");
+  const [active, setActive] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const navRef = useRef(null);
   const dropdownRef = useRef(null);
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const {user, logout} = useAuth()
   useEffect(() => {
     const handleClickOutside = (event) => {
       const target = event.target;
@@ -245,7 +246,7 @@ const Header = () => {
 
       {/* Right side - với search expandable */}
       <div ref={dropdownRef} className="flex items-center">
-        {isLoggedIn ? (
+        {user ? (
           <div className="flex items-center gap-4">
             {/* Expandable Search */}
             <div
@@ -339,7 +340,7 @@ const Header = () => {
                   <div className="border-t-[1px] border-[#FBDCB0] my-3">
                     <p
                       onClick={() => {
-                        setIsLoggedIn(false);
+                        logout()
                         setIsDropdownOpen(false);
                       }}
                       className="text-[#FF6363] font-medium text-[18px] mb-3 cursor-pointer mx-4 mt-3 hover:text-red-600 transition-colors duration-200"
@@ -354,7 +355,7 @@ const Header = () => {
         ) : (
           <div>
             <button
-              onClick={() => setIsLoggedIn(!isLoggedIn)}
+              onClick={() => navigate('/login')}
               className="font-medium text-[18px] text-white bg-[#04043F] hover:bg-[#03032d] py-2 px-6 rounded-[30px] ml-[80px] transition-colors duration-200"
             >
               Đăng nhập
