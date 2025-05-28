@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import BreadCrumb from "../../components/common/BreadCrumb";
 import { Plus } from "lucide-react"; // icon nút
-import RecipeCard from "../../components/recipe/SavedCard";
+import SavedCard from "../../components/sections/Recipe/SavedCard";
+import ActionButton from "../../components/common/ActionButton"
 
 const collections = [
   { id: "yeu-thich", name: "Yêu thích", thumbnail: "/images/yeuthich.jpg" },
@@ -19,7 +20,6 @@ const recipesMock = [
     image: "/images/pancake.jpg",
     author: "Bạn",
   },
-  // Thêm công thức khác nếu muốn
 ];
 
 const SavedRecipes = () => {
@@ -68,13 +68,15 @@ const SavedRecipes = () => {
         <h2 className="text-xl font-bold mb-4">{collections.find(c => c.id === activeTab)?.name}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {recipesMock.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+            <SavedCard key={recipe.id} recipe={recipe} />
           ))}
         </div>
 
         {/* Add recipe button */}
+        <ActionButton />
+
         <div className="flex justify-end my-8">
-          <button className="bg-pink-500 text-white rounded-full px-6 py-3 flex items-center gap-2 shadow-lg hover:bg-pink-600 transition">
+          <button className="bg-pink-500 text-white rounded-full px-6 py-3 flex items-center gap-2 shadow-lg hover:bg-transparent hover:border-pink-600 hover:border-1 transition">
             <Plus /> Thêm công thức
           </button>
         </div>

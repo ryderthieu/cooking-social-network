@@ -1,6 +1,6 @@
 import React from "react";
 
-const RecipeCard = ({ recipe }) => {
+const SavedCard = ({ recipe }) => {
   return (
     <div className="rounded-xl bg-[#FFF3ED] p-4 shadow hover:shadow-lg transition">
       <div className="relative">
@@ -18,4 +18,4 @@ const RecipeCard = ({ recipe }) => {
   );
 };
 
-export default RecipeCard;
+export default SavedCard;

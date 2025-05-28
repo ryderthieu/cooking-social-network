@@ -20,7 +20,7 @@ export default function BreadCrumb() {
   };
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
+    <nav className="flex items-center space-x-2 text-sm text-slate-600 mb-4">
       {/* Trang chủ */}
       <Link 
         to="/" 
@@ -37,15 +37,15 @@ export default function BreadCrumb() {
         
         return (
           <React.Fragment key={name}>
-            <span className="text-gray-700 text-lg ">{'>'}</span>
+            <span className="text-slate-700 font-bold text-lg ">{'>'}</span>
             {isLast ? (
-              <span className="text-gray-800 text-lg font-bold">
+              <span className="text-slate-800 text-lg font-bold">
                 {displayName}
               </span>
             ) : (
               <Link 
                 to={routeTo} 
-                className="hover:text-pink-600 font-bold text-lg transition-colors"
+                className="hover:text-pink-600 underline font-bold text-lg transition-colors"
               >
                 {displayName}
               </Link>

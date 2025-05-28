@@ -26,7 +26,8 @@ import PostDetail from "./pages/PostPage/PostDetail";
 import Recipes from "./pages/RecipesPage/Recipe";
 import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
 import RecipeCategories from "./pages/RecipesPage";
-
+import CreateRecipe from "./pages/RecipesPage/CreateRecipe";
+import ProfilePage from "./pages/ProfilePage"
 
 function App() {
   const routes = [
@@ -45,6 +46,8 @@ function App() {
     { path: "/support/ho-tro", element: <SupportsPage /> },
     { path: "/search", element: <SearchPage /> },
     { path: "/posts", element: <PostPage /> },
+    { path: "/profile", element: <ProfilePage /> },
+    {path: "/recipes/create", element: <CreateRecipe />}
     // { path: "/posts/:id", element: <PostDetail />}
   ];
 
@@ -63,11 +66,12 @@ function App() {
       <Route path="forgot-password" element={<ForgotPassword />} />
       <Route path="/posts/:id" element={<PostDetail />} />
 
-
       <Route path="/recipes" element={<RecipeCategories />} />
-      <Route path="/saved-recipes" element={<SavedRecipes />} />
+      <Route path="/recipes/saved" element={<SavedRecipes />} />
       <Route path="/recipes/:categoryType/:item" element={<Recipes />} />
       <Route path="/recipes" element={<RecipeCategories />} />
+      <Route path="/recipes" element={<RecipeCategories />} />
+      <Route path="/recipes/create" element={<CreateRecipe />} />
     </Routes>
   );
 }
