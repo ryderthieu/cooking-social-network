@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import BreadCrumb from "../../components/common/BreadCrumb";
-import { Plus } from "lucide-react"; // icon nút
+import { Plus, MoreVertical, Clock } from "lucide-react";
 import SavedCard from "../../components/sections/Recipe/SavedCard";
-import ActionButton from "../../components/common/ActionButton"
+import ActionButton from "../../components/common/ActionButton";
 
 const collections = [
   { id: "yeu-thich", name: "Yêu thích", thumbnail: "/images/yeuthich.jpg" },
@@ -20,6 +20,22 @@ const recipesMock = [
     image: "/images/pancake.jpg",
     author: "Bạn",
   },
+  {
+    id: 2,
+    title: "Strawberry Oatmeal Pancake with Honey Syrup",
+    time: "30 Minutes",
+    type: "Breakfast",
+    image: "/images/pancake.jpg",
+    author: "Bạn",
+  },
+  {
+    id: 3,
+    title: "Strawberry Oatmeal Pancake with Honey Syrup",
+    time: "30 Minutes",
+    type: "Breakfast",
+    image: "/images/pancake.jpg",
+    author: "Bạn",
+  },
 ];
 
 const SavedRecipes = () => {
@@ -27,17 +43,15 @@ const SavedRecipes = () => {
 
   return (
     <MainLayout>
+      {/* Header banner with gradient */}
+      <div className="bg-gradient-to-r from-orange-300 to-yellow-300 py-6 px-6 text-center p-6">
+        <BreadCrumb />
+        <h1 className="text-3xl font-bold text-white">Công thức đã lưu</h1>
+      </div>
+
       <div className="px-6">
-        {/* Breadcrumb */}
-        <div className="pt-4">
-          <BreadCrumb />
-        </div>
-
-        {/* Title */}
-        <h1 className="text-3xl font-bold my-4 text-center">Công thức đã lưu</h1>
-
-        {/* Tab */}
-        <div className="flex gap-6 justify-center my-6">
+        {/* Collection Tabs */}
+        <div className="flex gap-10 justify-center my-6">
           {collections.map((col) => (
             <div
               key={col.id}
@@ -52,10 +66,10 @@ const SavedRecipes = () => {
                   alt={col.name}
                   className={`w-16 h-16 rounded-full border-2 ${
                     activeTab === col.id ? "border-pink-600" : "border-gray-300"
-                  }`}
+                  } bg-white`}
                 />
               ) : (
-                <div className="w-16 h-16 flex items-center justify-center rounded-full border-2 border-dashed">
+                <div className="w-16 h-16 flex items-center justify-center rounded-full border-2 border-dashed bg-white">
                   <Plus />
                 </div>
               )}
@@ -64,20 +78,48 @@ const SavedRecipes = () => {
           ))}
         </div>
 
-        {/* Recipe List */}
-        <h2 className="text-xl font-bold mb-4">{collections.find(c => c.id === activeTab)?.name}</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Collection Title */}
+        <h2 className="text-xl font-bold mb-6">{collections.find(c => c.id === activeTab)?.name}</h2>
+
+        {/* Recipe Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
           {recipesMock.map((recipe) => (
-            <SavedCard key={recipe.id} recipe={recipe} />
+            <div key={recipe.id} className="bg-orange-50 rounded-lg overflow-hidden shadow">
+              <div className="relative">
+                <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
+                <button className="absolute top-2 right-2 bg-black/50 p-1 rounded-full text-white">
+                  <MoreVertical size={18} />
+                </button>
+                <div className="absolute bottom-0 left-0 bg-white px-3 py-1 rounded-tr-lg">
+                  <div className="text-xs text-gray-500">Tác giả bạn</div>
+                </div>
+              </div>
+              <div className="p-4">
+                <h3 className="font-bold text-lg mb-2">{recipe.title}</h3>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1 text-xs">
+                    <span className="w-4 h-4 rounded-full bg-black flex items-center justify-center">
+                      <Clock size={12} color="white" />
+                    </span>
+                    <span>{recipe.time}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs">
+                    <span className="w-4 h-4 rounded-full bg-black flex items-center justify-center text-white">
+                      <span className="text-[8px]">🍽️</span>
+                    </span>
+                    <span>{recipe.type}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
 
-        {/* Add recipe button */}
-        <ActionButton />
-
-        <div className="flex justify-end my-8">
-          <button className="bg-pink-500 text-white rounded-full px-6 py-3 flex items-center gap-2 shadow-lg hover:bg-transparent hover:border-pink-600 hover:border-1 transition">
-            <Plus /> Thêm công thức
+        {/* Add recipe button - positioned at bottom right */}
+        <div className="fixed bottom-8 right-8">
+          <button className="bg-pink-500 hover:bg-pink-600 text-white py-3 px-6 rounded-full flex items-center gap-2 shadow-lg">
+            <Plus size={20} />
+            <span>Thêm công thức</span>
           </button>
         </div>
       </div>

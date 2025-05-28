@@ -1,5 +1,6 @@
 import { FaUserFriends, FaFire, FaNewspaper, FaVideo, FaUser, FaBookmark, FaUtensils, FaPlus } from "react-icons/fa";
 import { MdLibraryAdd } from "react-icons/md";
+
 export const LeftSidebar = ({ data, activeTab, onTabChange }) => (
     <aside className="hidden lg:block w-72 pr-4 space-y-6 sticky top-24 h-fit">
         <div className="bg-white rounded-2xl shadow p-6 mb-2">

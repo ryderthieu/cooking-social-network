@@ -46,7 +46,7 @@ function App() {
     { path: "/support/ho-tro", element: <SupportsPage /> },
     { path: "/search", element: <SearchPage /> },
     { path: "/posts", element: <PostPage /> },
-    { path: "/profile", element: <ProfilePage /> },
+    { path: "/profile/@:username", element: <ProfilePage /> },
     {path: "/recipes/create", element: <CreateRecipe />}
     // { path: "/posts/:id", element: <PostDetail />}
   ];
