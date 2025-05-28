@@ -5,3 +5,14 @@
 body {
   @apply font-sans;
 }
+
+.background-gradient {
+  background: linear-gradient(135deg, rgb(251, 146, 60) 0%, rgb(236, 72, 153) 100%);
+
+}
+              
+.background-gradient:hover {
+  background: linear-gradient(135deg, rgb(240, 130, 20), rgb(220, 40, 130));
+  transition: 0.5s ease-in;
+
+}

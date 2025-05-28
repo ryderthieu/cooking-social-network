@@ -12,6 +12,7 @@ import SharePopup from '../../components/common/SharePopup';
 import Posts from './Posts';
 import Reels from './Reels';
 import { leftSidebarData, rightSidebarData } from './mockData';
+import CreatePostModal from '../../components/common/CreatePostModal';
 
 export const mockPosts = [
   {
@@ -214,7 +215,8 @@ const PostPage = () => {
   const [showReelComment, setShowReelComment] = useState(false);
   const [selectedReel, setSelectedReel] = useState(null);
 
-
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createType, setCreateType] = useState('post');
 
   const handleCloseReelComment = () => {
     setShowReelComment(false);
@@ -255,11 +257,11 @@ const PostPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFF4D6] via-white to-[#FFF4D6] py-10 px-2 lg:px-8">
       <div className="max-w-7xl mx-auto flex gap-8 relative">
-        <LeftSidebar activeTab={currentPath == '/explore/posts' ? 'posts' : 'reels'}/>
+        <LeftSidebar activeTab={currentPath == '/explore/posts' ? 'posts' : 'reels'} onAdd={() => setShowCreateModal(true)}/>
 
         <div className="flex-1">
           <Routes>
-            <Route path='/' element={<Navigate to = "posts" replace />} />
+            <Route path='/' element={<Navigate to="posts" replace />} />
             <Route path="/posts" element={<Posts />} />
             <Route path="/reels/:id" element={<Reels />} />
           </Routes>
@@ -295,6 +297,11 @@ const PostPage = () => {
           display: none;
         }
       `}</style>
+      <CreatePostModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        type={createType}
+      />
     </div>
   );
 };
