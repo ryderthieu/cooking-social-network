@@ -146,7 +146,7 @@ const Register = () => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Email"
-                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${errors.email ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm ${errors.email ? 'border-red-500' : 'border-gray-300'
                         } ${shakeFields.includes("email") ? "animate-shake" : ""}`}
                 />
                 {errors.email && <p className="text-red-600 text-xs italic ml-2 mt-1">{errors.email}</p>}
@@ -160,7 +160,7 @@ const Register = () => {
                     value={formData.password}
                     onChange={handleChange}
                     placeholder="Mật khẩu"
-                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${errors.password ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm ${errors.password ? 'border-red-500' : 'border-gray-300'
                         } ${shakeFields.includes("password") ? "animate-shake" : ""}`}
                 />
                 {errors.password && <p className="text-red-600 text-xs italic ml-2 mt-1">{errors.password}</p>}
@@ -174,7 +174,7 @@ const Register = () => {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     placeholder="Xác nhận mật khẩu"
-                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
                         } ${shakeFields.includes("confirmPassword") ? "animate-shake" : ""}`}
                 />
                 {errors.confirmPassword && <p className="text-red-600 text-xs italic ml-2 mt-1">{errors.confirmPassword}</p>}
@@ -182,7 +182,7 @@ const Register = () => {
 
             <button
                 type="submit"
-                className="w-full bg-[#04043F] hover:bg-[#1a1a5f] text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg"
+                className="w-full bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg"
             >
                 Tiếp theo
             </button>
@@ -200,7 +200,7 @@ const Register = () => {
                         value={formData.firstName}
                         onChange={handleChange}
                         placeholder="Họ"
-                        className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${errors.firstName ? 'border-red-500' : 'border-gray-300'
+                        className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm ${errors.firstName ? 'border-red-500' : 'border-gray-300'
                             } ${shakeFields.includes("firstName") ? "animate-shake" : ""}`}
                     />
                     {errors.firstName && <p className="text-red-600 text-xs italic ml-2 mt-1">{errors.firstName}</p>}
@@ -213,7 +213,7 @@ const Register = () => {
                         value={formData.lastName}
                         onChange={handleChange}
                         placeholder="Tên"
-                        className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${errors.lastName ? 'border-red-500' : 'border-gray-300'
+                        className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm ${errors.lastName ? 'border-red-500' : 'border-gray-300'
                             } ${shakeFields.includes("lastName") ? "animate-shake" : ""}`}
                     />
                     {errors.lastName && <p className="text-red-600 text-xs italic ml-2 mt-1">{errors.lastName}</p>}
@@ -225,7 +225,7 @@ const Register = () => {
                     name="gender"
                     value={formData.gender}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${errors.gender ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm ${errors.gender ? 'border-red-500' : 'border-gray-300'
                         }`}
                 >
                     <option value="">Chọn giới tính</option>
@@ -243,7 +243,7 @@ const Register = () => {
                     name="birthDate"
                     value={formData.birthDate}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${errors.birthDate ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent shadow-sm ${errors.birthDate ? 'border-red-500' : 'border-gray-300'
                         }`}
                 />
                 {errors.birthDate && <p className="text-red-600 text-xs italic ml-2 mt-1">{errors.birthDate}</p>}
@@ -257,8 +257,8 @@ const Register = () => {
                     name="agree"
                     checked={formData.agree}
                     onChange={handleChange}
-                    className={`form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out border rounded ${errors.agree ? 'border-red-500' : 'border-gray-300'
-                        } ${shakeFields.includes("agree") ? "animate-shake" : ""} focus:ring-blue-500`}
+                    className={`form-checkbox h-4 w-4 text-pink-600 transition duration-150 ease-in-out border rounded ${errors.agree ? 'border-red-500' : 'border-gray-300'
+                        } ${shakeFields.includes("agree") ? "animate-shake" : ""} focus:ring-pink-500`}
                 />
                 <label htmlFor="agree" className="text-sm text-gray-700 select-none">
                     Tôi đồng ý với các điều khoản của SHISHA
@@ -270,13 +270,13 @@ const Register = () => {
                 <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="w-1/2 bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg"
+                    className="w-1/2 bg-gray-400 hover:bg-gray-500 text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg"
                 >
                     Quay lại
                 </button>
                 <button
                     type="submit"
-                    className="w-1/2 bg-[#04043F] hover:bg-[#1a1a5f] text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg"
+                    className="w-1/2 bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg"
                 >
                     Đăng ký
                 </button>
@@ -287,7 +287,7 @@ const Register = () => {
     return (
         <div className="min-h-screen flex items-center justify-center p-6 animated-bg">
             <div
-                className="w-full max-w-6xl flex flex-row rounded-3xl shadow-2xl overflow-hidden border border-white/30 p-6 gap-5 relative"
+                className="w-full max-w-6xl flex flex-row rounded-3xl shadow-2xl overflow-hidden border border-pink-200/30 p-6 gap-5 relative bg-gradient-to-br from-pink-50 to-orange-50"
                 style={{
                     backgroundImage: `url(${bgImage})`,
                     backgroundSize: 'cover',
@@ -310,7 +310,7 @@ const Register = () => {
 
                         <p className="text-sm text-center text-gray-600 mt-6">
                             Bạn đã có tài khoản?{" "}
-                            <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium transition duration-300 ease-in-out">
+                            <Link to="/login" className="text-pink-600 hover:text-pink-800 font-medium transition duration-300 ease-in-out">
                                 Đăng nhập ngay
                             </Link>
                         </p>
@@ -322,14 +322,14 @@ const Register = () => {
                         </div>
 
                         <div className="flex justify-center items-center gap-5">
-                            <button className="w-11 h-11 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-110 shadow-sm">
+                            <button className="w-11 h-11 rounded-full border border-gray-200 hover:bg-pink-50 flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-110 shadow-sm">
                                 <img
                                     className="w-6 h-6"
                                     src="https://www.svgrepo.com/show/475656/google-color.svg"
                                     alt="Google"
                                 />
                             </button>
-                            <button className="w-11 h-11 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-110 shadow-sm">
+                            <button className="w-11 h-11 rounded-full border border-gray-200 hover:bg-pink-50 flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-110 shadow-sm">
                                 <img
                                     className="w-6 h-6"
                                     src="https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg"
