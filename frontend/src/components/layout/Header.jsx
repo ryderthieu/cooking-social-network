@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import logo from "../../assets/logo.png";
-import avatar from "../../assets/avatar.png";
 import { FaAngleDown, FaChevronDown, FaSearch, FaTimes } from "react-icons/fa";
 import { FiBookmark } from "react-icons/fi";
 import { Link, useLocation, useNavigate } from "react-router-dom";

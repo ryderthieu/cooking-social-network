@@ -2,7 +2,7 @@ import React from "react";
 import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 import blog1 from "../../assets/Blog/blog1.png";
 import blog2 from "../../assets/Blog/blog2.png";
-import avatar from "../../assets/avatar.png";
+import avatar from "../../assets/avatar.jpg";
 import Contact from "../../components/sections/Home/Contact";
 import Recipe from "../../components/common/Recipe";
 
