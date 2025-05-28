@@ -77,11 +77,14 @@ const MessageDropdown = () => {
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div
+      className="relative rounded-full hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
+      ref={dropdownRef}
+    >
       {/* Message Icon Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md focus:outline-none transition-colors duration-200"
+        className="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full focus:outline-none transition-colors duration-200"
       >
         <svg
           className="w-6 h-6"
@@ -97,7 +100,7 @@ const MessageDropdown = () => {
           />
         </svg>
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-[10px]">
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}

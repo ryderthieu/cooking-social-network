@@ -302,7 +302,7 @@ const Header = () => {
             </div>
 
             {/* Messages */}
-            <div className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer">
+            <div>
               {/* <Link
                 to="/messages"
                 className="flex items-center gap-2 hover:text-blue-600"
