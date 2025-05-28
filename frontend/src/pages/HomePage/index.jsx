@@ -30,7 +30,7 @@ const HomePage = () => {
           />
           <button
             onClick={handleSearch}
-            className="bg-[#FF37A5] text-white font-semibold py-2 px-6 rounded-[30px] ml-2"
+            className="bg-[#FF37A5] text-white font-semibold py-3 px-6 rounded-[30px] ml-2 text-[14px] hover:bg-[#FF2A8F] transition-colors duration-300"
           >
             TÌM KIẾM
           </button>
@@ -50,9 +50,7 @@ const HomePage = () => {
               Xem tất cả
             </Link>
           </div>
-          <div className="grid grid-cols-5 gap-6 mt-8 mb-8">
-            <Recipe />
-            <Recipe />
+          <div className="grid grid-cols-4 gap-6 mt-8 mb-8">
             <Recipe />
             <Recipe />
             <Recipe />
