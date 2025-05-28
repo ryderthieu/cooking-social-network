@@ -1,14 +1,20 @@
+import { useState, useEffect } from "react";
+import avatar1 from "../../assets/avatar1.jpg";
+import avatar2 from "../../assets/avatar2.jpg";
+import avatar from "../../assets/avatar.jpg";
 import blog9 from "../../assets/Blog/blog9.png";
 import blog1 from "../../assets/Blog/blog1.png";
 import blog8 from "../../assets/Blog/blog8.png";
-import { useEffect, useState } from "react";
-import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
-import avatar1 from "../../assets/avatar1.png";
-import avatar2 from "../../assets/avatar2.png";
-import avatar from "../../assets/avatar.png";
+import cmnt1 from "../../assets/About/cmnt1.jpg";
+import { FaPinterest, FaFacebook, FaInstagramSquare } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import atho from "../../assets/About/atho.png";
+import ntruong from "../../assets/About/ntruong.png";
+import tnhi from "../../assets/About/tnhi.jpg";
 
 function useCountUp(to, duration = 2000) {
   const [count, setCount] = useState(0);
+
   useEffect(() => {
     let start = 0;
     const increment = to / (duration / 16);
@@ -23,246 +29,361 @@ function useCountUp(to, duration = 2000) {
     }, 16);
     return () => clearInterval(handle);
   }, [to, duration]);
+
   return count.toLocaleString();
 }
 
-const AboutPage = () => {
+// Sample data
+const teamMembers = [
+  {
+    name: "Huỳnh Văn Thiệu",
+    role: "Sáng lập",
+    desc: "Chuyên gia ẩm thực và công nghệ, đam mê kết nối cộng đồng qua ẩm thực.",
+    img: avatar,
+  },
+  {
+    name: "Trần Đỗ Phương Nhi",
+    role: "Đồng sáng lập",
+    desc: "Chuyên gia truyền thông và marketing, mang đến những ý tưởng sáng tạo cho Oshisha.",
+    img: avatar1,
+  },
+  {
+    name: "Trịnh Thị Phương Quỳnh",
+    role: "Đồng sáng lập",
+    desc: "Kỹ sư phần mềm với kinh nghiệm phát triển ứng dụng, đảm bảo nền tảng hoạt động mượt mà.",
+    img: avatar2,
+  },
+];
+
+const featuredRecipes = [
+  {
+    name: "Bài viết phổ biến",
+    author: "Trịnh Thị Phương Quỳnh",
+    path: "/blog/bai-viet-pho-bien",
+    image: blog9,
+  },
+  {
+    name: "Bài viết mới nhất",
+    author: "Huỳnh Văn Thiệu",
+    path: "/blog/bai-viet-moi",
+    image: blog1,
+  },
+  {
+    name: "Bài viết nổi bật",
+    author: "Trần Đỗ Phương Nhi",
+    path: "/blog/bai-viet-noi-bat",
+    image: blog8,
+  },
+];
+
+const testimonials = [
+  {
+    name: "Thiện Nhi",
+    avatar: tnhi,
+    content:
+      "Oshisha giúp mình học nấu nhiều món mới và kết nối với bạn bè có cùng đam mê.",
+  },
+  {
+    name: "Nhật Trường",
+    avatar: ntruong,
+    content:
+      "Thiết kế đẹp, dễ sử dụng và có rất nhiều công thức món ăn độc đáo.",
+  },
+  {
+    name: "Anh Thơ",
+    avatar: atho,
+    content:
+      "Mỗi ngày đều có cảm hứng mới để vào bếp nhờ Oshisha. Thật tuyệt vời!",
+  },
+];
+
+export default function AboutPage() {
+  const [searchQuery, setSearchQuery] = useState("");
   const userCount = useCountUp(500000, 4000);
   const recipeCount = useCountUp(10000, 4000);
   const viewCount = useCountUp(1000000, 4000);
 
-  const blogs = [
-    {
-      name: "Bài viết mới",
-      path: "/blog/bai-viet-moi",
-      src: blog1,
-      desc: "Khám phá những công thức và xu hướng ẩm thực mới nhất từ cộng đồng Oshisha.",
-    },
-    {
-      name: "Bài viết nổi bật",
-      path: "/blog/bai-viet-noi-bat",
-      src: blog8,
-      desc: "Tổng hợp các bài viết được yêu thích và đánh giá cao bởi người dùng.",
-    },
-    {
-      name: "Bài viết phổ biến",
-      path: "/blog/bai-viet-pho-bien",
-      src: blog9,
-      desc: "Những chủ đề, mẹo vặt và công thức nấu ăn được chia sẻ nhiều nhất.",
-    },
-  ];
-
-  const teamMembers = [
-    {
-      name: "Huỳnh Văn Thiệu",
-      role: "creative leader",
-      img: avatar,
-    },
-    {
-      name: "Trần Đỗ Phương Nhi",
-      role: "sales manager",
-      img: avatar1,
-    },
-    {
-      name: "Trịnh Thị Phương Quỳnh",
-      role: "sales manager",
-      img: avatar2,
-    },
-  ];
+  const handleSearch = (e) => {
+    e.preventDefault();
+    console.log("Search:", searchQuery);
+  };
 
   return (
-    <section className="bg-white py-12 px-4 md:px-20 text-gray-800 mx-[110px]">
-      <div className="text-center mb-16">
-        <p className="text-lg max-w-2xl mx-auto leading-8">
-          Chúng tôi kết nối những người yêu ẩm thực qua các công thức nấu ăn,
-          câu chuyện và trải nghiệm nấu nướng tuyệt vời.
-        </p>
-        <img
-          src="/images/about-hero.png"
-          alt="Oshisha Hero"
-          className="mx-auto mt-6 rounded-xl shadow-md w-full max-w-xl"
-        />
-      </div>
-
-      {/* Team Intro */}
-      <div className="text-center mb-16">
-        <h2 className="text-2xl font-semibold mb-4">Đội ngũ của chúng tôi</h2>
-        <p className="leading-7 text-gray-600 mx-[120px] mb-10">
-          Chúng tôi là một đội ngũ yêu công nghệ và ẩm thực đến từ Việt Nam,
-          mong muốn tạo ra những ảnh hưởng tích cực qua từng món ăn và công nghệ
-          hiện đại.
-        </p>
-        <div className="max-w-4xl mx-auto px-4">
-          <div className="grid grid-cols-3 gap-8">
-            {teamMembers.map((member, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <img
-                  src={member.img}
-                  alt={member.name}
-                  className="w-24 h-24 object-cover rounded-full mb-4"
+    <div className="mx-[90px]">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden rounded-2xl mx-6 mt-6">
+        <div
+          className="relative rounded-2xl overflow-hidden px-[40px]"
+          style={{
+            background: "linear-gradient(135deg, #fb923c 0%, #ec4899 100%)",
+          }}
+        >
+          <div className="relative z-10 px-12 md:py-10 text-center md:text-left md:flex md:items-center md:justify-between">
+            <div className="md:w-[60%] mb-8 md:mb-0">
+              <h1 className="text-3xl font-bold text-white mb-4 leading-[45px]">
+                Khám phá công thức nấu ăn <br />
+                <span className="text-yellow-300">cùng cộng đồng Oshisha</span>
+              </h1>
+              <p className="text-white/90 text-sm md:text-base mb-6 max-w-md leading-6">
+                Chúng tôi kết nối những người yêu ẩm thực qua các công thức nấu
+                ăn, câu chuyện và trải nghiệm nấu nướng tuyệt vời.
+              </p>
+              <form onSubmit={handleSearch} className="relative max-w-md">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Tìm kiếm công thức, món ăn..."
+                  className="w-full h-12 pl-5 pr-12 rounded-full border-0 bg-white/95 shadow-md text-sm focus:outline-none"
                 />
-                <p className="text-sm text-gray-400 mb-1">{member.role}</p>
-                <h3 className="text-lg font-semibold">{member.name}</h3>
-                <p className="text-gray-500 text-sm mt-1 mb-2 px-4">
-                  Glavi amet ritnsi libero molestie ante ut fringilla purus eros
-                  quis quis guavid from dolor amet iquam lorem bibendum
-                </p>
-                <div className="flex gap-3">
-                  <a href="#" className="text-blue-500 hover:text-blue-600">
-                    <FaFacebookF />
-                  </a>
-                  <a href="#" className="text-sky-400 hover:text-sky-500">
-                    <FaTwitter />
-                  </a>
-                  <a href="#" className="text-pink-500 hover:text-pink-600">
-                    <FaInstagram />
-                  </a>
-                </div>
-              </div>
-            ))}
+                <button
+                  type="submit"
+                  className="absolute right-1 top-1 h-10 w-10 rounded-full bg-orange-500 text-white flex items-center justify-center"
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </button>
+              </form>
+            </div>
+            <div className="md:w-[40%] flex justify-center md:justify-end">
+              <img
+                src={cmnt1}
+                alt="Món ăn đặc sắc"
+                className="rounded-xl shadow-lg w-full h-auto max-w-xs md:max-w-md"
+                style={{ maxHeight: "300px", objectFit: "cover" }}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="mb-10 max-w-3xl mx-auto text-center">
-        <h2 className="text-2xl font-semibold mb-4">Sứ mệnh của chúng tôi</h2>
-        <p className="leading-7 text-gray-600">
-          Sứ mệnh của chúng tôi là tạo ra một cộng đồng nơi mọi người có thể
-          chia sẻ niềm đam mê nấu ăn, học hỏi và lan tỏa yêu thương qua từng món
-          ăn.
-        </p>
-      </div>
-
-      {/* Core Values */}
-      <div className="grid md:grid-cols-3 gap-8 mb-16">
-        <div className="text-center p-6 bg-orange-50 rounded-2xl shadow-md">
-          <div className="text-3xl mb-2">🍳</div>
-          <h3 className="font-semibold text-lg mb-1">
-            Chia sẻ công thức dễ dàng
-          </h3>
-          <p className="text-sm leading-6">
-            Nơi bạn có thể đăng, tìm và lưu lại những công thức nấu ăn yêu
-            thích.
-          </p>
-        </div>
-        <div className="text-center p-6 bg-orange-50 rounded-2xl shadow-md">
-          <div className="text-3xl mb-2">🫱‍🫲</div>
-          <h3 className="font-semibold text-lg mb-1">Kết nối cộng đồng</h3>
-          <p className="text-sm leading-6">
-            Tạo nhóm, tham gia sự kiện và kết bạn với những người cùng đam mê.
-          </p>
-        </div>
-        <div className="text-center p-6 bg-orange-50 rounded-2xl shadow-md">
-          <div className="text-3xl mb-2">💡</div>
-          <h3 className="font-semibold text-lg mb-1">Trung tâm cảm hứng</h3>
-          <p className="text-sm leading-6">
-            Cập nhật video, bài viết và mẹo nấu ăn mỗi ngày.
-          </p>
-        </div>
-      </div>
-
-      {/* Statistics Section */}
-      <div className="grid md:grid-cols-3 gap-6 text-center mb-16">
-        <div>
-          <h3 className="text-3xl font-bold text-pink-500">{userCount}+</h3>
-          <p className="text-sm">Người dùng trên toàn thế giới</p>
-        </div>
-        <div>
-          <h3 className="text-3xl font-bold text-pink-500">{recipeCount}+</h3>
-          <p className="text-sm">Công thức đã chia sẻ</p>
-        </div>
-        <div>
-          <h3 className="text-3xl font-bold text-pink-500">{viewCount}+</h3>
-          <p className="text-sm">Lượt truy cập hàng tháng</p>
-        </div>
-      </div>
-
-      {/* Blog Section */}
-      <div className="mb-16">
-        <h2 className="text-2xl font-semibold mb-6 text-center">
-          Khám phá các bài viết mới nhất
-        </h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          {blogs.map((item) => (
-            <a
-              key={item.path}
-              href={item.path}
-              className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow duration-300 block"
-            >
-              <img
-                src={item.src}
-                alt={item.name}
-                className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
-              />
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
-                <p className="leading-6 text-gray-600 ">{item.desc}</p>
-                <span className="mt-3 font-semibold text-[16px] inline-block text-pink-500 hover:text-pink-600 transition-colors duration-300">
-                  Xem thêm
-                </span>
+      {/* About Section */}
+      <section className="px-6 py-6 mt-10">
+        <div className="bg-orange-50 rounded-2xl p-6 md:p-8">
+          <div className="md:flex md:items-center md:space-x-8">
+            <div className="md:w-1/2 mb-6 md:mb-0">
+              <h3 className="text-[22px] font-bold text-gray-900 mb-4">
+                Giới thiệu về Oshisha
+              </h3>
+              <p className="text-gray-600 leading-8 mb-4 text-justify">
+                Oshisha là cộng đồng ẩm thực kết nối những người yêu nấu ăn trên
+                khắp Việt Nam. Chúng tôi cung cấp nền tảng để chia sẻ công thức,
+                kinh nghiệm và niềm đam mê với ẩm thực. <br /> Sứ mệnh của chúng
+                tôi là tạo ra một cộng đồng nơi mọi người có thể chia sẻ niềm
+                đam mê nấu ăn, học hỏi và lan tỏa yêu thương qua từng món ăn.
+              </p>
+            </div>
+            <div className="md:w-1/2 grid grid-cols-3 gap-4">
+              <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+                <div className="text-2xl font-bold text-orange-500 mb-1">
+                  {userCount}+
+                </div>
+                <p className="text-xs text-gray-500">Người dùng</p>
               </div>
-            </a>
+              <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+                <div className="text-2xl font-bold text-pink-500 mb-1">
+                  {recipeCount}+
+                </div>
+                <p className="text-xs text-gray-500">Công thức</p>
+              </div>
+              <div className="bg-white rounded-lg p-4 text-center shadow-sm">
+                <div className="text-2xl font-bold text-orange-500 mb-1">
+                  {viewCount}+
+                </div>
+                <p className="text-xs text-gray-500">Lượt xem</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="p-[40px]">
+        <div className="flex items-center justify-between mb-6 mx-4">
+          <h2 className="text-[22px] font-semibold text-gray-900">
+            Đội ngũ của chúng tôi
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-[10px]">
+          {teamMembers.map((member, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-xl shadow-xl overflow-hidden"
+            >
+              <div className="p-6">
+                <div className="flex items-center mb-4">
+                  <img
+                    src={member.img || "/placeholder.svg"}
+                    alt={member.name}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-orange-200"
+                  />
+                  <div className="ml-4">
+                    <h3 className="font-semibold text-gray-900">
+                      {member.name}
+                    </h3>
+                    <p className="text-orange-500 text-[15px] font-semibold mt-1">
+                      {member.role}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm leading-6">{member.desc}</p>
+                <div className="flex mt-4 space-x-3">
+                  <FaFacebook className="w-6 h-6 text-[#3B5998]" />
+                  <FaPinterest className="w-6 h-6 text-red-500" />
+                  <FaInstagramSquare className="w-6 h-6 text-pink-600" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
-      </div>
+      </section>
 
-      <section className="py-16 bg-orange-50">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-semibold text-gray-800">
+      {/* Featured Recipes */}
+      <section className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[22px] font-semibold text-gray-900">
+            Công thức nổi bật
+          </h2>
+          <a
+            href="/recipes"
+            className="text-orange-500 text-sm font-medium hover:underline"
+          >
+            Xem tất cả
+          </a>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {featuredRecipes.map((recipe, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-xl shadow-xl overflow-hidden"
+            >
+              <img
+                src={recipe.image || "/placeholder.svg"}
+                alt={recipe.name}
+                className="w-full h-48 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="font-semibold text-gray-900 mb-1">
+                  {recipe.name}
+                </h3>
+                <p className="text-gray-500 text-[13px] mb-2">
+                  Đăng bởi {recipe.author}
+                </p>
+
+                <div className="mt-4">
+                  <Link
+                    to={recipe.path}
+                    className="text-orange-500 font-semibold hover:text-orange-600 transition-colors duration-200"
+                  >
+                    Xem chi tiết
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-[22px] font-semibold text-gray-900">
             Người dùng nói gì về Oshisha?
           </h2>
-          <p className="text-gray-600 mt-2 max-w-xl mx-auto">
-            Lắng nghe cảm nhận thực tế từ cộng đồng nấu ăn yêu thích Oshisha.
-          </p>
         </div>
-
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto px-4">
-          {[
-            {
-              name: "Thiện Nhi",
-              avatar: "/images/user1.jpg",
-              content:
-                "Oshisha giúp mình học nấu nhiều món mới và kết nối với bạn bè có cùng đam mê.",
-            },
-            {
-              name: "Nhật Trường",
-              avatar: "/images/user2.jpg",
-              content:
-                "Thiết kế đẹp, dễ sử dụng và có rất nhiều công thức món ăn độc đáo.",
-            },
-            {
-              name: "Anh Thơ",
-              avatar: "/images/user3.jpg",
-              content:
-                "Mỗi ngày đều có cảm hứng mới để vào bếp nhờ Oshisha. Thật tuyệt vời!",
-            },
-          ].map((user, index) => (
-            <div key={index} className="bg-white p-6 rounded-xl shadow-md">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {testimonials.map((user, index) => (
+            <div key={index} className="bg-white rounded-xl shadow-xl p-6">
               <div className="flex items-center mb-4">
                 <img
-                  src={user.avatar}
+                  src={user.avatar || "/placeholder.svg"}
                   alt={user.name}
-                  className="w-12 h-12 rounded-full object-cover mr-4"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-orange-200"
                 />
-                <h4 className="font-semibold text-gray-800">{user.name}</h4>
+                <div className="ml-3">
+                  <h4 className="font-semibold text-gray-900">{user.name}</h4>
+                  <div className="flex text-yellow-400 text-xs">
+                    <svg
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                    <svg
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                    <svg
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                    <svg
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                    <svg
+                      className="h-4 w-4"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                    </svg>
+                  </div>
+                </div>
               </div>
-              <p className="text-gray-600 italic">“{user.content}”</p>
+              <p className="text-gray-600 text-[15px] leading-6">
+                "{user.content}"
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Call to Action */}
-      <div className="text-center mt-[30px]">
-        <h2 className="text-xl font-semibold mb-2">
-          Tham gia cộng đồng Oshisha ngay hôm nay!
-        </h2>
-        <button className="mt-4 px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg transition-all">
-          Đăng ký ngay
-        </button>
-      </div>
-    </section>
+      <section className="max-w-7xl mx-auto px-4 md:px-6 py-8 mb-8">
+        <div
+          className="rounded-2xl overflow-hidden relative"
+          style={{
+            background: "linear-gradient(135deg, #fb923c 0%, #ec4899 100%)",
+          }}
+        >
+          <div className="p-8 md:p-12 text-center">
+            <h2 className="text-xl md:text-2xl font-bold text-white mb-4">
+              Tham gia cộng đồng Oshisha ngay hôm nay!
+            </h2>
+            <p className="text-white/90 text-sm mb-6 max-w-lg mx-auto">
+              Khám phá thế giới ẩm thực đầy màu sắc và kết nối với hàng ngàn
+              người yêu nấu ăn khác.
+            </p>
+            <Link to="/explore">
+              <button className="bg-white text-pink-600 hover:bg-gray-100 font-semibold px-6 py-3 rounded-full text-sm shadow-lg hover:shadow-xl transition-all duration-300">
+                Khám phá ngay
+              </button>
+            </Link>
+          </div>
+        </div>
+      </section>
+    </div>
   );
-};
-
-export default AboutPage;
+}

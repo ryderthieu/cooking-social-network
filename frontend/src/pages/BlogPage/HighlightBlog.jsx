@@ -4,7 +4,7 @@ import blog8 from "../../assets/Blog/blog8.png";
 import blog3 from "../../assets/Blog/blog3.png";
 import blog6 from "../../assets/Blog/blog6.png";
 import blog7 from "../../assets/Blog/blog7.png";
-import avatar1 from "../../assets/avatar1.png";
+import avatar1 from "../../assets/avatar1.jpg";
 import Contact from "../../components/sections/Home/Contact";
 import Recipe from "../../components/common/Recipe";
 

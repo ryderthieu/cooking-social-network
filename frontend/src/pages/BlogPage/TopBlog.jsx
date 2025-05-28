@@ -3,7 +3,7 @@ import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 import blog9 from "../../assets/Blog/blog9.png";
 import blog4 from "../../assets/Blog/blog4.png";
 import blog5 from "../../assets/Blog/blog5.png";
-import avatar2 from "../../assets/avatar2.png";
+import avatar2 from "../../assets/avatar2.jpg";
 import Contact from "../../components/sections/Home/Contact";
 import Recipe from "../../components/common/Recipe";
 
