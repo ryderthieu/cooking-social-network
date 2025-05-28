@@ -7,6 +7,7 @@ import { categories, search, supports } from "./MenuData";
 import { IoNotifications, IoSearchOutline } from "react-icons/io5";
 import { MdMessage } from "react-icons/md";
 import NotificationDropdown from "../sections/Home/NotificationDropdown";
+import MessageDropdown from "../sections/Home/MessageDropdown";
 
 const Header = () => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
@@ -302,12 +303,13 @@ const Header = () => {
 
             {/* Messages */}
             <div className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer">
-              <Link
+              {/* <Link
                 to="/messages"
                 className="flex items-center gap-2 hover:text-blue-600"
               >
                 <MdMessage className="w-6 h-6 text-[#04043F]" />
-              </Link>
+              </Link> */}
+              <MessageDropdown />
             </div>
 
             {/* User Avatar */}

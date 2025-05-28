@@ -53,10 +53,10 @@ export default function NotificationDropdown() {
     <div ref={dropdownRef} className="relative inline-block text-left">
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-full hover:bg-gray-100"
+        className="relative p-4 rounded-full hover:bg-gray-100"
       >
         <Bell className="w-6 h-6 text-gray-700" />
-        <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+        <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
       </button>
 
       {open && (

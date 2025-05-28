@@ -1,5 +1,4 @@
-import banner from "../../../assets/Home/banner.png";
-
+import cmnt2 from "../../../assets/About/cmnt2.jpg";
 const Hero = () => {
   return (
     <section className="relative overflow-hidden rounded-2xl mx-6 mt-6 px-[90px]">
@@ -26,8 +25,9 @@ const Hero = () => {
           </div>
           <div className="md:w-[40%] flex justify-center md:justify-end">
             <img
-              src={banner}
+              src={cmnt2}
               alt="Món ăn đặc sắc"
+              className="rounded-xl shadow-lg w-full h-auto max-w-xs md:max-w-md"
               style={{ maxHeight: "300px", objectFit: "cover" }}
             />
           </div>

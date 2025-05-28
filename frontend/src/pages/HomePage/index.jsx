@@ -50,7 +50,9 @@ const HomePage = () => {
               Xem tất cả
             </Link>
           </div>
-          <div className="grid grid-cols-5 gap-2 mt-8 mb-8">
+          <div className="grid grid-cols-5 gap-6 mt-8 mb-8">
+            <Recipe />
+            <Recipe />
             <Recipe />
             <Recipe />
             <Recipe />
