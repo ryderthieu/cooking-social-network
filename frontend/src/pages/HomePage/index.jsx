@@ -7,7 +7,7 @@ import { IoSearchSharp } from "react-icons/io5";
 import Hero from "../../components/sections/Home/Hero.jsx";
 import VideoShorts from "../../components/sections/Home/VideoShorts.jsx";
 import { Link } from "react-router-dom";
-
+import CarouselPlugin from "../../components/sections/Home/CarouselHero.jsx"
 const HomePage = () => {
   const [search, setSearch] = useState("");
 
@@ -17,7 +17,8 @@ const HomePage = () => {
   };
   return (
     <div>
-      <Hero />
+      {/* <Hero /> */}
+      <CarouselPlugin />
       <div className="px-[110px] pt-[40px]">
         <div className="flex items-center max-w-[100%] bg-white border-2 border-[#FFA663] rounded-[30px] px-4 py-2 mb-[50px]">
           <IoSearchSharp className="w-6 h-6 mr-2 text-gray-400" />
