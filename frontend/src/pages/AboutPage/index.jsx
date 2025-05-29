@@ -253,7 +253,7 @@ export default function AboutPage() {
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-[22px] font-semibold text-gray-900">
-            Công thức nổi bật
+            Các bài viết nổi bật
           </h2>
           <a
             href="/recipes"
