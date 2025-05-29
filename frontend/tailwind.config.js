@@ -20,9 +20,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        birthstone: ['Birthstone Bounce"', "cursive"],
-        vietnam: ['Be Vietnam Pro"', "sans-serif"],
-        chango: ['Chango"', "sans-serif"],
+        birthstone: ['"Birthstone Bounce"', "cursive"],
+        vietnam: ['"Be Vietnam Pro"', "sans-serif"],
+        chango: ['"Chango"', "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

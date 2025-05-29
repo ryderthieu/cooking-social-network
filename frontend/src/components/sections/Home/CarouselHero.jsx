@@ -15,7 +15,7 @@ import {
 
 export default function CarouselPlugin() {
   const plugin = React.useRef(
-    Autoplay({ delay: 500, stopOnInteraction: true })
+    Autoplay({ delay: 2000, stopOnInteraction: true })
   );
 
   // Array of banner components
