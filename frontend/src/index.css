@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import "tailwindcss-animated";
+/* @import "tailwindcss-animate"; */
 
 html, body, #root, #__next {
   font-family: 'Be Vietnam Pro', system-ui, sans-serif;
@@ -93,4 +93,14 @@ html, body, #root, #__next {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Thêm định nghĩa cho message-highlighted */
+.message-highlighted {
+  transition: background-color 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
+  background-color: rgba(255, 220, 100, 0.35) !important; /* Màu vàng nhạt với độ trong suốt */
+  /* box-shadow: 0 0 12px rgba(255, 200, 50, 0.5) !important; */ /* Tạm thời comment out box-shadow nếu không cần thiết ngay */
+  border-radius: 8px !important; /* Đảm bảo bo góc được áp dụng */
+  /* Thêm một chút padding để highlight không quá sát text, nếu cần */
+  /* padding: 2px 4px !important; */ 
 }
