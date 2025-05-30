@@ -1,5 +1,4 @@
 import ProfileHeader from './ProfileHeader';
-import ProfileTabs from './ProfileTabs';
 import PostsTab from './PostsTab';
 import RecipesTab from './RecipesTab';
 import VideosTab from './VideosTab';
@@ -7,11 +6,11 @@ import PostItem from './PostItem';
 import RecipeCard from './RecipeCard';
 import VideoCard from './VideoCard';
 import EmptyState from './EmptyState';
-import ProfileStats from './ProfileStats';
+import ProfileStats from './ProfileStats'; 
+import ProfileSidebar from './ProfileSidebar'; 
 
 export {
   ProfileHeader,
-  ProfileTabs,
   PostsTab,
   RecipesTab,
   VideosTab,
@@ -19,6 +18,6 @@ export {
   RecipeCard,
   VideoCard,
   EmptyState,
-  ProfileStats
+  ProfileSidebar
 };
 

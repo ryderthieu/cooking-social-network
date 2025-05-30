@@ -1,5 +1,6 @@
 import React from 'react';
 import RecipeCard from './RecipeCard';
+import Recipe from '../../common/Recipe'
 
 export default function RecipesTab() {
   // Dữ liệu mẫu cho công thức
@@ -40,9 +41,7 @@ export default function RecipesTab() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {recipes.map((recipe) => (
-        <RecipeCard key={recipe.id} recipe={recipe} />
-      ))}
+      <Recipe />
     </div>
   );
 }

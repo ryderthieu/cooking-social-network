@@ -20,8 +20,20 @@ export const confirmOtp = ({email, otp}) => {
     return API.post('/users/confirm-otp', {email, otp})
 }
 
-export const toggleFollow = ({followingId, action}) => {
-    return API.post('/users/toggle-follow', {followingId, action})
+export const toggleFollow = async ({followingId, action}) => {
+    try {
+        console.log("Sending toggle follow request:", { followingId, action });
+
+        const response = await API.post('/users/toggle-follow', {
+        followingId,
+        action
+        });
+        console.log("Toggle follow response:", response.data);
+        return response;
+  } catch (error) {
+    console.error('Toggle follow error:', error);
+    throw error;
+  }
 }
 
 export const getUserInfo = () => {
@@ -54,6 +66,10 @@ export const getFollowing = ({userId}) => {
 
 export const getUserById = ({userId}) => {
     return API.get(`/users/${userId}`)
+}
+
+export const getUserStats = (userId) => {
+    return API.get(`/users/${userId}/stats`)
 }
 
 export const editProfile = ({ firstName, lastName, gender, birthDay, avatar }) => {
