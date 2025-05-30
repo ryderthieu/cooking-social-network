@@ -18,6 +18,6 @@ export {
   RecipeCard,
   VideoCard,
   EmptyState,
-  ProfileSidebar
+  ProfileSidebar,
 };
 

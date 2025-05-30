@@ -410,12 +410,10 @@ function SavedContentSection({ savedTab, setSavedTab }) {
   );
 }
 
-// Optimized SavedContent component
 function SavedContent({ type }) {
   const [content, setContent] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Service mapping for better maintainability - using useMemo to avoid dependency issues
   const serviceMap = React.useMemo(
     () => ({
       recipes: {
@@ -424,6 +422,7 @@ function SavedContent({ type }) {
         deleteKey: "recipeId",
         component: RecipeCard,
         props: "recipe",
+        responseKey: "savedRecipes",
       },
       posts: {
         fetch: getSavedPost,
@@ -431,6 +430,7 @@ function SavedContent({ type }) {
         deleteKey: "postId",
         component: PostItem,
         props: "post",
+        responseKey: "savedPosts", 
       },
       reels: {
         fetch: getSavedReels,
@@ -438,6 +438,7 @@ function SavedContent({ type }) {
         deleteKey: "reelId",
         component: VideoCard,
         props: "video",
+        responseKey: "savedReels",
       },
     }),
     []
@@ -458,10 +459,15 @@ function SavedContent({ type }) {
       try {
         const service = serviceMap[type];
         const response = await service.fetch();
-        setContent(response.data || []);
+        console.log("Saved content: ", response.data)
+
+
+        const contentArray = response.data[service.responseKey] || [];
+        setContent(contentArray);
       } catch (error) {
         console.error(`Error fetching saved ${type}:`, error);
         toast.error(`Không thể tải ${typeLabels[type]} đã lưu`);
+        setContent([]);
       } finally {
         setLoading(false);
       }
