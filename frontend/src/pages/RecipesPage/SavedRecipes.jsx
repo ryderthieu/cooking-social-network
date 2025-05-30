@@ -1,129 +1,167 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import BreadCrumb from "../../components/common/BreadCrumb";
 import { Plus, MoreVertical, Clock } from "lucide-react";
 import SavedCard from "../../components/sections/Recipe/SavedCard";
 import ActionButton from "../../components/common/ActionButton";
+import AddCollectionModal from "../../components/common/Modal/Recipe/AddCollectionModal";
+import { Love, Matcha, Ramen } from "@/assets/Recipe/images";
+import { useNavigate } from "react-router-dom";
 
 const collections = [
-  { id: "yeu-thich", name: "Yêu thích", thumbnail: "/images/yeuthich.jpg" },
-  { id: "trang-mieng", name: "Tráng miệng", thumbnail: "/images/trangmieng.jpg" },
+  { id: "yeu-thich", name: "Yêu thích", thumbnail: Love },
+  { id: "trang-mieng", name: "Tráng miệng", thumbnail: Matcha },
   { id: "bo-suu-tap-moi", name: "Bộ sưu tập mới", thumbnail: null },
 ];
 
 const recipesMock = [
   {
     id: 1,
-    title: "Strawberry Oatmeal Pancake with Honey Syrup",
-    time: "30 Minutes",
-    type: "Breakfast",
-    image: "/images/pancake.jpg",
+    title: "Mì ramen chuẩn Nhật siêu đơn giản ai cũng có thể làm",
+    time: "30 phút",
+    type: "Bữa sáng",
+    image: Ramen,
     author: "Bạn",
   },
   {
     id: 2,
-    title: "Strawberry Oatmeal Pancake with Honey Syrup",
-    time: "30 Minutes",
-    type: "Breakfast",
-    image: "/images/pancake.jpg",
+    title: "Mì ramen chuẩn Nhật siêu đơn giản ai cũng có thể làm",
+    time: "30 phút",
+    type: "Bữa sáng",
+    image: Ramen,
     author: "Bạn",
   },
   {
     id: 3,
-    title: "Strawberry Oatmeal Pancake with Honey Syrup",
-    time: "30 Minutes",
-    type: "Breakfast",
-    image: "/images/pancake.jpg",
+    title: "Mì ramen chuẩn Nhật siêu đơn giản ai cũng có thể làm",
+    time: "30 phút",
+    type: "Bữa sáng",
+    image: Ramen,
     author: "Bạn",
   },
 ];
 
 const SavedRecipes = () => {
+  const navigate = useNavigate();
+  const [scrollY, setScrollY] = useState(0);
   const [activeTab, setActiveTab] = useState("yeu-thich");
+  const [showModal, setShowModal] = useState(false);
+  const [collectionName, setCollectionName] = useState("");
+  const [collectionDescription, setCollectionDescription] = useState("");
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const getBannerStyles = () => {
+    const maxScroll = 200;
+    const scrollProgress = Math.min(scrollY / maxScroll, 1);
+    const width = 100 - scrollProgress * 10;
+    const borderRadius = scrollProgress * 48;
+
+    return {
+      width: `${width}%`,
+      borderRadius: `${borderRadius}px`,
+      transition: "width 0.5s ease-out, border-radius 0.5s ease-out",
+      margin: "0 auto",
+    };
+  };
+
+  const handleTabClick = (colId) => {
+    if (colId === "bo-suu-tap-moi") {
+      setShowModal(true);
+    } else {
+      setActiveTab(colId);
+    }
+  };
+
+  const handleCreateCollection = () => {
+    // Xử lý tạo bộ sưu tập mới
+    console.log("Tạo bộ sưu tập:", { collectionName, collectionDescription });
+    setShowModal(false);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+  };
 
   return (
-    <MainLayout>
+    <>
       {/* Header banner with gradient */}
-      <div className="bg-gradient-to-r from-orange-300 to-yellow-300 py-6 px-6 text-center p-6">
+      <div className="bg-gradient-to-br to-yellow-200 via-amber-300 from-orange-400 pt-10 pb-20 px-6 text-center" style={getBannerStyles()}>
         <BreadCrumb />
-        <h1 className="text-3xl font-bold text-white">Công thức đã lưu</h1>
+        <h1 className="text-[2.5em] font-bold text-white">Công thức đã lưu</h1>
       </div>
 
-      <div className="px-6">
+
+      <div className="my-12 mx-4 lg:mx-[120px]">
         {/* Collection Tabs */}
-        <div className="flex gap-10 justify-center my-6">
+        <div className="flex gap-10 justify-start my-6">
           {collections.map((col) => (
             <div
               key={col.id}
-              onClick={() => setActiveTab(col.id)}
+              onClick={() => handleTabClick(col.id)}
               className={`flex flex-col items-center cursor-pointer ${
-                activeTab === col.id ? "text-pink-600 font-semibold" : "text-gray-600"
+                activeTab === col.id
+                  ? "text-pink-600 font-semibold"
+                  : "text-gray-600"
               }`}
             >
               {col.thumbnail ? (
                 <img
                   src={col.thumbnail}
                   alt={col.name}
-                  className={`w-16 h-16 rounded-full border-2 ${
+                  className={`size-[90px] object-cover rounded-full border-[5px] ${
                     activeTab === col.id ? "border-pink-600" : "border-gray-300"
                   } bg-white`}
                 />
               ) : (
-                <div className="w-16 h-16 flex items-center justify-center rounded-full border-2 border-dashed bg-white">
-                  <Plus />
+                <div className="size-[90px] flex items-center justify-center rounded-full border-2 border-dashed bg-white hover:border-pink-400 transition-colors">
+                  <Plus className="text-gray-400" />
                 </div>
               )}
-              <span className="mt-2 text-sm">{col.name}</span>
+              <span className="mt-2 text-base font-semibold">{col.name}</span>
             </div>
           ))}
         </div>
 
         {/* Collection Title */}
-        <h2 className="text-xl font-bold mb-6">{collections.find(c => c.id === activeTab)?.name}</h2>
+        <h2 className="text-2xl font-bold mb-6">
+          {collections.find((c) => c.id === activeTab)?.name}
+        </h2>
 
         {/* Recipe Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {recipesMock.map((recipe) => (
-            <div key={recipe.id} className="bg-orange-50 rounded-lg overflow-hidden shadow">
-              <div className="relative">
-                <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
-                <button className="absolute top-2 right-2 bg-black/50 p-1 rounded-full text-white">
-                  <MoreVertical size={18} />
-                </button>
-                <div className="absolute bottom-0 left-0 bg-white px-3 py-1 rounded-tr-lg">
-                  <div className="text-xs text-gray-500">Tác giả bạn</div>
-                </div>
-              </div>
-              <div className="p-4">
-                <h3 className="font-bold text-lg mb-2">{recipe.title}</h3>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-1 text-xs">
-                    <span className="w-4 h-4 rounded-full bg-black flex items-center justify-center">
-                      <Clock size={12} color="white" />
-                    </span>
-                    <span>{recipe.time}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-xs">
-                    <span className="w-4 h-4 rounded-full bg-black flex items-center justify-center text-white">
-                      <span className="text-[8px]">🍽️</span>
-                    </span>
-                    <span>{recipe.type}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <SavedCard key={recipe.id} recipe={recipe} />
           ))}
         </div>
 
-        {/* Add recipe button - positioned at bottom right */}
-        <div className="fixed bottom-8 right-8">
-          <button className="bg-pink-500 hover:bg-pink-600 text-white py-3 px-6 rounded-full flex items-center gap-2 shadow-lg">
+        {/* Add recipe button  */}
+        <div className="flex justify-end">
+          <button className="bg-pink-500 hover:bg-pink-600 text-white py-4 px-6 rounded-full flex items-center gap-2 shadow-lg z-100" onClick={() => navigate('/recipes/create')}>
             <Plus size={20} />
             <span>Thêm công thức</span>
           </button>
         </div>
       </div>
-    </MainLayout>
+
+      {/* Add Collection Modal */}
+      <AddCollectionModal
+        showModal={showModal}
+        onClose={handleCloseModal}
+        collectionName={collectionName}
+        setCollectionName={setCollectionName}
+        collectionDescription={collectionDescription}
+        setCollectionDescription={setCollectionDescription}
+        onCreateCollection={handleCreateCollection}
+      />
+    </>
   );
 };
 

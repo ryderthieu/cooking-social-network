@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ProfileStats from "./ProfileStats";
 import { UserCheck } from "lucide-react";
-import EditProfileModal from "../../common/ProfileModal/EditProfileModal";
+import EditProfileModal from "../../common/Modal/Profile/EditProfileModal";
 
 export default function ProfileHeader({
   user,

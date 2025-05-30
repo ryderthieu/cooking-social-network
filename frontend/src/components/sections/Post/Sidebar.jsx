@@ -2,7 +2,7 @@ import { FaUserFriends, FaFire, FaNewspaper, FaVideo, FaUser, FaBookmark, FaUten
 import { MdLibraryAdd } from "react-icons/md";
 import { Link } from "react-router-dom";
 import React, { useState } from 'react';
-import CreatePostModal from '../../common/CreatePostModal';
+import CreatePostModal from '../../common/Modal/CreatePostModal';
 
 const defaultData = {
   profile: {

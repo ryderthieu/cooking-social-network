@@ -13,14 +13,16 @@ export default function BreadCrumb() {
     'profile': 'Hồ sơ',
     'about': 'Về chúng tôi',
     'contact': 'Liên hệ',
-    'saved-recipes': 'Công thức đã lưu',
+    'saved': 'Công thức đã lưu',
     'breakfast': 'Bữa sáng',
     'lunch': 'Bữa trưa',
-    'dinner': 'Bữa tối'
+    'dinner': 'Bữa tối',
+    'meal-type': "Loại bữa ăn",
+    'create': "Tạo công thức"
   };
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-slate-600 mb-4">
+    <nav className="flex items-center space-x-2 text-sm text-white mb-4">
       {/* Trang chủ */}
       <Link 
         to="/" 
@@ -37,7 +39,7 @@ export default function BreadCrumb() {
         
         return (
           <React.Fragment key={name}>
-            <span className="text-slate-700 font-bold text-lg ">{'>'}</span>
+            <span className="text-white font-bold text-lg ">{'>'}</span>
             {isLast ? (
               <span className="text-slate-800 text-lg font-bold">
                 {displayName}

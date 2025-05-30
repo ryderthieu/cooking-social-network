@@ -12,7 +12,7 @@ import SharePopup from '../../components/common/SharePopup';
 import Posts from './Posts';
 import Reels from './Reels';
 import { leftSidebarData, rightSidebarData } from './mockData';
-import CreatePostModal from '../../components/common/CreatePostModal';
+import CreatePostModal from '../../components/common/Modal/CreatePostModal';
 
 export const mockPosts = [
   {

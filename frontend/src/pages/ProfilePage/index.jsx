@@ -25,7 +25,7 @@ import {
 } from "../../services/userService";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-toastify";
-import EditProfileModal from "../../components/common/ProfileModal/EditProfileModal";
+import EditProfileModal from "../../components/common/Modal/Profile/EditProfileModal";
 
 export default function ProfilePage() {
   const { userId } = useParams();

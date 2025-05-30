@@ -65,6 +65,7 @@ function App() {
 
     { path: "/profile/:userId", element: <ProfilePage /> },
     { path: "/recipes/create", element: <CreateRecipe /> },
+    { path: "/recipes/saved", element: <SavedRecipes /> },
     // { path: "/posts/:id", element: <PostDetail />}
     { path: "/explore/*", element: <PostPage /> },
   ];
@@ -87,7 +88,7 @@ function App() {
       <Route path="/posts/:id" element={<PostDetail />} />
 
       <Route path="/recipes" element={<RecipeCategories />} />
-      <Route path="/recipes/saved" element={<SavedRecipes />} />
+
       <Route path="/recipes/:categoryType/:item" element={<Recipes />} />
       <Route path="/recipes" element={<RecipeCategories />} />
       <Route path="/recipes/create" element={<CreateRecipe />} />

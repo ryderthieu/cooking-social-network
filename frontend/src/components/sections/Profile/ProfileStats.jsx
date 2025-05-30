@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import FollowModal from '../../common/ProfileModal/FollowModal'; 
+import FollowModal from '../../common/Modal/Profile/FollowModal'; 
 
 export default function ProfileStats({ stats, currentUserId, onToggleFollow }) {
   const [isFollowerModalOpen, setIsFollowerModalOpen] = useState(false);
