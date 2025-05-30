@@ -6,7 +6,7 @@ import { mockPosts } from './mockData';
 import { getAllPost } from '@/services/postService';
 
 const Posts = () => {
-  const [posts, setPosts] = useState(mockPosts);
+  const [posts, setPosts] = useState([]);
   const [sharePopup, setSharePopup] = useState({ open: false, postId: null });
   const navigate = useNavigate();
 
