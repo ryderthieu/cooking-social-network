@@ -10,6 +10,7 @@ const {
   searchPosts,
   getAllPosts,
   getPostById,
+  getPostsByUserId
 } = require("../controllers/postController");
 
 const router = express.Router();
@@ -23,5 +24,6 @@ router.patch("/share-post/:id", authenticateJWT, sharePost);
 router.get("/search", searchPosts);
 router.get("/:id", getPostById);
 router.post("/add-post", authenticateJWT, addPost);
+router.get("/user/:userId", authenticateJWT, getPostsByUserId);
 
 module.exports = router;

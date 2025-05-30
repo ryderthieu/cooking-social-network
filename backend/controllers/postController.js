@@ -305,6 +305,32 @@ const getPostById = async (req, res) => {
   }
 };
 
+const getPostsByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "ID người dùng không hợp lệ" });
+    }
+
+    const posts = await Post.find({ author: userId })
+      .sort({ createdAt: -1 }) // Sắp xếp bài viết mới nhất lên đầu
+      .populate("author", "email firstName lastName avatar") // Populate thông tin tác giả
+      .populate("recipe", "name"); // Populate thông tin công thức
+
+    res.status(200).json({
+      message: "Danh sách bài viết của người dùng",
+      posts,
+    });
+  } catch (error) {
+    console.error("Lỗi khi lấy bài viết theo user ID:", error);
+    res.status(500).json({
+      message: "Lấy bài viết thất bại",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   addPost,
   editPost,
@@ -315,4 +341,5 @@ module.exports = {
   searchPosts,
   getAllPosts,
   getPostById,
+  getPostsByUserId
 };
