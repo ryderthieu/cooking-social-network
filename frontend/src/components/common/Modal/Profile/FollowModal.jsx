@@ -84,13 +84,15 @@ export default function FollowModal({
                     </div>
                     <p className="text-sm text-gray-500 truncate">{user._id}</p>
                   </div>
-                </div>{" "}
-                {/* Follow Button */}
+                </div>{" "}                {/* Follow Button */}
                 {user._id !== currentUserId && (
                   <div className="flex-shrink-0">
                     {isFollowing ? (
                       <button
-                        onClick={() => onToggleFollow(user._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleFollow(user._id);
+                        }}
                         className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                       >
                         <UserCheck className="w-4 h-4 mr-1" />
@@ -98,7 +100,10 @@ export default function FollowModal({
                       </button>
                     ) : (
                       <button
-                        onClick={() => onToggleFollow(user._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onToggleFollow(user._id);
+                        }}
                         className="flex items-center px-4 py-2 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors"
                       >
                         <UserPlus className="w-4 h-4 mr-1" />

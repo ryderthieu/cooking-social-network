@@ -1,6 +1,7 @@
 // controllers/messageController.js
 const Message = require('../models/message');
 const Conversation = require('../models/conversation');
+const User = require('../models/user');
 
   // Tạo tin nhắn mới
   const createMessage = async (req, res) => {
@@ -68,29 +69,93 @@ const Conversation = require('../models/conversation');
         });
       }
 
-      const messages = await Message.find({ conversationId })
-        .populate('sender', 'firstName lastName avatar')
+      const messagesFromDb = await Message.find({ conversationId })
+        .populate('sender', 'firstName lastName avatar _id')
         .populate('sharedId')
+        .populate({
+          path: 'replyTo',
+          select: 'text content sender recalled type',
+          populate: {
+            path: 'sender',
+            select: 'firstName _id'
+          }
+        })
         .sort({ createdAt: -1 })
-        .limit(limit * 1)
-        .skip((page - 1) * limit);
+        .limit(parseInt(limit))
+        .skip((parseInt(page) - 1) * parseInt(limit))
+        .lean();
+
+      const messagesWithPopulatedReactions = await Promise.all(
+        messagesFromDb.map(async (msg) => {
+            console.log(`Processing message ID: ${msg._id}, Original DB reactions:`, JSON.stringify(msg.reactions, null, 2));
+
+            if (!msg.reactions || msg.reactions.length === 0) {
+                console.log(`Message ID: ${msg._id} has no reactions or empty, returning [] for reactions.`);
+                return { ...msg, reactions: [] };
+            }
+
+            const populatedReactionsForClient = [];
+            const reactionGroups = {};
+            
+            msg.reactions.forEach(r => {
+                if (!r || !r.type || !r.userId) {
+                    console.warn(`Message ID: ${msg._id}, Invalid reaction object in DB:`, r);
+                    return;
+                }
+                const userIdStr = r.userId.toString();
+                reactionGroups[r.type] = reactionGroups[r.type] || [];
+                reactionGroups[r.type].push(userIdStr);
+            });
+            
+            console.log(`Message ID: ${msg._id}, Grouped reactions:`, JSON.stringify(reactionGroups, null, 2));
+
+            if (Object.keys(reactionGroups).length === 0 && msg.reactions.length > 0) {
+                 console.error(`Message ID: ${msg._id}, reactionGroups is empty but msg.reactions was not! Original msg.reactions:`, JSON.stringify(msg.reactions));
+            }
+
+            for (const type of Object.keys(reactionGroups)) {
+                const userIdsInGroup = reactionGroups[type];
+                console.log(`Message ID: ${msg._id}, Type: ${type}, User IDs to populate:`, userIdsInGroup);
+
+                const users = await User.find({ _id: { $in: userIdsInGroup } })
+                                        .select('_id firstName lastName avatar')
+                                        .lean();
+                
+                console.log(`Message ID: ${msg._id}, Type: ${type}, Populated users:`, JSON.stringify(users, null, 2));
+                
+                if (users.length > 0) {
+                    populatedReactionsForClient.push({
+                        type: type,
+                        users: users
+                    });
+                } else if (userIdsInGroup.length > 0) {
+                    console.warn(`Message ID: ${msg._id}, Type: ${type}, Could not populate users for IDs:`, userIdsInGroup, "Original users from DB for this reaction type:", msg.reactions.filter(r => r.type === type).map(r => r.userId));
+                }
+            }
+            
+            console.log(`Message ID: ${msg._id}, Final populatedReactionsForClient:`, JSON.stringify(populatedReactionsForClient, null, 2));
+            
+            return { ...msg, reactions: populatedReactionsForClient };
+        })
+      );
 
       const totalMessages = await Message.countDocuments({ conversationId });
 
       res.json({
         success: true,
         data: {
-          messages: messages.reverse(),
+          messages: messagesWithPopulatedReactions.reverse(),
           pagination: {
             currentPage: parseInt(page),
-            totalPages: Math.ceil(totalMessages / limit),
+            totalPages: Math.ceil(totalMessages / parseInt(limit)),
             totalMessages,
-            hasNextPage: page < Math.ceil(totalMessages / limit),
-            hasPrevPage: page > 1
+            hasNextPage: parseInt(page) < Math.ceil(totalMessages / parseInt(limit)),
+            hasPrevPage: parseInt(page) > 1
           }
         }
       });
     } catch (error) {
+      console.error('Error in getMessagesByConversation:', error);
       res.status(500).json({ 
         success: false,
         message: error.message 
@@ -105,12 +170,12 @@ const Conversation = require('../models/conversation');
       const { page = 1, limit = 10 } = req.query;
       const userId = req.user._id;
 
-      if (!query || query.trim().length < 2) {
-        return res.status(400).json({
-          success: false,
-          message: 'Từ khóa tìm kiếm phải có ít nhất 2 ký tự'
-        });
-      }
+      // if (!query || query.trim().length < 2) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: 'Từ khóa tìm kiếm phải có ít nhất 2 ký tự'
+      //   });
+      // }
 
       let searchFilter = {
         type: 'text',
@@ -313,6 +378,48 @@ const Conversation = require('../models/conversation');
       });
     }
   }
+  const reactToMessage = async (req, res) => {
+    try {
+      const { messageId, reaction } = req.body;
+      const userId = req.user._id;
+
+      const message = await Message.findById(messageId);  
+      if (!message) {
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy tin nhắn'
+        });
+      } 
+      if (message.sender.toString() !== userId) {
+        return res.status(403).json({
+          success: false,
+          message: 'Không có quyền phản hồi tin nhắn này'
+        });
+      }
+      const existingReaction = message.reactions.find(r => r.userId.toString() === userId);
+      if (existingReaction) {
+        return res.status(400).json({
+          success: false,
+          message: 'Bạn đã phản hồi tin nhắn này rồi'
+        });
+      } 
+      message.reactions.push({
+        type: reaction,
+        userId
+      });
+      await message.save();
+      
+      res.json({
+        success: true,
+        message: 'Phản hồi tin nhắn thành công'
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
 
 
-module.exports = {createMessage, getMessagesByConversation, searchMessages, getMessageById, updateMessage, deleteMessage, getRecentMessages};
+module.exports = {createMessage, getMessagesByConversation, searchMessages, getMessageById, updateMessage, deleteMessage, getRecentMessages, reactToMessage };

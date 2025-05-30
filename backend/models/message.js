@@ -11,7 +11,16 @@ const messageSchema = new Schema({
   // Nếu là share
   sharedType: { type: String, enum: ['post', 'video'] },
   sharedId: { type: Schema.Types.ObjectId },
-  isRead: {type: Boolean, default: false}
+
+  // Thêm trường replyTo
+  replyTo: { type: Schema.Types.ObjectId, ref: 'Message', default: null }, // Tham chiếu đến tin nhắn gốc
+
+  isRead: {type: Boolean, default: false},
+  reactions: [{
+    type: {type: String},
+    userId: {type: Schema.Types.ObjectId, ref: 'User'}
+  }],
+  recalled: {type: Boolean, default: false}
 }, {
   timestamps: true
 });

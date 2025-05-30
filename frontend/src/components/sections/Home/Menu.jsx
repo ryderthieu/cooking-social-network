@@ -64,7 +64,7 @@ const Menu = () => {
     },
     {
       id: 8,
-      name: "Hai sản",
+      name: "Hải sản",
       image: haisan,
       bgGradient: "bg-gradient-to-b from-white to-[#c8e2d0]",
       marginTop: "mt-[40px]",
@@ -119,7 +119,7 @@ const Menu = () => {
         }
 
         .animate-marquee {
-          animation: marquee 60s linear infinite;
+          animation: marquee 80s linear infinite;
         }
 
         .animate-marquee:hover {

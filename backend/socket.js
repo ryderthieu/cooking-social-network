@@ -5,12 +5,13 @@ const Message = require("./models/message");
 const Conversation = require("./models/conversation");
 const Notification = require("./models/notification");
 
-const onlineUsers = new Map();
+// onlineUsers sẽ lưu trữ: Map<userId, Set<socketId>>
+const onlineUsers = new Map(); 
 
 const socketServer = (server) => {
   const io = new Server(server, {
     cors: {
-      origin: "http://localhost:5173", // điều chỉnh nếu client ở domain khác
+      origin: "http://localhost:5173",
       methods: ["GET", "POST"]
     }
   });
@@ -19,15 +20,12 @@ const socketServer = (server) => {
     try {
       const token = socket.handshake.auth.token;
       if (!token) return next(new Error("No token provided"));
-
-      // Loại bỏ 'Bearer ' nếu có
       const actualToken = token.startsWith('Bearer ') ? token.slice(7) : token;
-      
       const decoded = jwt.verify(actualToken, process.env.SECRET);
-      const user = await User.findById(decoded._id);
+      const user = await User.findById(decoded._id).select('-password'); // Exclude password
       if (!user) return next(new Error("User not found"));
 
-      socket.userId = decoded._id;
+      socket.userId = decoded._id.toString(); // Ensure it's a string for Map keys
       socket.user = user;
       next();
     } catch (err) {
@@ -37,39 +35,53 @@ const socketServer = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log(`User connected: ${socket.user.firstName} (${socket.id})`);
+    console.log(`User connected: ${socket.user.firstName} (${socket.id}), userId: ${socket.userId}`);
 
-    onlineUsers.set(socket.userId, socket.id);
-    socket.broadcast.emit("user_online", socket.userId);
+    // Quản lý user online
+    if (!onlineUsers.has(socket.userId)) {
+      onlineUsers.set(socket.userId, new Set());
+    }
+    const userSocketIds = onlineUsers.get(socket.userId);
+    
+    // Chỉ emit 'user_online' nếu đây là kết nối đầu tiên của user này
+    if (userSocketIds.size === 0) {
+      socket.broadcast.emit("user_online", socket.userId);
+      console.log(`${socket.userId} is now online (first connection). Emitting user_online.`);
+    }
+    userSocketIds.add(socket.id);
+    
+    console.log('Current online users:', Array.from(onlineUsers.keys())); // Log userIds that have active connections
+
+    // Gửi danh sách người dùng đang online cho client vừa kết nối
+    // Lấy danh sách các userId đang có ít nhất 1 socketId hoạt động
+    const activeOnlineUserIds = Array.from(onlineUsers.entries())
+                                .filter(([userId, socketIds]) => socketIds.size > 0)
+                                .map(([userId, socketIds]) => userId);
+    socket.emit("initial_online_users", activeOnlineUserIds);
+    console.log(`Sent initial_online_users to ${socket.userId}: ${activeOnlineUserIds}`);
+
 
     // Join all conversations
     socket.on("join_conversations", async () => {
-      const conversations = await Conversation.find({ members: socket.userId });
-      conversations.forEach((c) => socket.join(c._id.toString()));
+      try {
+        const conversations = await Conversation.find({ members: socket.userId });
+        conversations.forEach((c) => socket.join(c._id.toString()));
+        console.log(`${socket.userId} joined rooms for their conversations.`);
+      } catch (error) {
+        console.error(`Error joining conversations for ${socket.userId}:`, error);
+      }
     });
 
     socket.on("send_message", async (data) => {
       try {
-        const { conversationId, type, text, image, sticker, sharedType, sharedId } = data;
-        console.log('Received message data:', data);
-        console.log('Socket user:', socket.userId);
-
-        const conversation = await Conversation.findById(conversationId);
-        console.log('Found conversation:', conversation);
+        const { conversationId, type, text, image, sticker, sharedType, sharedId, replyTo } = data;
         
+        const conversation = await Conversation.findById(conversationId);
         if (!conversation) {
-          console.error('Conversation not found:', conversationId);
-          socket.emit("error", { message: "Cuộc trò chuyện không tồn tại." });
-          return;
+          return socket.emit("error", { message: "Cuộc trò chuyện không tồn tại." });
         }
-
-        if (!conversation.members.includes(socket.userId)) {
-          console.error('User not in conversation members:', {
-            userId: socket.userId,
-            members: conversation.members
-          });
-          socket.emit("error", { message: "Bạn không có quyền gửi tin nhắn." });
-          return;
+        if (!conversation.members.map(id => id.toString()).includes(socket.userId)) {
+          return socket.emit("error", { message: "Bạn không có quyền gửi tin nhắn." });
         }
 
         const newMessage = new Message({
@@ -80,48 +92,176 @@ const socketServer = (server) => {
           image: type === 'image' ? image : undefined,
           sticker: type === 'sticker' ? sticker : undefined,
           sharedType: type === 'share' ? sharedType : undefined,
-          sharedId: type === 'share' ? sharedId : undefined
+          sharedId: type === 'share' ? sharedId : undefined,
+          reactions: []
         });
 
-        console.log('Created new message:', newMessage);
+        if (replyTo) {
+          newMessage.replyTo = replyTo;
+        }
+
         await newMessage.save();
-        await newMessage.populate("sender", "firstName lastName avatar");
-        console.log('Saved and populated message:', newMessage);
+        
+        await newMessage.populate(
+            { path: "sender", select: "firstName lastName avatar _id" }
+        );
 
-        io.to(conversationId).emit("new_message", { message: newMessage, conversationId });
+        let populatedMessage = newMessage.toObject();
 
-        const others = conversation.members.filter(id => id.toString() !== socket.userId);
-        for (const memberId of others) {
+        if (populatedMessage.replyTo) {
+            try {
+                const originalMessage = await Message.findById(populatedMessage.replyTo)
+                                                 .populate('sender', 'firstName _id')
+                                                 .select('text content sender recalled');
+                if (originalMessage) {
+                    populatedMessage.replyTo = {
+                        id: originalMessage._id,
+                        content: originalMessage.recalled ? "Tin nhắn này đã bị xóa" : (originalMessage.text || originalMessage.content),
+                        sender: originalMessage.sender
+                    };
+                } else {
+                    populatedMessage.replyTo = null; 
+                }
+            } catch (populateError) {
+                console.error("Error populating replyTo message:", populateError);
+                populatedMessage.replyTo = null;
+            }
+        }
+
+        io.to(conversationId.toString()).emit("new_message", { message: populatedMessage, conversationId });
+        console.log(`Message sent in conversation ${conversationId} by ${socket.userId}`);
+
+        // Create notifications for other members
+        const otherMembers = conversation.members.filter(id => id.toString() !== socket.userId);
+        for (const memberIdStr of otherMembers) {
           const notification = new Notification({
-            receiver: memberId,
+            receiver: memberIdStr,
             sender: socket.userId,
             type: "message",
-            message: `${socket.user.firstName} đã gửi tin nhắn`
+            contentObject: newMessage._id,
+            contentType: 'Message',
+            message: `${socket.user.firstName} đã gửi cho bạn một tin nhắn.`
           });
           await notification.save();
           await notification.populate("sender", "firstName lastName avatar");
-
-          const receiverSocketId = onlineUsers.get(memberId.toString());
-          if (receiverSocketId) {
-            io.to(receiverSocketId).emit("new_notification", notification);
+          
+          const memberSocketIds = onlineUsers.get(memberIdStr);
+          if (memberSocketIds) {
+            memberSocketIds.forEach(socketId => {
+                io.to(socketId).emit("new_notification", notification);
+            })
           }
         }
       } catch (error) {
         console.error("Send message error:", error);
-        let errorMessage = "Không thể gửi tin nhắn";
-        
-        if (error.name === 'ValidationError') {
-          errorMessage = "Dữ liệu tin nhắn không hợp lệ";
-        } else if (error.name === 'CastError') {
-          errorMessage = "ID cuộc trò chuyện không hợp lệ";
+        socket.emit("error", { message: "Không thể gửi tin nhắn", details: error.message });
+      }
+    });
+    
+    socket.on("delete_message", async ({ messageId }) => {
+      try {
+        const message = await Message.findById(messageId);
+        if (!message) {
+          return socket.emit("error", { message: "Tin nhắn không tìm thấy." });
+        }
+        if (message.sender.toString() !== socket.userId) {
+          return socket.emit("error", { message: "Bạn không có quyền xóa tin nhắn này." });
         }
         
-        socket.emit("error", { message: errorMessage, details: error.message });
+        message.text = "Tin nhắn này đã bị xóa";
+        message.recalled = true;
+        // Optionally clear other fields like image, sticker if needed
+        // message.image = undefined; 
+        await message.save();
+        
+        io.to(message.conversationId.toString()).emit("message_recalled", {
+          messageId: message._id,
+          conversationId: message.conversationId.toString()
+        });
+        console.log(`Message ${messageId} recalled by ${socket.userId}`);
+      } catch (error) {
+        console.error("Error recalling message:", error);
+        socket.emit("error", { message: "Lỗi khi thu hồi tin nhắn.", details: error.message });
       }
     });
 
+    socket.on("react_to_message", async ({ messageId, type: reactionType }) => {
+        try {
+            const message = await Message.findById(messageId).populate('sender', '_id');
+            if (!message) {
+                return socket.emit("error", { message: "Tin nhắn không tìm thấy." });
+            }
+
+            if (message.sender && message.sender._id.toString() === socket.userId) {
+                console.log(`User ${socket.userId} attempted to react to their own message ${messageId}. Denied.`);
+                return;
+            }
+
+            const userIdStr = socket.userId;
+
+            if (!Array.isArray(message.reactions)) {
+                message.reactions = [];
+            }
+            
+            // Tìm reaction hiện tại của user này trên tin nhắn này (nếu có)
+            const userExistingReactionIndex = message.reactions.findIndex(
+                r => r.userId && r.userId.toString() === userIdStr
+            );
+
+            let userCurrentReactionType = null;
+            if (userExistingReactionIndex > -1) {
+                userCurrentReactionType = message.reactions[userExistingReactionIndex].type;
+                // Gỡ bỏ reaction hiện tại của user
+                message.reactions.splice(userExistingReactionIndex, 1);
+            }
+
+            // Nếu reactionType mới khác với reaction hiện tại (hoặc user chưa có reaction nào),
+            // thì thêm reaction mới. Nếu giống (tức là click lại vào cái đã chọn), thì không thêm lại (đã gỡ ở trên).
+            if (userCurrentReactionType !== reactionType) {
+                message.reactions.push({ type: reactionType, userId: socket.userId });
+            }
+            
+            await message.save();
+
+            // Transform message.reactions for client emission (logic này giữ nguyên)
+            const populatedReactionsForClient = [];
+            if (Array.isArray(message.reactions) && message.reactions.length > 0) {
+                const reactionGroups = {};
+                message.reactions.forEach(r => {
+                    if (!r || !r.type || !r.userId) return;
+                    reactionGroups[r.type] = reactionGroups[r.type] || [];
+                    reactionGroups[r.type].push(r.userId);
+                });
+
+                for (const type of Object.keys(reactionGroups)) {
+                    const userIdsInGroup = reactionGroups[type];
+                    const users = await User.find({ _id: { $in: userIdsInGroup } })
+                                            .select('_id firstName lastName avatar')
+                                            .lean();
+                    if (users.length > 0) { // Chỉ push nếu có user được populate
+                        populatedReactionsForClient.push({
+                            type: type,
+                            users: users
+                        });
+                    }
+                }
+            }
+            
+            io.to(message.conversationId.toString()).emit("message_reaction", {
+                messageId,
+                conversationId: message.conversationId.toString(),
+                reactions: populatedReactionsForClient
+            });
+            console.log(`User ${socket.userId} reacted with '${reactionType}' on message ${messageId}. Final client reactions: `, JSON.stringify(populatedReactionsForClient, null, 2));
+        } catch (error) {
+            console.error("Error reacting to message:", error);
+            socket.emit("error", { message: "Lỗi khi thả cảm xúc.", details: error.message });
+        }
+    });
+
+
     socket.on("typing_start", ({ conversationId }) => {
-      socket.to(conversationId).emit("user_typing", {
+      socket.to(conversationId.toString()).emit("user_typing", {
         userId: socket.userId,
         userName: socket.user.firstName,
         conversationId
@@ -129,7 +269,7 @@ const socketServer = (server) => {
     });
 
     socket.on("typing_stop", ({ conversationId }) => {
-      socket.to(conversationId).emit("user_stop_typing", {
+      socket.to(conversationId.toString()).emit("user_stop_typing", {
         userId: socket.userId,
         conversationId
       });
@@ -140,7 +280,7 @@ const socketServer = (server) => {
         { conversationId, sender: { $ne: socket.userId } },
         { isRead: true }
       );
-      socket.to(conversationId).emit("messages_read", {
+      socket.to(conversationId.toString()).emit("messages_read", {
         conversationId,
         readBy: socket.userId
       });
@@ -161,9 +301,11 @@ const socketServer = (server) => {
         await notification.save();
         await notification.populate("sender", "firstName lastName avatar");
 
-        const receiverSocketId = onlineUsers.get(receiverId);
-        if (receiverSocketId) {
-          io.to(receiverSocketId).emit("new_notification", notification);
+        const receiverSocketIds = onlineUsers.get(receiverId.toString());
+        if (receiverSocketIds) {
+          receiverSocketIds.forEach(socketId => {
+            io.to(socketId).emit("new_notification", notification);
+          });
         }
       } catch (err) {
         console.error("Send notification error:", err);
@@ -171,9 +313,17 @@ const socketServer = (server) => {
     });
 
     socket.on("disconnect", () => {
-      console.log(`User disconnected: ${socket.user.firstName}`);
-      onlineUsers.delete(socket.userId);
-      socket.broadcast.emit("user_offline", socket.userId);
+      console.log(`User disconnected: ${socket.user.firstName} (${socket.id}), userId: ${socket.userId}`);
+      const userSocketIds = onlineUsers.get(socket.userId);
+      if (userSocketIds) {
+        userSocketIds.delete(socket.id);
+        if (userSocketIds.size === 0) {
+          onlineUsers.delete(socket.userId);
+          socket.broadcast.emit("user_offline", socket.userId);
+          console.log(`${socket.userId} is now offline (last connection closed). Emitting user_offline.`);
+        }
+      }
+      console.log('Current online users (after disconnect):', Array.from(onlineUsers.keys()));
     });
   });
 };

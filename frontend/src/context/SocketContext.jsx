@@ -20,71 +20,103 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      console.log('Initializing socket with token:', token);
+      console.log('Initializing socket with token...');
       const newSocket = io('http://localhost:8080', {
         auth: {
           token: token.startsWith('Bearer ') ? token : `Bearer ${token}`
-        }
+        },
+        // transports: ['websocket'], // Optional: force websocket if polling is an issue
       });
 
       setSocket(newSocket);
 
-      // Lắng nghe các events
       newSocket.on('connect', () => {
-        console.log('Connected to server');
-        newSocket.emit('join_conversations');
+        console.log('Socket connected:', newSocket.id);
+        newSocket.emit('join_conversations'); // Client tells server to join its conversation rooms
+      });
+
+      // Nhận danh sách người dùng online ban đầu từ server
+      newSocket.on('initial_online_users', (initialUsers) => {
+        console.log('Received initial_online_users:', initialUsers);
+        setOnlineUsers(initialUsers);
       });
 
       newSocket.on('user_online', (userId) => {
-        setOnlineUsers(prev => [...prev.filter(id => id !== userId), userId]);
+        console.log('Socket event: user_online - userId:', userId);
+        setOnlineUsers(prev => {
+          if (!prev.includes(userId)) {
+            return [...prev, userId];
+          }
+          return prev;
+        });
       });
-
+      
       newSocket.on('user_offline', (userId) => {
+        console.log('Socket event: user_offline - userId:', userId);
         setOnlineUsers(prev => prev.filter(id => id !== userId));
       });
 
       newSocket.on('new_notification', (notification) => {
-        setNotifications(prev => [notification, ...prev]);
+        setNotifications(prev => [notification, ...prev].slice(0, 20)); // Keep last 20 notifications
         setUnreadNotifications(prev => prev + 1);
-        
-        // Hiển thị toast notification
         showNotificationToast(notification);
       });
 
-      newSocket.on('disconnect', () => {
-        console.log('Disconnected from server');
+      // Generic error listeners
+      newSocket.on('disconnect', (reason) => {
+        console.log('Socket disconnected:', reason);
       });
 
       newSocket.on('error', (error) => {
-        console.error('Socket error:', error);
+        console.error('Socket general error:', error);
       });
 
       newSocket.on('connect_error', (error) => {
-        console.error('Socket connection error:', error);
+        console.error('Socket connection error:', error.message);
+        // Potentially handle token expiry or auth issues here
+        if (error.message === 'Authentication error') {
+            // Handle logout or token refresh
+            console.log("Authentication failed, need to re-login or refresh token.");
+        }
       });
 
-      newSocket.on('new_message', (data) => {
-        console.log('Received new message:', data);
-      });
+      // No need to listen for 'new_message' here if MessagePage handles it directly
+      // newSocket.on('new_message', (data) => {\n      //   console.log('SocketContext received new_message:', data);\n      // });\n
 
       return () => {
+        console.log('Closing socket connection for:', newSocket.id);
+        newSocket.off('connect');
+        newSocket.off('initial_online_users');
+        newSocket.off('user_online');
+        newSocket.off('user_offline');
+        newSocket.off('new_notification');
+        newSocket.off('disconnect');
+        newSocket.off('error');
+        newSocket.off('connect_error');
+        // newSocket.off('new_message');
         newSocket.close();
+        setSocket(null); // Clear socket state on cleanup
       };
+    } else {
+        // No token, so clear socket if it exists from a previous session
+        if(socket) {
+            socket.close();
+            setSocket(null);
+        }
+        setOnlineUsers([]); // Clear online users if no token
     }
-  }, []);
+  }, []); // Run only once on mount and unmount
 
   const showNotificationToast = (notification) => {
-    // Implement toast notification here
-    // You can use libraries like react-toastify
-    console.log('New notification:', notification.message);
+    console.log('Toast:: New notification:', notification.message);
+    // Replace with actual toast library call, e.g., toast.info(notification.message)
   };
 
   const sendMessage = (messageData) => {
     if (socket) {
-      console.log('Socket emitting message:', messageData);
       socket.emit('send_message', messageData);
     } else {
-      console.error('Socket not initialized');
+      console.error('Socket not initialized to send message');
     }
   };
 
@@ -96,6 +128,9 @@ export const SocketProvider = ({ children }) => {
 
   const markNotificationsAsRead = () => {
     setUnreadNotifications(0);
+    // No actual API call to mark as read on server in this snippet, 
+    // but you might want to implement that.
+    // For now, just marking client-side notifications as read.
     setNotifications(prev => 
       prev.map(notif => ({ ...notif, isRead: true }))
     );
@@ -113,9 +148,10 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
-  const markAsRead = (conversationId) => {
+  const markAsRead = (conversationId) => { // This might be for marking messages in a conversation as read
     if (socket) {
       socket.emit('mark_as_read', { conversationId });
+      // You might want UI feedback or state update here if needed
     }
   };
 
