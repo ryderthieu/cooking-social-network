@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {Backgrounds} from '../../assets/Recipe/images'
+import {Backgrounds} from '../../../assets/Recipe/images'
 
 export default function Banner() {
   return (

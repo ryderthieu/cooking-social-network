@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route } from "react-router";
+import { Routes, Route, Navigate } from "react-router";
 import HomePage from "./pages/HomePage/index";
 import NewBlog from "./pages/BlogPage/NewBlog";
 import HighlightBlog from "./pages/BlogPage/HighlightBlog";
@@ -27,13 +27,16 @@ import PostDetail from "./pages/PostPage/PostDetail";
 import Recipes from "./pages/RecipesPage/Recipe";
 import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
 import RecipeCategories from "./pages/RecipesPage";
+import CreateRecipe from "./pages/RecipesPage/CreateRecipe";
+import ProfilePage from "./pages/ProfilePage";
 import HeaderLayout from "./components/layout/HeaderLayout";
 import ChatPage from "./pages/ChatPage";
-import { AuthProvider, useAuth } from './context/AuthContext';
-import { SocketProvider } from './context/SocketContext';
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
 
 function App() {
-  const {user} = useAuth()
+  const { user } = useAuth();
+
   const routes = [
     { path: "/", element: <HomePage /> },
     { path: "/about", element: <AboutPage /> },
@@ -50,13 +53,26 @@ function App() {
     { path: "/support/ho-tro", element: <SupportsPage /> },
     { path: "/notification", element: <NotificationPage /> },
     { path: "/search", element: <SearchPage /> },
+    { path: "/posts", element: <PostPage /> },
+    {
+      path: "/profile",
+      element: user ? (
+        <Navigate to={`/profile/${user._id}`} replace />
+      ) : (
+        <Navigate to="/login" replace />
+      ),
+    },
+
+    { path: "/profile/:userId", element: <ProfilePage /> },
+    { path: "/recipes/create", element: <CreateRecipe /> },
+    { path: "/recipes/saved", element: <SavedRecipes /> },
+    // { path: "/posts/:id", element: <PostDetail />}
     { path: "/explore/*", element: <PostPage /> },
   ];
 
   const headeronlyRoutes = [{ path: "/messages", element: <MessagePage /> }];
 
   return (
-
     <Routes>
       {routes.map(({ path, element }) => (
         <Route
@@ -72,9 +88,10 @@ function App() {
       <Route path="/posts/:id" element={<PostDetail />} />
 
       <Route path="/recipes" element={<RecipeCategories />} />
-      <Route path="/saved-recipes" element={<SavedRecipes />} />
+
       <Route path="/recipes/:categoryType/:item" element={<Recipes />} />
       <Route path="/recipes" element={<RecipeCategories />} />
+      <Route path="/recipes/create" element={<CreateRecipe />} />
       <Route path="/chat" element={<ChatPage />} />
 
       {headeronlyRoutes.map(({ path, element }) => (
@@ -85,7 +102,6 @@ function App() {
         />
       ))}
     </Routes>
-
   );
 }
 

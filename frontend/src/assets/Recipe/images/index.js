@@ -15,6 +15,9 @@ export { default as Blog2 } from './blog2.png';
 export { default as Blog3 } from './blog3.png';
 export { default as Blog4 } from './blog4.png';
 
+export { default as Matcha } from './matcha.jpg';
+export { default as Love } from './love.jpg';
+export { default as Ramen } from './ramen.jpg';
 export { default as Dessert } from './dessert.png';
 
 export const Backgrounds = {
