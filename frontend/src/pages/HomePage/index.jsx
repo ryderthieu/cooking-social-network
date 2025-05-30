@@ -4,10 +4,10 @@ import Recipe from "../../components/common/Recipe.jsx";
 import Menu from "../../components/sections/Home/Menu.jsx";
 import Contact from "../../components/sections/Home/Contact.jsx";
 import { IoSearchSharp } from "react-icons/io5";
-import Hero from "../../components/sections/Home/Hero.jsx";
+import Blogs from "@/components/sections/Home/Blogs.jsx";
 import VideoShorts from "../../components/sections/Home/VideoShorts.jsx";
 import { Link } from "react-router-dom";
-import CarouselPlugin from "../../components/sections/Home/CarouselHero.jsx"
+import CarouselPlugin from "../../components/sections/Home/CarouselHero.jsx";
 const HomePage = () => {
   const [search, setSearch] = useState("");
 
@@ -41,7 +41,7 @@ const HomePage = () => {
         <VideoShorts />
         <div className="mt-[50px]">
           <div className="flex justify-between items-center">
-            <p className="font-bold text-[22px]">
+            <p className="font-bold text-[24px]">
               Khám phá các công thức đỉnh cao
             </p>
             <Link
@@ -61,6 +61,7 @@ const HomePage = () => {
             <Recipe />
           </div>
         </div>
+        <Blogs />
       </div>
       <Contact />
     </div>
