@@ -58,27 +58,31 @@ export default function ProfilePage() {
   );
 
   // Error handling helper
-  const handleFetchError = useCallback(
-    (error) => {
-      if (error.response) {
-        switch (error.response.status) {
-          case 401:
-            toast.error("Vui lòng đăng nhập để xem trang này");
-            navigate("/login");
-            break;
-          case 404:
-            toast.error("Không tìm thấy người dùng");
-            navigate("/404");
-            break;
-          default:
-            toast.error("Đã xảy ra lỗi khi tải thông tin người dùng");
-        }
-      } else {
-        toast.error("Không thể kết nối đến máy chủ");
-      }
-    },
-    [navigate]
-  );
+  // const handleFetchError = useCallback(
+  //   (error) => {
+  //     if (error.response) {
+  //       switch (error.response.status) {
+  //         case 401:
+  //           toast.error("Vui lòng đăng nhập để xem trang này");
+  //           navigate("/login");
+  //           break;
+  //         case 404:
+  //           toast.error("Không tìm thấy người dùng");
+  //           navigate("/404");
+  //           break;
+  //         default:
+  //           toast.error("Đã xảy ra lỗi khi tải thông tin người dùng");
+  //       }
+  //     } else {
+  //       toast.error("Không thể kết nối đến máy chủ");
+  //     }
+  //   },
+  //   [navigate]
+  // );
+
+  useEffect(() => {
+    console.log(currentUser)
+  }, [])
 
   // Fetch user data and stats
   useEffect(() => {
@@ -109,13 +113,13 @@ export default function ProfilePage() {
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
-        handleFetchError(error);
+        // handleFetchError(error);
       } finally {
         setIsLoading(false);
       }
     };
     fetchData();
-  }, [userId, currentUser, navigate, checkFollowStatus, handleFetchError]);
+  }, [userId, currentUser, navigate, checkFollowStatus]);
 
   // Handle follow/unfollow action for main profile
   const handleToggleFollow = async () => {

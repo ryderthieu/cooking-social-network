@@ -43,7 +43,44 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
     const formatDate = (dateString) => {
         try {
             const date = new Date(dateString);
-            return formatDistanceToNow(date, { addSuffix: true, locale: vi });
+            const now = new Date();
+            
+            // Reset thời gian về 00:00:00 để so sánh ngày
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+            
+            // Nếu là thời gian trong ngày hôm nay
+            if (date >= today) {
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / (1000 * 60));
+                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+                if (diffMins < 1) return 'Vừa xong';
+                if (diffHours < 1) return `${diffMins} phút trước`;
+                return `${diffHours} giờ trước`;
+            }
+            
+            // Nếu là ngày hôm qua
+            if (date >= yesterday) {
+                return 'Hôm qua';
+            }
+            
+            // Tính số ngày chênh lệch
+            const diffTime = Math.abs(today - date);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            
+            // Nếu trong khoảng 2-3 ngày
+            if (diffDays <= 3) {
+                return `${diffDays} ngày trước`;
+            }
+            
+            // Còn lại hiển thị ngày tháng năm
+            return new Intl.DateTimeFormat('vi-VN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            }).format(date);
         } catch (error) {
             return dateString;
         }

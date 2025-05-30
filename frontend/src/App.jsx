@@ -84,7 +84,7 @@ function App() {
       <Route path="*" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="forgot-password" element={<ForgotPassword />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/posts/:id" element={<PostDetail />} />
 
       <Route path="/recipes" element={<RecipeCategories />} />
