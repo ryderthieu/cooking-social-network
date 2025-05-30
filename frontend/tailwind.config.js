@@ -11,8 +11,7 @@ export default {
       },
       animation: {
         marquee: "marquee 120s linear infinite",
-		'shine': 'shine 8s ease-in-out infinite',
-
+        shine: "shine 8s ease-in-out infinite",
       },
       keyframes: {
         marquee: {
@@ -23,10 +22,10 @@ export default {
             transform: "translateX(-50%)",
           },
         },
-		shine: {
-          '0%, 100%': { left: '-100%' },
-          '50%': { left: '100%' }
-        }
+        shine: {
+          "0%, 100%": { left: "-100%" },
+          "50%": { left: "100%" },
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
