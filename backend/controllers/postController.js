@@ -279,7 +279,7 @@ const sharePost = async (req, res) => {
 
 const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate('author', 'avatar firstName lastName');
+    const posts = await Post.find().populate('author', 'avatar firstName lastName').sort({'createdAt': -1});
     res.status(200).json(posts);
   } catch (error) {
     console.error("Lỗi khi lấy tất cả post:", error);

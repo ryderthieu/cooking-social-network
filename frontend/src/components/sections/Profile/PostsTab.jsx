@@ -21,7 +21,6 @@ export default function PostsTab({userId}) {
           setError('User information is not available');
           return;
         }
-        console.log('Posts data:', response.data);
         // Extract the posts array from the response
         setPosts(response.data.posts || []);
       } catch (err) {
@@ -101,32 +100,10 @@ export default function PostsTab({userId}) {
   return (
     <div className="space-y-6">
       {posts.map(post => {
-        // Transform the post data to match what PostCard expects
-        const transformedPost = {
-          id: post._id,
-          content: post.caption,
-          date: new Date(post.createdAt).toLocaleDateString('vi-VN'),
-          user: {
-            // Use author data or fallback to empty values
-            name: post.author ? `${post.author.firstName || ''} ${post.author.lastName || ''}` : 'Unknown User',
-            avatar: post.author?.avatar || '/assets/default-avatar.png',
-          },
-          // Convert likes array to count
-          likes: post.likes?.length || 0,
-          // Ensure comments is an array
-          comments: post.comments || [],
-          // Add shares count
-          shares: post.shares?.length || 0,
-          // Transform media to images array
-          images: post.media?.map(item => item.url) || [],
-          // Add liked state
-          liked: post.likes?.includes(currentUser?._id)
-        };
-
         return (
           <PostCard 
             key={post._id}
-            post={transformedPost}
+            post={post}
             onLike={() => handleLike(post._id)}
             onComment={() => handleComment(post._id)}
             onShare={() => handleShare(post._id)}
