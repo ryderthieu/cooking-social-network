@@ -8,6 +8,7 @@ import Blogs from "@/components/sections/Home/Blogs.jsx";
 import VideoShorts from "../../components/sections/Home/VideoShorts.jsx";
 import { Link } from "react-router-dom";
 import CarouselPlugin from "../../components/sections/Home/CarouselHero.jsx";
+import SmallBlogs from "@/components/sections/Home/SmallBlogs.jsx";
 const HomePage = () => {
   const [search, setSearch] = useState("");
 
@@ -51,7 +52,7 @@ const HomePage = () => {
               Xem tất cả
             </Link>
           </div>
-          <div className="grid grid-cols-4 gap-6 mt-8 mb-8">
+          <div className="grid grid-cols-4 gap-6 mt-4 mb-8">
             <Recipe />
             <Recipe />
             <Recipe />
@@ -61,7 +62,26 @@ const HomePage = () => {
             <Recipe />
           </div>
         </div>
-        <Blogs />
+        <div className="mt-[50px]">
+          <p className="font-bold text-[24px]">
+            Bài viết mới nhất từ cộng đồng
+          </p>
+          <div className="flex">
+            <div className="w-[70%]">
+              <Blogs />
+              <Blogs />
+              <Blogs />
+            </div>
+            <div className="w-[30%]">
+              <div>
+                <p className="font-bold text-[18px] mb-4">Đề xuất bài viết</p>
+                <SmallBlogs />
+                <SmallBlogs />
+                <SmallBlogs />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <Contact />
     </div>

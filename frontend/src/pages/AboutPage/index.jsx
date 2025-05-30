@@ -11,6 +11,9 @@ import { Link } from "react-router-dom";
 import atho from "../../assets/About/atho.png";
 import ntruong from "../../assets/About/ntruong.png";
 import tnhi from "../../assets/About/tnhi.jpg";
+import CarouselPlugin from "../../components/sections/Home/CarouselHero.jsx";
+import Blogs from "../../components/sections/Home/Blogs.jsx";
+import SmallBlogs from "../../components/sections/Home/SmallBlogs.jsx";
 
 import {
   Facebook,
@@ -106,6 +109,12 @@ const testimonials = [
     content:
       "Mỗi ngày đều có cảm hứng mới để vào bếp nhờ Oshisha. Thật tuyệt vời!",
   },
+  {
+    name: "Anh Thơ",
+    avatar: atho,
+    content:
+      "Mỗi ngày đều có cảm hứng mới để vào bếp nhờ Oshisha. Thật tuyệt vời!",
+  },
 ];
 
 export default function AboutPage() {
@@ -120,10 +129,12 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="mx-4 lg:mx-[90px]">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-2xl mx-6 mt-6">
-        <div
+    <div>
+      <CarouselPlugin />
+      <div className="mx-4 lg:mx-[110px]">
+        {/* Hero Section */}
+        {/* <section className="relative overflow-hidden rounded-2xl mx-6 mt-6"> */}
+        {/* <div
           className="relative rounded-2xl overflow-hidden px-[40px]"
           style={{
             background: "linear-gradient(135deg, #fb923c 0%, #ec4899 100%)",
@@ -177,311 +188,333 @@ export default function AboutPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
-      {/* About Section */}
-      <section className="px-6 py-6 mt-10">
-        <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-6 md:p-8 border border-orange-100">
-          <div className="md:flex md:items-center md:space-x-8">
-            <div className="md:w-1/2 mb-6 md:mb-0">
-              <h3 className="text-[22px] font-bold text-gray-900 mb-4 flex items-center">
-                <div className="w-1 h-8 bg-gradient-to-b from-orange-500 to-pink-500 rounded-full mr-3"></div>
-                Giới thiệu về Oshisha
-              </h3>
-              <p className="text-gray-600 leading-8 mb-4 text-justify">
-                Oshisha là cộng đồng ẩm thực kết nối những người yêu nấu ăn trên
-                khắp Việt Nam. Chúng tôi cung cấp nền tảng để chia sẻ công thức,
-                kinh nghiệm và niềm đam mê với ẩm thực. <br /> Sứ mệnh của chúng
-                tôi là tạo ra một cộng đồng nơi mọi người có thể chia sẻ niềm
-                đam mê nấu ăn, học hỏi và lan tỏa yêu thương qua từng món ăn.
-              </p>
-            </div>
-            <div className="md:w-1/2 grid grid-cols-3 gap-4">
-              <div className="bg-white rounded-xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-100 group">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-2xl font-bold text-orange-500 mb-1">
-                  {userCount}+
-                </div>
-                <p className="text-xs text-gray-500">Người dùng</p>
+        {/* About Section */}
+        <section className="py-6 mt-10">
+          <div className="bg-[#F8F5F2] rounded-2xl p-6 md:p-8 ">
+            <div className="md:flex md:items-center md:space-x-8">
+              <div className="md:w-1/2 mb-6 md:mb-0">
+                <h3 className="text-[22px] font-bold text-gray-900 mb-4 flex items-center">
+                  <div className="w-1 h-8 inline-block bg-[#592500] text-[#592500] rounded-full mr-3"></div>
+                  Giới thiệu về Oshisha
+                </h3>
+                <p className="text-gray-600 leading-8 mb-4 text-justify">
+                  Oshisha là cộng đồng ẩm thực kết nối những người yêu nấu ăn
+                  trên khắp Việt Nam. Chúng tôi cung cấp nền tảng để chia sẻ
+                  công thức, kinh nghiệm và niềm đam mê với ẩm thực. <br /> Sứ
+                  mệnh của chúng tôi là tạo ra một cộng đồng nơi mọi người có
+                  thể chia sẻ niềm đam mê nấu ăn, học hỏi và lan tỏa yêu thương
+                  qua từng món ăn.
+                </p>
               </div>
-              <div className="bg-white rounded-xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-pink-100 group">
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <BookOpen className="w-6 h-6 text-white" />
+              <div className="md:w-1/2 grid grid-cols-3 gap-4">
+                <div className="bg-white rounded-xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-100 group">
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <Users className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold text-orange-500 mb-1">
+                    {userCount}+
+                  </div>
+                  <p className="text-xs text-gray-500">Người dùng</p>
                 </div>
-                <div className="text-2xl font-bold text-pink-500 mb-1">
-                  {recipeCount}+
+                <div className="bg-white rounded-xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-pink-100 group">
+                  <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <BookOpen className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold text-pink-500 mb-1">
+                    {recipeCount}+
+                  </div>
+                  <p className="text-xs text-gray-500">Công thức</p>
                 </div>
-                <p className="text-xs text-gray-500">Công thức</p>
-              </div>
-              <div className="bg-white rounded-xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-100 group">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
-                  <Eye className="w-6 h-6 text-white" />
+                <div className="bg-white rounded-xl p-4 text-center shadow-lg hover:shadow-xl transition-all duration-300 border border-orange-100 group">
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform duration-300">
+                    <Eye className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-2xl font-bold text-orange-500 mb-1">
+                    {viewCount}+
+                  </div>
+                  <p className="text-xs text-gray-500">Lượt xem</p>
                 </div>
-                <div className="text-2xl font-bold text-orange-500 mb-1">
-                  {viewCount}+
-                </div>
-                <p className="text-xs text-gray-500">Lượt xem</p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Team Section - Uniform Design */}
-      <section className="p-[40px]">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Đội ngũ của chúng tôi
-          </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Gặp gỡ những con người đầy đam mê đứng sau Oshisha - những người
-            luôn nỗ lực để mang đến trải nghiệm tuyệt vời nhất cho cộng đồng
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-[10px]">
-          {teamMembers.map((member, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 group"
-            >
-              {/* Header với gradient thống nhất */}
-              <div className="h-24 bg-gradient-to-br from-orange-400 to-pink-500 relative overflow-hidden">
-                <div className="absolute inset-0 bg-black/10"></div>
-                <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/20 rounded-full"></div>
-                <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-white/10 rounded-full"></div>
-              </div>
-
-              <div className="p-6 -mt-8 relative">
-                {/* Avatar */}
-                <div className="relative mb-4 flex justify-center">
-                  <div className="relative">
-                    <img
-                      src={member.img || "/placeholder.svg"}
-                      alt={member.name}
-                      className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
-                    />
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="text-center mb-4">
-                  <h3 className="font-bold text-gray-900 text-lg mb-1">
-                    {member.name}
-                  </h3>
-                  <p className="text-orange-500 font-semibold text-sm mb-3">
-                    {member.role}
-                  </p>
-                </div>
-
-                <p className="text-gray-600 text-sm leading-6 text-center mb-6">
-                  {member.desc}
-                </p>
-
-                {/* Social links - thống nhất */}
-                <div className="flex justify-center space-x-4">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all duration-300 cursor-pointer group/social">
-                    <Facebook className="w-5 h-5 text-blue-600 group-hover/social:text-white" />
-                  </div>
-                  <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center hover:bg-pink-500 hover:text-white transition-all duration-300 cursor-pointer group/social">
-                    <Instagram className="w-5 h-5 text-pink-600 group-hover/social:text-white" />
-                  </div>
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300 cursor-pointer group/social">
-                    <Linkedin className="w-5 h-5 text-blue-700 group-hover/social:text-white" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Hover effect overlay - thống nhất */}
-              <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-pink-500 opacity-0 group-hover:opacity-5 transition-opacity duration-500 pointer-events-none"></div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Featured Recipes */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Các bài viết nổi bật
+        {/* Team Section - Uniform Design */}
+        <section className="py-[40px] cursor-pointer">
+          <div className="text-center mb-8">
+            <h2 className="text-[22px] font-bold text-gray-900 mb-2">
+              Đội ngũ của chúng tôi
             </h2>
-            <p className="text-gray-600">
-              Khám phá những nội dung được yêu thích nhất
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Gặp gỡ những con người đầy đam mê đứng sau Oshisha - những người
+              luôn nỗ lực để mang đến trải nghiệm tuyệt vời nhất cho cộng đồng
             </p>
           </div>
-          <button className="flex items-center text-orange-500 font-medium hover:text-orange-600 transition-colors duration-300 group">
-            Xem tất cả
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-          </button>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featuredRecipes.map((recipe, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 group"
-            >
-              <div className="relative overflow-hidden">
-                <img
-                  src={recipe.image || "/placeholder.svg"}
-                  alt={recipe.name}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-[10px]">
+            {teamMembers.map((member, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 group"
+              >
+                {/* Header với gradient thống nhất */}
+                {/* <div className="h-24 bg-gradient-to-br from-orange-400 to-pink-500 relative overflow-hidden">
+                  <div className="absolute inset-0 bg-black/10"></div>
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-white/20 rounded-full"></div>
+                  <div className="absolute -bottom-2 -left-2 w-16 h-16 bg-white/10 rounded-full"></div>
+                </div> */}
 
-              <div className="p-6">
-                <h3 className="font-bold text-gray-900 mb-2 text-lg group-hover:text-orange-500 transition-colors duration-300">
-                  {recipe.name}
-                </h3>
-                <p className="text-gray-500 text-sm mb-4 flex items-center">
-                  <div className="w-6 h-6 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full mr-2 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      {recipe.author.charAt(0)}
-                    </span>
+                <div className="p-6 mt-4 mb-4 relative">
+                  {/* Avatar */}
+                  <div className="relative mb-4 flex justify-center">
+                    <div className="relative">
+                      <img
+                        src={member.img || "/placeholder.svg"}
+                        alt={member.name}
+                        className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                      />
+                    </div>
                   </div>
-                  Đăng bởi {recipe.author}
-                </p>
 
-                <button className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold py-3 rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                  Xem chi tiết
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+                  {/* Content */}
+                  <div className="text-center mb-4">
+                    <h3 className="font-bold text-gray-900 text-lg mb-1">
+                      {member.name}
+                    </h3>
+                    <p className="text-[#F63C3C] font-semibold text-sm mb-3">
+                      {member.role}
+                    </p>
+                  </div>
 
-      {/* Testimonials */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
-            Người dùng nói gì về Oshisha?
-          </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Những phản hồi chân thực từ cộng đồng người dùng yêu thích Oshisha
-          </p>
-        </div>
+                  <p className="text-gray-600 text-sm leading-6 text-center mb-6">
+                    {member.desc}
+                  </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((user, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-gray-100 group relative overflow-hidden"
-            >
-              {/* Background decoration */}
-              <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-100 to-pink-100 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-500"></div>
-
-              <div className="relative">
-                {/* Quote icon */}
-                <div className="text-6xl text-orange-200 font-serif leading-none mb-4">
-                  "
+                  {/* Social links - thống nhất */}
+                  <div className="flex justify-center space-x-4">
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-500 hover:text-white transition-all duration-300 cursor-pointer group/social">
+                      <Facebook className="w-5 h-5 text-blue-600 group-hover/social:text-white" />
+                    </div>
+                    <div className="w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center hover:bg-pink-500 hover:text-white transition-all duration-300 cursor-pointer group/social">
+                      <Instagram className="w-5 h-5 text-pink-600 group-hover/social:text-white" />
+                    </div>
+                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all duration-300 cursor-pointer group/social">
+                      <Linkedin className="w-5 h-5 text-blue-700 group-hover/social:text-white" />
+                    </div>
+                  </div>
                 </div>
 
-                <p className="text-gray-600 text-base leading-7 mb-6 relative z-10">
-                  {user.content}
-                </p>
+                {/* Hover effect overlay - thống nhất */}
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-400 to-pink-500 opacity-0 group-hover:opacity-5 transition-opacity duration-500 pointer-events-none"></div>
+              </div>
+            ))}
+          </div>
+        </section>
 
-                {/* User info */}
-                <div className="flex items-center">
-                  <div className="relative">
-                    <img
-                      src={user.avatar || "/placeholder.svg"}
-                      alt={user.name}
-                      className="w-14 h-14 rounded-full object-cover border-3 border-orange-200 group-hover:border-orange-300 transition-colors duration-300"
-                    />
-                    <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+        {/* Featured Recipes */}
+        {/* <section className="max-w-7xl mx-auto px-4 md:px-6 py-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Các bài viết nổi bật
+              </h2>
+              <p className="text-gray-600">
+                Khám phá những nội dung được yêu thích nhất
+              </p>
+            </div>
+            <button className="flex items-center text-orange-500 font-medium hover:text-orange-600 transition-colors duration-300 group">
+              Xem tất cả
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featuredRecipes.map((recipe, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 group"
+              >
+                <div className="relative overflow-hidden">
+                  <img
+                    src={recipe.image || "/placeholder.svg"}
+                    alt={recipe.name}
+                    className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </div>
+
+                <div className="p-6">
+                  <h3 className="font-bold text-gray-900 mb-2 text-lg group-hover:text-orange-500 transition-colors duration-300">
+                    {recipe.name}
+                  </h3>
+                  <p className="text-gray-500 text-sm mb-4 flex items-center">
+                    <div className="w-6 h-6 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full mr-2 flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">
+                        {recipe.author.charAt(0)}
+                      </span>
+                    </div>
+                    Đăng bởi {recipe.author}
+                  </p>
+
+                  <button className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold py-3 rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                    Xem chi tiết
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section> */}
+        <div className="mt-[50px]">
+          <p className="font-bold text-[22px]">
+            Bài viết mới nhất từ cộng đồng
+          </p>
+          <div className="flex">
+            <div className="w-[70%]">
+              <Blogs />
+              <Blogs />
+              <Blogs />
+            </div>
+            <div className="w-[30%]">
+              <div>
+                <p className="font-bold text-[18px] mb-4">Đề xuất bài viết</p>
+                <SmallBlogs />
+                <SmallBlogs />
+                <SmallBlogs />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Testimonials */}
+        <section className="mx-auto py-8">
+          <div className="text-center mb-12">
+            <h2 className="text-[22px] font-bold text-gray-900 mb-4">
+              Người dùng nói gì về Oshisha?
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Những phản hồi chân thực từ cộng đồng người dùng yêu thích Oshisha
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {testimonials.map((user, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-gray-100 group relative overflow-hidden"
+              >
+                {/* Background decoration */}
+                <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br from-orange-100 to-pink-100 rounded-full -translate-y-10 translate-x-10 group-hover:scale-150 transition-transform duration-500"></div>
+
+                <div className="relative">
+                  {/* Quote icon */}
+                  <div className="text-6xl text-orange-200 font-serif leading-none mb-4">
+                    "
                   </div>
-                  <div className="ml-4">
-                    <h4 className="font-bold text-gray-900 transition-colors duration-300">
-                      {user.name}
-                    </h4>
-                    <div className="flex text-yellow-400 text-xs">
-                      <svg
-                        className="h-4 w-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                      </svg>
-                      <svg
-                        className="h-4 w-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                      </svg>
-                      <svg
-                        className="h-4 w-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                      </svg>
-                      <svg
-                        className="h-4 w-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                      </svg>
-                      <svg
-                        className="h-4 w-4"
-                        fill="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                      </svg>
+
+                  <p className="text-gray-600 text-base leading-7 mb-6 relative z-10">
+                    {user.content}
+                  </p>
+
+                  {/* User info */}
+                  <div className="flex items-center">
+                    <div className="relative">
+                      <img
+                        src={user.avatar || "/placeholder.svg"}
+                        alt={user.name}
+                        className="w-14 h-14 rounded-full object-cover border-3 border-orange-200 group-hover:border-orange-300 transition-colors duration-300"
+                      />
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                    </div>
+                    <div className="ml-4">
+                      <h4 className="font-bold text-gray-900 transition-colors duration-300">
+                        {user.name}
+                      </h4>
+                      <div className="flex text-yellow-400 text-xs">
+                        <svg
+                          className="h-4 w-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                        <svg
+                          className="h-4 w-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                        <svg
+                          className="h-4 w-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                        <svg
+                          className="h-4 w-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                        <svg
+                          className="h-4 w-4"
+                          fill="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Call to Action */}
-      <section className="max-w-7xl mx-auto px-4 md:px-6 py-8 mb-8">
-        <div
-          className="rounded-2xl overflow-hidden relative group"
-          style={{
-            background: "linear-gradient(135deg, #fb923c 0%, #ec4899 100%)",
-          }}
-        >
-          {/* Animated background elements */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-4 -left-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
-            <div className="absolute top-1/2 -right-8 w-32 h-32 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-1000"></div>
-            <div className="absolute -bottom-6 left-1/3 w-20 h-20 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-1000"></div>
+            ))}
           </div>
+        </section>
 
-          <div className="relative p-8 md:p-12 text-center">
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-              Tham gia cộng đồng Oshisha ngay hôm nay!
-            </h2>
-            <p className="text-white/90 text-base mb-8 max-w-2xl mx-auto">
-              Khám phá thế giới ẩm thực đầy màu sắc và kết nối với hàng ngàn
-              người yêu nấu ăn khác. Bắt đầu hành trình ẩm thực của bạn ngay bây
-              giờ!
-            </p>
+        {/* Call to Action */}
+        <section className="mx-auto py-8 mb-8">
+          <div
+            className="rounded-2xl overflow-hidden relative bg-gradient-to-tr from-[#FFE101] from-0% via-[#FFAF01] via-50% to-[#F63C3C] to-100%"
+            style={{
+              background: " rounded-2xl",
+            }}
+          >
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="absolute -top-4 -left-4 w-24 h-24 bg-white/10 rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
+              <div className="absolute top-1/2 -right-8 w-32 h-32 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-1000"></div>
+              <div className="absolute -bottom-6 left-1/3 w-20 h-20 bg-white/10 rounded-full group-hover:scale-110 transition-transform duration-1000"></div>
+            </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <button className="bg-white text-pink-600 hover:bg-gray-50 font-bold px-8 py-4 rounded-full text-base shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center group/btn">
-                Khám phá ngay
-                <ArrowRight className="w-5 h-5 ml-2 group-hover/btn:translate-x-1 transition-transform duration-300" />
-              </button>
+            <div className="relative p-8 md:p-12 text-center">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+                Tham gia cộng đồng Oshisha ngay hôm nay!
+              </h2>
+              <p className="text-white/90 text-base mb-8 max-w-2xl mx-auto">
+                Khám phá thế giới ẩm thực đầy màu sắc và kết nối với hàng ngàn
+                người yêu nấu ăn khác. Bắt đầu hành trình ẩm thực của bạn ngay
+                bây giờ!
+              </p>
 
-              <button className="border-2 border-white text-white hover:bg-white hover:text-pink-600 font-semibold px-8 py-4 rounded-full text-base transition-all duration-300 transform hover:scale-105">
-                Tìm hiểu thêm
-              </button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <button className="bg-white text-[#F63C3C] hover:bg-gray-50 font-bold px-8 py-4 rounded-full text-base shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 flex items-center group/btn">
+                  Khám phá ngay
+                  <ArrowRight className="w-5 h-5 ml-2 group-hover/btn:translate-x-1 transition-transform duration-300" />
+                </button>
+
+                <button className="border-2 border-white text-white hover:bg-white hover:text-[#F63C3C] font-semibold px-8 py-4 rounded-full text-base transition-all duration-300 transform hover:scale-105">
+                  Tìm hiểu thêm
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </div>
   );
 }

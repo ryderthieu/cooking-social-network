@@ -32,32 +32,27 @@ const featuredRecipes = [
   },
 ];
 
-const Blogs = () => {
+const SmallBlogs = () => {
   return (
-    <div className="mt-4 flex gap-4">
+    <div className="mt-4 flex justify-center items-center gap-4">
       <img
         src={blog}
-        className="w-[240px] h-[180px] object-cover rounded-2xl"
+        className="w-[160px] h-[110px] object-cover rounded-2xl"
         alt=""
       />
-      <div className="max-w-[550px] my-auto">
-        <h4 className="font-semibold text-[18px]">
+      <div className="max-w-[400px]">
+        <h4 className="font-semibold text-[14px]">
           Crochet Projects for Noodle Lovers
         </h4>
-        <p className="text-justify leading-6 text-[14px] text-gray-600 mt-2 font-light">
-          Lorem ipsum dolor sit amet, consectetuipisicing elit, sed do eiusmod
-          tempor incididunt ut labore et dolore magna aliqut enim{" "}
-        </p>
         <div className="flex mt-4">
           <img src="" alt="" />
-          <span className="mr-4 font-semibold">Wade Warren</span>
-          <p className="border-l-2 border-l-gray-300 pl-4 my-auto text-[14px] font-semibold text-[rgba(0,0,0,0.6)]">
-            12 November 2021
-          </p>
+          <span className="text-[rgba(0,0,0,0.6)] text-[13px]">
+            Wade Warren
+          </span>
         </div>
       </div>
     </div>
   );
 };
 
-export default Blogs;
+export default SmallBlogs;
