@@ -52,34 +52,34 @@ const Notification = require('../models/notification');
       target.comments.push(newComment._id);
       await target.save();
 
-      // Tạo thông báo cho chủ bài viết (nếu không phải chính mình)
-      if (target.author.toString() !== userId) {
-        const notification = new Notification({
-          receiver: target.author,
-          sender: userId,
-          type: replyOf ? 'reply' : 'comment',
-          postId: targetType === 'post' ? targetId : undefined,
-          videoId: targetType === 'video' ? targetId : undefined,
-          commentId: newComment._id
-        });
-        await notification.save();
-      }
+      // // Tạo thông báo cho chủ bài viết (nếu không phải chính mình)
+      // if (target.author.toString() !== userId) {
+      //   const notification = new Notification({
+      //     receiver: target.author,
+      //     sender: userId,
+      //     type: replyOf ? 'reply' : 'comment',
+      //     postId: targetType === 'post' ? targetId : undefined,
+      //     videoId: targetType === 'video' ? targetId : undefined,
+      //     commentId: newComment._id
+      //   });
+      //   await notification.save();
+      // }
 
-      // Tạo thông báo cho chủ comment gốc (nếu là reply)
-      if (replyOf) {
-        const parentComment = await Comment.findById(replyOf);
-        if (parentComment && parentComment.userId.toString() !== userId) {
-          const notification = new Notification({
-            receiver: parentComment.userId,
-            sender: userId,
-            type: 'reply',
-            postId: targetType === 'post' ? targetId : undefined,
-            videoId: targetType === 'video' ? targetId : undefined,
-            commentId: newComment._id
-          });
-          await notification.save();
-        }
-      }
+      // // Tạo thông báo cho chủ comment gốc (nếu là reply)
+      // if (replyOf) {
+      //   const parentComment = await Comment.findById(replyOf);
+      //   if (parentComment && parentComment.userId.toString() !== userId) {
+      //     const notification = new Notification({
+      //       receiver: parentComment.userId,
+      //       sender: userId,
+      //       type: 'reply',
+      //       postId: targetType === 'post' ? targetId : undefined,
+      //       videoId: targetType === 'video' ? targetId : undefined,
+      //       commentId: newComment._id
+      //     });
+      //     await notification.save();
+      //   }
+      // }
 
       res.status(201).json({
         success: true,

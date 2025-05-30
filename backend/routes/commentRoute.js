@@ -4,9 +4,9 @@ const { getCommentById, searchComments, getReplies, getCommentsByTarget, createC
 
 const router = express.Router()
 
-router.get('/:commentId', getCommentById)
 router.get('/search', searchComments)
 router.get('replies/:commentId', getReplies)
+router.get('/:commentId', getCommentById)
 router.get('/target/:targetType/:targetId', getCommentsByTarget)
 
 router.post('/', authenticateJWT, createComment)
