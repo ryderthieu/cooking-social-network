@@ -10,6 +10,7 @@ const {
   searchPosts,
   getAllPosts,
   getPostById,
+  getPostsByUserId
 } = require("../controllers/postController");
 
 const router = express.Router();
@@ -20,6 +21,7 @@ router.patch("/like-post/:id", authenticateJWT, likePost);
 router.patch("/comment-post/:id", authenticateJWT, commentPost);
 router.patch("/share-post/:id", authenticateJWT, sharePost);
 router.post("/add-post", authenticateJWT, addPost);
+router.get("/user/:userId", authenticateJWT, getPostsByUserId);
 
 router.get("/search", searchPosts);
 router.get("/:id", getPostById);
