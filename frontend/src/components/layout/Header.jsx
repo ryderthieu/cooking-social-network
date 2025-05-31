@@ -313,7 +313,13 @@ const Header = () => {
               onClick={() => setIsDropdownOpen((prev) => !prev)}
             >
               <div className="flex items-center gap-4">
-                <img src={user.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'} className="w-12 h-12 rounded-full object-cover border-2 border-[#FFB800]"/>
+                <img
+                  src={
+                    user.avatar ||
+                    "https://randomuser.me/api/portraits/men/32.jpg"
+                  }
+                  className="w-12 h-12 rounded-full object-cover border-2 border-[#FFB800]"
+                />
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-[20px] h-[20px] bg-[#E2E5E9] rounded-full flex items-center justify-center text-[12px]">
                 <FaChevronDown
@@ -340,6 +346,7 @@ const Header = () => {
                     <p
                       onClick={() => {
                         logout();
+                        navigate("/login");
                         setIsDropdownOpen(false);
                       }}
                       className="text-[#FF6363] font-medium text-[18px] mb-3 cursor-pointer mx-4 mt-3 hover:text-red-600 transition-colors duration-200"
