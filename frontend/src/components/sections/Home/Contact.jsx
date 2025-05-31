@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Contact = () => {
   const [email, setEmail] = useState("");
@@ -8,18 +10,34 @@ const Contact = () => {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscribeEmail, setSubscribeEmail] = useState("");
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+  const onSubmit = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
 
-    setTimeout(() => {
-      console.log("Contact form submitted:", { name, email, message });
-      setIsSubmitting(false);
+    formData.append("access_key", "ec50783c-36db-4d7d-82b7-f06c8d80ef67");
+
+    const object = Object.fromEntries(formData);
+    const json = JSON.stringify(object);
+
+    const res = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: json,
+    }).then((res) => res.json());
+
+    if (res.success) {
+      toast.success(
+        "Gửi liên hệ thành công! Chúng tôi sẽ phản hồi sớm nhất có thể."
+      );
       setName("");
       setEmail("");
       setMessage("");
-      alert("Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.");
-    }, 1500);
+    } else {
+      toast.error("Gửi liên hệ thất bại. Vui lòng thử lại!");
+    }
   };
 
   const handleSubscribe = async (e) => {
@@ -30,13 +48,13 @@ const Contact = () => {
       console.log("Newsletter subscription:", subscribeEmail);
       setIsSubscribing(false);
       setSubscribeEmail("");
-      alert("Cảm ơn bạn đã đăng ký nhận tin!");
+      toast.success("Cảm ơn bạn đã đăng ký nhận tin!");
     }, 1000);
   };
 
   return (
     <div className="w-full">
-      {/* Newsletter Section - Matches the "Deliciousness to your inbox" section */}
+      <ToastContainer position="top-right" autoClose={3000} />
       <section className="w-full py-10 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-8">
@@ -74,7 +92,7 @@ const Contact = () => {
                 <h3 className="text-xl font-bold text-white mb-4">
                   Liên hệ với chúng tôi
                 </h3>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={onSubmit}>
                   <div className="mb-4">
                     <input
                       type="text"
@@ -83,6 +101,7 @@ const Contact = () => {
                       placeholder="Họ và tên"
                       required
                       className="w-full px-4 py-2 rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      name="name"
                     />
                   </div>
                   <div className="mb-4">
@@ -93,6 +112,7 @@ const Contact = () => {
                       placeholder="Email"
                       required
                       className="w-full px-4 py-2 rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      name="email"
                     />
                   </div>
                   <div className="mb-4">
@@ -103,14 +123,14 @@ const Contact = () => {
                       required
                       rows={3}
                       className="w-full px-4 py-2 rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-white/50"
+                      name="message"
                     />
                   </div>
                   <button
                     type="submit"
-                    disabled={isSubmitting}
                     className="w-full font-semibold bg-white text-[#F63C3C] hover:bg-gray-100 px-4 py-2 rounded-md transition-colors duration-300"
                   >
-                    {isSubmitting ? "Đang gửi..." : "Gửi tin nhắn"}
+                    Gửi tin nhắn
                   </button>
                 </form>
               </div>
