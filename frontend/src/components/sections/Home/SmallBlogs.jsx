@@ -26,7 +26,7 @@ const featuredRecipes = [
   {
     name: "Cách làm salad tôm bơ nướng healthy chỉ với bếp ga đơn mini",
     author: "Trần Ngọc Anh Thơ",
-    path: "/blog/bai-viet-noi-bat",
+    path: "/blog/4",
     image: salad,
   },
 ];
