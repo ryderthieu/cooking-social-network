@@ -4,11 +4,10 @@ import Recipe from "../../components/common/Recipe.jsx";
 import Menu from "../../components/sections/Home/Menu.jsx";
 import Contact from "../../components/sections/Home/Contact.jsx";
 import { IoSearchSharp } from "react-icons/io5";
-import Blogs from "@/components/sections/Home/Blogs.jsx";
 import VideoShorts from "../../components/sections/Home/VideoShorts.jsx";
 import { Link } from "react-router-dom";
 import CarouselPlugin from "../../components/sections/Home/CarouselHero.jsx";
-import SmallBlogs from "@/components/sections/Home/SmallBlogs.jsx";
+import AllBlogs from "../../components/sections/Home/AllBlogs.jsx";
 const HomePage = () => {
   const [search, setSearch] = useState("");
 
@@ -62,26 +61,7 @@ const HomePage = () => {
             <Recipe />
           </div>
         </div>
-        <div className="mt-[50px]">
-          <p className="font-bold text-[24px]">
-            Bài viết mới nhất từ cộng đồng
-          </p>
-          <div className="flex">
-            <div className="w-[70%]">
-              <Blogs />
-              <Blogs />
-              <Blogs />
-            </div>
-            <div className="w-[30%]">
-              <div>
-                <p className="font-bold text-[18px] mb-4">Đề xuất bài viết</p>
-                <SmallBlogs />
-                <SmallBlogs />
-                <SmallBlogs />
-              </div>
-            </div>
-          </div>
-        </div>
+        <AllBlogs />
       </div>
       <Contact />
     </div>

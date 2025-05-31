@@ -4,31 +4,35 @@ import blog9 from "../../assets/Blog/blog9.png";
 import blog4 from "../../assets/Blog/blog4.png";
 import blog5 from "../../assets/Blog/blog5.png";
 import avatar2 from "../../assets/avatar2.jpg";
-import Contact from "../../components/sections/Home/Contact";
 import Recipe from "../../components/common/Recipe";
+import { Link } from "react-router-dom";
 
 const TopBlog = () => {
   return (
-    <div className="px-[300px] pt-[30px] pb-[50px]">
-      <h1 className="font-semibold text-center text-[35px]">
+    <div className="px-[300px] pt-[20px] pb-[50px]">
+      <h1 className="font-semibold text-center text-[30px]">
         Gỏi cuốn kèm nước chấm tương đen
       </h1>
-      <div className="flex justify-center items-center gap-10 mt-[20px]">
+      <div className="flex justify-center items-center gap-10 my-4">
         <div className="flex items-center gap-4">
-          <img className="w-12 h-12" src={avatar2} alt="" />
+          <img className="w-12 h-12 rounded-full" src={avatar2} alt="" />
           <p className="text-[16px] font-bold">Trịnh Thị Phương Quỳnh</p>
         </div>
         <div className="text-[16px] text-[rgba(0,0,0,0.6)] border-l-2 border-gray-200 pl-8 font-medium">
           Ngày 15 tháng 3 năm 2022
         </div>
       </div>
-      <p className="my-[20px] text-[18px] text-center text-[rgba(0,0,0,0.6)]">
+      <p className="mb-4 text-[16px] text-center text-[rgba(0,0,0,0.6)]">
         Ẩm thực Việt Nam
       </p>
-      <img className="mb-[30px]" src={blog9} alt="" />
+      <img
+        className="mb-[30px] h-[350px] w-full object-cover rounded-3xl"
+        src={blog9}
+        alt=""
+      />
       <div className="flex">
         <div className="w-[70%]">
-          <h3 className="text-[24px] font-semibold mb-4">
+          <h3 className="text-[20px] font-semibold mb-4">
             Phần nước chấm gỏi cuốn từ bơ đậu phộng với vị ngọt vừa hòa quyện
             cùng vị béo tự nhiên của đậu phộng và vị thơm của bơ.
           </h3>
@@ -71,16 +75,20 @@ const TopBlog = () => {
           <FaInstagram className="w-8 h-8 my-2 cursor-pointer" />
         </div>
       </div>
-      <Contact />
-      <div className="my-[20px] ">
-        <h1 className="text-center text-[32px] font-semibold ">
+      <div className="my-4">
+        <h1 className="text-center text-[24px] font-semibold ">
           Gợi ý các món ăn
         </h1>
-        <div className="grid grid-cols-3 gap-2 mt-8 mb-8">
+        <div className="grid grid-cols-3 gap-2 mt-3 mb-8">
           <Recipe />
           <Recipe />
           <Recipe />
         </div>
+        <Link to="/recipes" className="flex justify-center">
+          <button className="bg-[#FF37A5] text-white font-semibold py-3 px-8 rounded-[30px] text-[14px] hover:bg-[#FF2A8F] transition-colors duration-300">
+            Xem tất cả
+          </button>
+        </Link>
       </div>
     </div>
   );
