@@ -1,7 +1,14 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Image, Video, Plus, Search, User, Settings, ChefHat } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import { useCloudinary } from '@/context/CloudinaryContext';
+import { createPost } from '@/services/postService';
+import { getAllRecipes, getMyRecipes, searchRecipes } from '@/services/recipeService';
+import { toast } from 'react-toastify';
 
 const CreatePostModal = ({ isOpen, onClose }) => {
+  const { user } = useAuth();
+  const { uploadImage, uploadVideo } = useCloudinary();
   const [postType, setPostType] = useState('post'); // 'post' hoặc 'reels'
   const [content, setContent] = useState('');
   const [media, setMedia] = useState([]);
@@ -11,68 +18,169 @@ const CreatePostModal = ({ isOpen, onClose }) => {
   const [recipeTab, setRecipeTab] = useState('system'); // 'system' hoặc 'personal'
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [recipes, setRecipes] = useState([]);
+  const [isLoadingRecipes, setIsLoadingRecipes] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Mock data cho recipes
-  const systemRecipes = [
-    { id: 1, name: 'Phở Bò Hà Nội', image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100&h=100&fit=crop', difficulty: 'Khó' },
-    { id: 2, name: 'Bánh Mì Thịt Nướng', image: 'https://images.unsplash.com/photo-1564888111485-9c4d5eab2848?w=100&h=100&fit=crop', difficulty: 'Dễ' },
-    { id: 3, name: 'Bún Chả Hà Nội', image: 'https://images.unsplash.com/photo-1559847844-d9b43e2d1b94?w=100&h=100&fit=crop', difficulty: 'Trung bình' },
-    { id: 4, name: 'Cơm Tấm Sài Gòn', image: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?w=100&h=100&fit=crop', difficulty: 'Dễ' },
-  ];
+  // Fetch recipes khi tab thay đổi
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      setIsLoadingRecipes(true);
+      try {
+        const response = await getAllRecipes();
+        if (response.data.success) {
+          setRecipes(response.data.data || []);
+        } else {
+          toast.error('Không thể tải danh sách công thức');
+        }
+      } catch (error) {
+        console.error('Error fetching recipes:', error);
+        toast.error('Không thể tải danh sách công thức');
+      } finally {
+        setIsLoadingRecipes(false);
+      }
+    };
 
-  const personalRecipes = [
-    { id: 5, name: 'Bánh Xèo Miền Tây', image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100&h=100&fit=crop', difficulty: 'Trung bình' },
-    { id: 6, name: 'Chả Cá Lã Vọng', image: 'https://images.unsplash.com/photo-1564888111485-9c4d5eab2848?w=100&h=100&fit=crop', difficulty: 'Khó' },
-  ];
+    if (showRecipeModal) {
+      fetchRecipes();
+    }
+  }, [recipeTab, showRecipeModal]);
 
-  const currentRecipes = recipeTab === 'system' ? systemRecipes : personalRecipes;
-  const filteredRecipes = currentRecipes.filter(recipe => 
-    recipe.name.toLowerCase().includes(recipeSearch.toLowerCase())
-  );
+  // Search recipes
+  useEffect(() => {
+    const searchRecipesDebounced = async () => {
+      if (!recipeSearch.trim()) {
+        const response = await getAllRecipes();
+        if (response.data.success) {
+          setRecipes(response.data.data || []);
+        }
+        return;
+      }
+
+      setIsLoadingRecipes(true);
+      try {
+        const response = await searchRecipes(recipeSearch);
+        if (response.data.success) {
+          setRecipes(response.data.data || []);
+        }
+      } catch (error) {
+        console.error('Error searching recipes:', error);
+      } finally {
+        setIsLoadingRecipes(false);
+      }
+    };
+
+    const timeoutId = setTimeout(searchRecipesDebounced, 500);
+    return () => clearTimeout(timeoutId);
+  }, [recipeSearch]);
+
+  const renderUploadProgress = () => {
+    if (!isLoading || uploadProgress === 0) return null;
+
+    return (
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-sm font-medium text-gray-700">
+            {postType === 'post' ? 'Đang tải ảnh lên...' : 'Đang tải video lên...'}
+          </span>
+          <span className="text-sm font-medium text-orange-600">{uploadProgress}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-orange-500 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${uploadProgress}%` }}
+          />
+        </div>
+      </div>
+    );
+  };
 
   const handleMediaChange = (e) => {
     const files = Array.from(e.target.files);
-    const newMedia = files.map(file => ({
-      file,
-      preview: URL.createObjectURL(file)
-    }));
-    setMedia([...media, ...newMedia]);
-  };
-
-  const removeMedia = (index) => {
-    const newMedia = [...media];
-    URL.revokeObjectURL(newMedia[index].preview);
-    newMedia.splice(index, 1);
-    setMedia(newMedia);
-  };
-
-  const handleRecipeSelect = (recipe) => {
-    if (!selectedRecipes.find(r => r.id === recipe.id)) {
-      setSelectedRecipes([...selectedRecipes, recipe]);
+    if (postType === 'reels' && files.length > 0) {
+      // Nếu là reels, chỉ cho phép 1 video
+      setMedia([{
+        file: files[0],
+        preview: URL.createObjectURL(files[0])
+      }]);
+    } else {
+      // Nếu là post, cho phép nhiều ảnh
+      const newMedia = files.map(file => ({
+        file,
+        preview: URL.createObjectURL(file)
+      }));
+      setMedia(prevMedia => {
+        const updatedMedia = [...prevMedia, ...newMedia];
+        // Giới hạn số lượng ảnh là 5
+        return updatedMedia.slice(0, 5);
+      });
     }
   };
 
-  const removeRecipe = (recipeId) => {
-    setSelectedRecipes(selectedRecipes.filter(r => r.id !== recipeId));
+  const removeMedia = (index) => {
+    setMedia(prevMedia => {
+      const newMedia = [...prevMedia];
+      URL.revokeObjectURL(newMedia[index].preview);
+      newMedia.splice(index, 1);
+      return newMedia;
+    });
+  };
+
+  const handleRecipeSelect = (recipe) => {
+    setSelectedRecipes([recipe]);
+    setShowRecipeModal(false);
+  };
+
+  const removeRecipe = () => {
+    setSelectedRecipes([]);
   };
 
   const handleSubmit = async () => {
     setIsLoading(true);
     setError(null);
+    setUploadProgress(0);
 
     try {
-      const formData = new FormData();
-      formData.append('content', content);
-      formData.append('type', postType);
-      formData.append('recipes', JSON.stringify(selectedRecipes.map(r => r.id)));
-      
-      media.forEach((item) => {
-        formData.append('media', item.file);
-      });
+      if (postType === 'post') {
+        // Upload tất cả ảnh lên Cloudinary
+        const uploadPromises = media.map(item => uploadImage(item.file));
+        const uploadedImages = await Promise.all(uploadPromises);
+        let images = []
+        uploadedImages.map((v) => images.push(v.url))
+        console.log(images)
+        
+        // Tạo post data
+        const postData = {
+          caption: content,
+          recipe: selectedRecipes.length > 0 ? selectedRecipes[0]._id : null,
+          imgUri: images
+        };
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+        await createPost(postData);
+        toast.success('Đã tạo bài viết thành công!');
+      } else {
+        // Xử lý tạo video
+        if (media.length === 0) {
+          toast.error('Vui lòng chọn video!');
+          return;
+        }
+
+        // Upload video lên Cloudinary
+        const videoUrl = await uploadVideo(media[0].file, (progress) => {
+          setUploadProgress(progress);
+        });
+
+        // Tạo video data
+        const videoData = {
+          caption: content,
+          recipe: selectedRecipes.length > 0 ? selectedRecipes[0]._id : null,
+          videoUri: videoUrl
+        };
+
+        await createPost(videoData);
+        toast.success('Đã tạo video thành công!');
+      }
       
       // Reset form
       onClose();
@@ -80,8 +188,11 @@ const CreatePostModal = ({ isOpen, onClose }) => {
       setMedia([]);
       setSelectedRecipes([]);
       setPostType('post');
+      setUploadProgress(0);
     } catch (error) {
-      setError('Đã có lỗi xảy ra khi đăng bài');
+      console.error('Error creating post/video:', error);
+      toast.error(error.response?.data?.message || 'Đã có lỗi xảy ra khi đăng bài');
+      setError(error.response?.data?.message || 'Đã có lỗi xảy ra khi đăng bài');
     } finally {
       setIsLoading(false);
     }
@@ -109,7 +220,10 @@ const CreatePostModal = ({ isOpen, onClose }) => {
             <div className="flex bg-gray-100 rounded-xl p-1">
               <button
                 type="button"
-                onClick={() => setPostType('post')}
+                onClick={() => {
+                  setPostType('post');
+                  setMedia([]);
+                }}
                 className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
                   postType === 'post' 
                     ? 'bg-white text-orange-600 shadow-sm' 
@@ -120,7 +234,10 @@ const CreatePostModal = ({ isOpen, onClose }) => {
               </button>
               <button
                 type="button"
-                onClick={() => setPostType('reels')}
+                onClick={() => {
+                  setPostType('reels');
+                  setMedia([]);
+                }}
                 className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
                   postType === 'reels' 
                     ? 'bg-white text-orange-600 shadow-sm' 
@@ -135,11 +252,23 @@ const CreatePostModal = ({ isOpen, onClose }) => {
           <div className="px-6 py-4">
             {/* User Info */}
             <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br  rounded-full flex items-center justify-center" style={{background: 'linear-gradient(135deg, rgb(251, 146, 60) 0%, rgb(236, 72, 153) 100%)'}}>
-                <User size={20} className="text-white" />
+              <div className="w-12 h-12 bg-gradient-to-br rounded-full overflow-hidden">
+                {user?.avatar ? (
+                  <img 
+                    src={user.avatar} 
+                    alt={user.firstName} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-400 to-pink-500">
+                    <User size={20} className="text-white" />
+                  </div>
+                )}
               </div>
               <div className="ml-3">
-                <span className="font-semibold text-gray-800">Nguyễn Văn A</span>
+                <span className="font-semibold text-gray-800">
+                  {user ? `${user.firstName} ${user.lastName}` : 'Người dùng'}
+                </span>
                 <p className="text-sm text-gray-500">Đăng công khai</p>
               </div>
             </div>
@@ -157,19 +286,21 @@ const CreatePostModal = ({ isOpen, onClose }) => {
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2">Công thức đã chọn:</h3>
                 <div className="flex flex-wrap gap-2">
-                  {selectedRecipes.map((recipe) => (
-                    <div key={recipe.id} className="flex items-center bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm">
-                      <img src={recipe.image} alt={recipe.name} className="w-6 h-6 rounded-full mr-2" />
-                      <span>{recipe.name}</span>
-                      <button
-                        type="button"
-                        onClick={() => removeRecipe(recipe.id)}
-                        className="ml-2 hover:text-red-500"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
+                  <div className="flex items-center bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-sm">
+                    <img 
+                      src={selectedRecipes[0].image} 
+                      alt={selectedRecipes[0].name} 
+                      className="w-6 h-6 rounded-full mr-2" 
+                    />
+                    <span>{selectedRecipes[0].name}</span>
+                    <button
+                      type="button"
+                      onClick={removeRecipe}
+                      className="ml-2 hover:text-red-500"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
@@ -201,6 +332,15 @@ const CreatePostModal = ({ isOpen, onClose }) => {
                     </button>
                   </div>
                 ))}
+                {postType === 'post' && media.length < 5 && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center hover:border-orange-500 transition-colors"
+                  >
+                    <Plus size={24} className="text-gray-400" />
+                  </button>
+                )}
               </div>
             )}
 
@@ -208,18 +348,20 @@ const CreatePostModal = ({ isOpen, onClose }) => {
             <div className="flex items-center justify-between mb-6 p-4 border border-gray-200 rounded-xl bg-gray-50">
               <span className="text-sm font-medium text-gray-600">Thêm vào bài viết</span>
               <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="p-2 hover:bg-white rounded-lg transition-colors"
-                  title={`Thêm ${postType === 'post' ? 'ảnh' : 'video'}`}
-                >
-                  {postType === 'post' ? (
-                    <Image size={20} className="text-green-600" />
-                  ) : (
-                    <Video size={20} className="text-red-600" />
-                  )}
-                </button>
+                {(!media.length || (postType === 'post' && media.length < 5)) && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2 hover:bg-white rounded-lg transition-colors"
+                    title={`Thêm ${postType === 'post' ? 'ảnh' : 'video'}`}
+                  >
+                    {postType === 'post' ? (
+                      <Image size={20} className="text-green-600" />
+                    ) : (
+                      <Video size={20} className="text-red-600" />
+                    )}
+                  </button>
+                )}
                 
                 <button
                   type="button"
@@ -241,6 +383,8 @@ const CreatePostModal = ({ isOpen, onClose }) => {
               className="hidden"
             />
 
+            {renderUploadProgress()}
+
             {error && (
               <div className="text-red-500 mb-4 p-3 bg-red-50 rounded-xl">
                 {error}
@@ -250,17 +394,17 @@ const CreatePostModal = ({ isOpen, onClose }) => {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={isLoading || !content.trim()}
+              disabled={isLoading || !content.trim() || (postType === 'reels' && !media.length)}
               className={`w-full py-3 px-6 rounded-xl font-semibold transition-all ${
-                isLoading || !content.trim()
+                isLoading || !content.trim() || (postType === 'reels' && !media.length)
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'background-gradient text-white shadow-lg hover:shadow-xl'
+                  : 'bg-gradient-to-r from-orange-500 to-pink-500 text-white hover:from-orange-600 hover:to-pink-600 shadow-lg hover:shadow-xl'
               }`}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Đang đăng...
+                  {postType === 'post' ? 'Đang tạo bài viết...' : 'Đang tạo video...'}
                 </div>
               ) : (
                 'Đăng bài'
@@ -328,28 +472,42 @@ const CreatePostModal = ({ isOpen, onClose }) => {
 
             {/* Recipe List */}
             <div className="px-6 pb-4 max-h-80 overflow-y-auto">
-              {filteredRecipes.map((recipe) => (
-                <div
-                  key={recipe.id}
-                  onClick={() => handleRecipeSelect(recipe)}
-                  className="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
-                >
-                  <img
-                    src={recipe.image}
-                    alt={recipe.name}
-                    className="w-12 h-12 rounded-lg object-cover mr-3"
-                  />
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-800">{recipe.name}</h4>
-                    <p className="text-sm text-gray-500">{recipe.difficulty}</p>
-                  </div>
-                  {selectedRecipes.find(r => r.id === recipe.id) && (
-                    <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                      <Plus size={16} className="text-white rotate-45" />
-                    </div>
-                  )}
+              {isLoadingRecipes ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
                 </div>
-              ))}
+              ) : recipes.length > 0 ? (
+                recipes.map((recipe) => (
+                  <div
+                    key={recipe._id}
+                    onClick={() => handleRecipeSelect(recipe)}
+                    className="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                  >
+                    <img
+                      src={recipe.image}
+                      alt={recipe.name}
+                      className="w-12 h-12 rounded-lg object-cover mr-3"
+                    />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-800">{recipe.name}</h4>
+                      <p className="text-sm text-gray-500">
+                        {recipe.categories?.difficultyLevel || 'Chưa có độ khó'}
+                      </p>
+                    </div>
+                    {selectedRecipes.find(r => r._id === recipe._id) && (
+                      <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
+                        <Plus size={16} className="text-white rotate-45" />
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  {recipeSearch.trim() 
+                    ? 'Không tìm thấy công thức phù hợp'
+                    : 'Chưa có công thức nào'}
+                </div>
+              )}
             </div>
           </div>
         </div>

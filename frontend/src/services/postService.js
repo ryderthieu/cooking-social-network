@@ -43,8 +43,44 @@ const postsService = {
 // export default postsService;
 // import API from "./api";
 
-export const getAllPost = () => {
-    return API.get('/posts')
-}
+export const getAllPosts = () => {
+  return API.get('/posts');
+};
+
+export const getPostById = (id) => {
+  return API.get(`/posts/${id}`);
+};
+
+export const createPost = (data) => {
+  return API.post('/posts/add-post', data);
+};
+
+export const editPost = (id, data) => {
+  return API.put(`/posts/edit-post/${id}`, data);
+};
+
+export const deletePost = (id) => {
+  return API.delete(`/posts/delete-post/${id}`);
+};
+
+export const likePost = (id) => {
+  return API.patch(`/posts/like-post/${id}`);
+};
+
+export const sharePost = (id) => {
+  return API.patch(`/posts/share-post/${id}`);
+};
+
+export const commentPost = (id, data) => {
+  return API.post(`/posts/${id}/comments`, data);
+};
+
+export const getSavedPosts = () => {
+  return API.get('/posts/saved');
+};
+
+export const savePost = (id) => {
+  return API.patch(`/posts/save-post/${id}`);
+};
 
 export default postsService
