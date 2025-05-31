@@ -8,6 +8,7 @@ import { formatDate } from '@/components/common/Post';
 import { useAuth } from '@/context/AuthContext';
 import { createComment, getCommentsByTarget } from '@/services/commentService';
 import SharePopup from '../../components/common/SharePopup';
+import { useSocket } from '@/context/SocketContext';
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -21,6 +22,7 @@ const PostDetail = () => {
   const navigate = useNavigate();
   const {user} = useAuth()
   const [sharePopup, setSharePopup] = useState({ open: false, postId: null, postTitle: null });
+  const { sendNotification } = useSocket();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -76,8 +78,18 @@ const PostDetail = () => {
 
   const handleLike = async () => {
     try {
-      await postsService.toggleLike(post._id);
+      const res = await postsService.toggleLike(post._id);
+      const isLiking = !isLiked; // Trạng thái mới sẽ ngược với trạng thái hiện tại
       setIsLiked(!isLiked);
+      
+      // Chỉ gửi thông báo khi like, không gửi khi unlike
+      if (isLiking && post.author._id !== user._id) {
+        sendNotification({
+          receiverId: post.author._id,
+          type: 'like',
+          postId: post._id,
+        });
+      }
     } catch (error) {
       console.error('Error liking post:', error);
     }
@@ -85,6 +97,15 @@ const PostDetail = () => {
   
   const handleShare = () => {
     setSharePopup({ open: true, postId: post._id, postTitle: post.content });
+    
+    // Gửi thông báo khi share bài viết
+    if (post.author._id !== user._id) {
+      sendNotification({
+        receiverId: post.author._id,
+        type: 'share',
+        postId: post._id,
+      });
+    }
   };
 
   const handleAddComment = async (content) => {
@@ -93,6 +114,16 @@ const PostDetail = () => {
       await createComment({targetId: post._id, targetType: 'post', text: content});
       const updatedPost = await postsService.fetchById(post._id);
       setPost(updatedPost.data);
+
+      // Gửi thông báo khi comment bài viết
+      if (post.author._id !== user._id) {
+        sendNotification({
+          receiverId: post.author._id,
+          type: 'comment',
+          postId: post._id,
+          message: `${user.firstName} đã bình luận: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
+        });
+      }
     } catch (error) {
       console.error('Error adding comment:', error);
     }

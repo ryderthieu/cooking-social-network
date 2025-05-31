@@ -183,7 +183,7 @@ const socketServer = (server) => {
             message: `${socket.user.firstName} đã gửi cho bạn ${type === 'image' ? 'một hình ảnh' : 'một tin nhắn'}.`
           });
           await notification.save();
-          await notification.populate("sender", "firstName lastName avatar");
+          (await notification.populate("sender", "firstName lastName avatar"));
           
           const memberSocketIds = onlineUsers.get(memberIdStr);
           if (memberSocketIds) {
@@ -405,6 +405,87 @@ const socketServer = (server) => {
         }
       } catch (err) {
         console.error("Send notification error:", err);
+      }
+    });
+
+    socket.on("mark_notifications_as_read", async () => {
+      try {
+        // Cập nhật tất cả thông báo chưa đọc của user thành đã đọc
+        await Notification.updateMany(
+          { 
+            receiver: socket.userId,
+            isRead: false 
+          },
+          { 
+            $set: { 
+              isRead: true,
+              readAt: new Date()
+            } 
+          }
+        );
+
+        // Emit sự kiện cập nhật cho tất cả các socket của user này
+        const userSocketIds = onlineUsers.get(socket.userId);
+        if (userSocketIds) {
+          userSocketIds.forEach(socketId => {
+            if (socketId !== socket.id) { // Không cần gửi lại cho socket hiện tại
+              io.to(socketId).emit("notifications_marked_as_read");
+            }
+          });
+        }
+
+        console.log(`All notifications marked as read for user ${socket.userId}`);
+      } catch (error) {
+        console.error("Error marking notifications as read:", error);
+        socket.emit("error", { message: "Không thể đánh dấu thông báo là đã đọc" });
+      }
+    });
+
+    socket.on("mark_notification_as_read", async ({ notificationId }) => {
+      try {
+        // Cập nhật một thông báo cụ thể thành đã đọc và populate đầy đủ thông tin
+        const notification = await Notification.findOneAndUpdate(
+          { 
+            _id: notificationId,
+            receiver: socket.userId 
+          },
+          { 
+            $set: { 
+              isRead: true,
+              readAt: new Date()
+            } 
+          },
+          { new: true }
+        ).populate([
+          {
+            path: 'postId',
+            select: '_id content images'
+          },
+          {
+            path: 'sender',
+            select: 'firstName lastName avatar'
+          }
+        ]);
+
+        if (!notification) {
+          return socket.emit("error", { message: "Không tìm thấy thông báo" });
+        }
+
+        // Emit sự kiện cập nhật cho tất cả các socket của user này
+        const userSocketIds = onlineUsers.get(socket.userId);
+        if (userSocketIds) {
+          userSocketIds.forEach(socketId => {
+            io.to(socketId).emit("notification_marked_as_read", { 
+              notificationId,
+              notification // Gửi toàn bộ thông tin notification đã được populate
+            });
+          });
+        }
+
+        console.log(`Notification ${notificationId} marked as read for user ${socket.userId}`);
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+        socket.emit("error", { message: "Không thể đánh dấu thông báo là đã đọc" });
       }
     });
 

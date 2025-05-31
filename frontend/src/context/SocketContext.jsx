@@ -62,6 +62,18 @@ export const SocketProvider = ({ children }) => {
         showNotificationToast(notification);
       });
 
+      newSocket.on('notifications_marked_as_read', () => {
+        setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true })));
+        setUnreadNotifications(0);
+      });
+
+      newSocket.on('notification_marked_as_read', ({ notificationId }) => {
+        setNotifications(prev => prev.map(notif => 
+          notif._id === notificationId ? { ...notif, isRead: true } : notif
+        ));
+        setUnreadNotifications(prev => Math.max(0, prev - 1));
+      });
+
       // Generic error listeners
       newSocket.on('disconnect', (reason) => {
         console.log('Socket disconnected:', reason);
@@ -90,6 +102,8 @@ export const SocketProvider = ({ children }) => {
         newSocket.off('user_online');
         newSocket.off('user_offline');
         newSocket.off('new_notification');
+        newSocket.off('notifications_marked_as_read');
+        newSocket.off('notification_marked_as_read');
         newSocket.off('disconnect');
         newSocket.off('error');
         newSocket.off('connect_error');
@@ -127,13 +141,23 @@ export const SocketProvider = ({ children }) => {
   };
 
   const markNotificationsAsRead = () => {
-    setUnreadNotifications(0);
-    // No actual API call to mark as read on server in this snippet, 
-    // but you might want to implement that.
-    // For now, just marking client-side notifications as read.
-    setNotifications(prev => 
-      prev.map(notif => ({ ...notif, isRead: true }))
-    );
+    if (socket) {
+      socket.emit('mark_notifications_as_read');
+      setUnreadNotifications(0);
+      setNotifications(prev => 
+        prev.map(notif => ({ ...notif, isRead: true }))
+      );
+    }
+  };
+
+  const markNotificationAsRead = (notificationId) => {
+    if (socket) {
+      socket.emit('mark_notification_as_read', { notificationId });
+      setNotifications(prev => prev.map(notif => 
+        notif._id === notificationId ? { ...notif, isRead: true } : notif
+      ));
+      setUnreadNotifications(prev => Math.max(0, prev - 1));
+    }
   };
 
   const startTyping = (conversationId) => {
@@ -163,6 +187,7 @@ export const SocketProvider = ({ children }) => {
     sendMessage,
     sendNotification,
     markNotificationsAsRead,
+    markNotificationAsRead,
     startTyping,
     stopTyping,
     markAsRead
