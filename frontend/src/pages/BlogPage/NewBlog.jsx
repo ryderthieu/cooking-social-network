@@ -3,31 +3,35 @@ import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 import blog1 from "../../assets/Blog/blog1.png";
 import blog2 from "../../assets/Blog/blog2.png";
 import avatar from "../../assets/avatar.jpg";
-import Contact from "../../components/sections/Home/Contact";
 import Recipe from "../../components/common/Recipe";
+import { Link } from "react-router-dom";
 
 const NewBlog = () => {
   return (
-    <div className="px-[300px] pt-[30px] pb-[50px]">
-      <h1 className="font-semibold text-center text-[35px]">
+    <div className="px-[300px] pt-[20px] pb-[50px]">
+      <h1 className="font-semibold text-center text-[30px]">
         Phong phú khẩu vị riêng của người Huế
       </h1>
       <div className="flex justify-center items-center gap-10 mt-[20px]">
         <div className="flex items-center gap-4">
-          <img className="w-12 h-12" src={avatar} alt="" />
+          <img className="w-12 h-12 rounded-full" src={avatar} alt="" />
           <p className="text-[16px] font-bold">Huỳnh Văn Thiệu</p>
         </div>
         <div className="text-[16px] text-[rgba(0,0,0,0.6)] border-l-2 border-gray-200 pl-8 font-medium">
           Ngày 15 tháng 3 năm 2022
         </div>
       </div>
-      <p className="my-[20px] text-[18px] text-center text-[rgba(0,0,0,0.6)]">
+      <p className="my-4 text-[16px] text-center text-[rgba(0,0,0,0.6)]">
         Nét Văn Hóa Ẩm Thực Của Người Huế
       </p>
-      <img className="mb-[30px]" src={blog1} alt="" />
+      <img
+        className="mb-[30px] h-[350px] w-full object-cover rounded-3xl"
+        src={blog1}
+        alt=""
+      />
       <div className="flex">
         <div className="w-[70%]">
-          <h3 className="text-[24px] font-semibold mb-4">
+          <h3 className="text-[20px] font-semibold mb-4">
             Người Huế thích vị ngọt thanh, vị đường vừa phải.
           </h3>
           <p className="text-[rgba(0,0,0,0.6)] mb-4 leading-7 text-justify">
@@ -41,7 +45,7 @@ const NewBlog = () => {
             ăn đó là món rất bình thường, dân dã hay là thịt cá, cao lương mỹ
             vị. Nói chung là người Huế có “tật” chế biến. .
           </p>
-          <h3 className="text-[24px] font-semibold mb-4">
+          <h3 className="text-[20px] font-semibold mb-4">
             Người Huế thích những món ăn “thấm tháp”, có vị mặn hơn phía Nam,
             phía Bắc, nhưng không mặn theo kiểu Bắc Trung Bộ.
           </h3>
@@ -57,7 +61,7 @@ const NewBlog = () => {
             vùng đất kinh kỳ.
           </p>
           <img className="mb-4 mx-auto" src={blog2} alt="" />
-          <h3 className="text-[24px] font-semibold mb-4">
+          <h3 className="text-[20px] font-semibold mb-4">
             Tại Nét Huế gần như mỗi món ăn lại kèm theo 1 loại nước chấm khác
             nhau.
           </h3>
@@ -70,7 +74,7 @@ const NewBlog = () => {
             trăm năm từ thời vua chúa đến hiện tại mà còn là nét văn hóa ẩm thực
             đáng trân quý là lưu giữ. 
           </p>
-          <div className="bg-[rgba(255,151,0,0.1)] text-center p-6 rounded-lg mt-4 font-medium text-[28px] italic my-[20px] ">
+          <div className="bg-[rgba(255,151,0,0.1)] text-center p-6 rounded-lg mt-4 font-medium text-[22px] italic my-[20px] ">
             “Hương vị Cố đô – Tinh hoa ẩm thực Huế, đậm đà bản sắc, tinh tế từng
             món ăn!”
           </div>
@@ -82,16 +86,20 @@ const NewBlog = () => {
           <FaInstagram className="w-8 h-8 my-2 cursor-pointer" />
         </div>
       </div>
-      <Contact />
-      <div className="my-[20px] ">
-        <h1 className="text-center text-[32px] font-semibold ">
+      <div className="my-4">
+        <h1 className="text-center text-[24px] font-semibold ">
           Gợi ý các món ăn
         </h1>
-        <div className="grid grid-cols-3 gap-2 mt-8 mb-8">
+        <div className="grid grid-cols-3 gap-2 mt-3 mb-8">
           <Recipe />
           <Recipe />
           <Recipe />
         </div>
+        <Link to="/recipes" className="flex justify-center">
+          <button className="bg-[#FF37A5] text-white font-semibold py-3 px-8 rounded-[30px] text-[14px] hover:bg-[#FF2A8F] transition-colors duration-300">
+            Xem tất cả
+          </button>
+        </Link>
       </div>
     </div>
   );

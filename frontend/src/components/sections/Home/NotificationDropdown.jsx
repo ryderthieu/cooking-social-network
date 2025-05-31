@@ -62,7 +62,7 @@ export default function NotificationDropdown() {
       {open && (
         <div className="absolute right-0 mt-6 w-96 bg-white border border-gray-200 rounded-xl shadow-xl z-50">
           <div className="p-4 border-b border-gray-100 font-semibold text-gray-800">
-            Notification
+            Thông báo
           </div>
           <div className="max-h-72 overflow-y-auto divide-y divide-gray-100">
             {notifications.map((n, index) => (
@@ -79,7 +79,7 @@ export default function NotificationDropdown() {
                   <p>
                     <span className="font-semibold text-black">{n.user}</span>{" "}
                     {n.action}{" "}
-                    <span className="text-orange-500 hover:underline cursor-pointer">
+                    <span className="text-orange-500 hover:orange-600 cursor-pointer">
                       {n.id}
                     </span>
                   </p>
@@ -91,9 +91,9 @@ export default function NotificationDropdown() {
           <div className="p-4 text-center">
             <a
               href="/notification"
-              className="text-sm text-orange-500 font-semibold hover:underline"
+              className="text-sm text-orange-500 font-semibold hover:orange-600"
             >
-              All Notification
+              Xem tất cả thông báo
             </a>
           </div>
         </div>

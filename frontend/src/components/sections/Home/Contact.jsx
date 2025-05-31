@@ -61,7 +61,7 @@ const Contact = () => {
                   <button
                     type="submit"
                     disabled={isSubscribing}
-                    className="bg-orange-500 w-[25%] hover:bg-orange-600 text-white px-4 py-2 rounded-r-md transition-colors duration-300"
+                    className="bg-[#FFAF01] w-[25%] hover:bg-[#F63C3C] text-white px-4 py-2 rounded-r-md transition-colors duration-300"
                   >
                     {isSubscribing ? "Đang gửi..." : "Đăng ký"}
                   </button>
@@ -70,7 +70,7 @@ const Contact = () => {
             </div>
 
             <div className="md:w-1/2">
-              <div className="bg-gradient-to-r from-orange-400 to-pink-500 rounded-xl p-6 shadow-lg">
+              <div className="bg-gradient-to-tr from-[#FFE101] from-0% via-[#FFAF01] via-50% to-[#F63C3C] to-100% rounded-2xl p-6 shadow-lg">
                 <h3 className="text-xl font-bold text-white mb-4">
                   Liên hệ với chúng tôi
                 </h3>
@@ -108,7 +108,7 @@ const Contact = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full font-semibold bg-white text-pink-500 hover:bg-gray-100 font-medium px-4 py-2 rounded-md transition-colors duration-300"
+                    className="w-full font-semibold bg-white text-[#F63C3C] hover:bg-gray-100 px-4 py-2 rounded-md transition-colors duration-300"
                   >
                     {isSubmitting ? "Đang gửi..." : "Gửi tin nhắn"}
                   </button>

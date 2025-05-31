@@ -4,10 +4,10 @@ import Recipe from "../../components/common/Recipe.jsx";
 import Menu from "../../components/sections/Home/Menu.jsx";
 import Contact from "../../components/sections/Home/Contact.jsx";
 import { IoSearchSharp } from "react-icons/io5";
-import Blogs from "@/components/sections/Home/Blogs.jsx";
 import VideoShorts from "../../components/sections/Home/VideoShorts.jsx";
 import { Link } from "react-router-dom";
 import CarouselPlugin from "../../components/sections/Home/CarouselHero.jsx";
+import AllBlogs from "../../components/sections/Home/AllBlogs.jsx";
 const HomePage = () => {
   const [search, setSearch] = useState("");
 
@@ -51,7 +51,7 @@ const HomePage = () => {
               Xem tất cả
             </Link>
           </div>
-          <div className="grid grid-cols-4 gap-6 mt-8 mb-8">
+          <div className="grid grid-cols-4 gap-6 mt-4 mb-8">
             <Recipe />
             <Recipe />
             <Recipe />
@@ -61,7 +61,7 @@ const HomePage = () => {
             <Recipe />
           </div>
         </div>
-        <Blogs />
+        <AllBlogs />
       </div>
       <Contact />
     </div>

@@ -4,6 +4,10 @@ import HomePage from "./pages/HomePage/index";
 import NewBlog from "./pages/BlogPage/NewBlog";
 import HighlightBlog from "./pages/BlogPage/HighlightBlog";
 import TopBlog from "./pages/BlogPage/TopBlog";
+import Blog1 from "./pages/BlogPage/Blog1";
+import Blog2 from "./pages/BlogPage/Blog2";
+import Blog3 from "./pages/BlogPage/Blog3";
+import Blog4 from "./pages/BlogPage/Blog4";
 import LayoutRoute from "./routes/LayoutRoute";
 import TermsPage from "./pages/SupportPage/TermsAndConditions/TermsPage";
 import ConditionsPage from "./pages/SupportPage/TermsAndConditions/ConditionsPage";
@@ -39,10 +43,15 @@ function App() {
 
   const routes = [
     { path: "/", element: <HomePage /> },
+    { path: "*", element: <HomePage /> },
     { path: "/about", element: <AboutPage /> },
     { path: "/blog/bai-viet-moi", element: <NewBlog /> },
     { path: "/blog/bai-viet-noi-bat", element: <HighlightBlog /> },
     { path: "/blog/bai-viet-pho-bien", element: <TopBlog /> },
+    { path: "/blog/1", element: <Blog1 /> },
+    { path: "/blog/2", element: <Blog2 /> },
+    { path: "/blog/3", element: <Blog3 /> },
+    { path: "/blog/4", element: <Blog4 /> },
     { path: "/support/dieu-khoan", element: <TermsPage /> },
     { path: "/support/dieu-kien", element: <ConditionsPage /> },
     { path: "/support/huong-dan", element: <InstructionsPage /> },
@@ -81,7 +90,6 @@ function App() {
           element={<LayoutRoute element={element} />}
         />
       ))}
-      <Route path="*" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
