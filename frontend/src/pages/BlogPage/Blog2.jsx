@@ -7,7 +7,7 @@ import b4 from "../../assets/Blog/b4.jpg";
 import b5 from "../../assets/Blog/b5.jpg";
 import b6 from "../../assets/Blog/b6.jpg";
 import b7 from "../../assets/Blog/b7.jpg";
-import avatar1 from "../../assets/avatar1.jpg";
+import avatar from "../../assets/avatar.jpg";
 import Recipe from "../../components/common/Recipe";
 import { Link } from "react-router-dom";
 import banh from "../../assets/Blog/banh.jpg";
@@ -20,8 +20,8 @@ const Blog2 = () => {
       </h1>
       <div className="flex justify-center items-center gap-10 mt-[25px]">
         <div className="flex items-center gap-4">
-          <img className="w-12 h-12 rounded-full" src={avatar1} alt="" />
-          <p className="text-[16px] font-bold">Trần Đỗ Phương Nhi</p>
+          <img className="w-12 h-12 rounded-full" src={avatar} alt="" />
+          <p className="text-[16px] font-bold">Huỳnh Văn Thiệu</p>
         </div>
         <div className="text-[16px] text-[rgba(0,0,0,0.6)] border-l-2 border-gray-200 pl-8 font-medium">
           Ngày 15 tháng 3 năm 2025
@@ -154,7 +154,7 @@ const Blog2 = () => {
           <FaInstagram className="w-8 h-8 my-2 cursor-pointer" />
         </div>
       </div>
-      <div className="mb-8 mt-10">
+      <div className="mb-8 mt-14">
         <h1 className="text-center text-[24px] font-semibold ">
           Gợi ý các món ăn
         </h1>
