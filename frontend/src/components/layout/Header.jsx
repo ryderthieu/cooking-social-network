@@ -28,7 +28,7 @@ const Header = () => {
   const searchRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
-  const {user, logout} = useAuth()
+  const { user, logout } = useAuth();
   useEffect(() => {
     const handleClickOutside = (event) => {
       const target = event.target;
@@ -330,13 +330,16 @@ const Header = () => {
                   <div className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
                     Trang cá nhân
                   </div>
-                  <div className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
+                  <div
+                    onClick={() => navigate("/account")}
+                    className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200"
+                  >
                     Tài khoản
                   </div>
                   <div className="border-t-[1px] border-[#FBDCB0] my-3">
                     <p
                       onClick={() => {
-                        logout()
+                        logout();
                         setIsDropdownOpen(false);
                       }}
                       className="text-[#FF6363] font-medium text-[18px] mb-3 cursor-pointer mx-4 mt-3 hover:text-red-600 transition-colors duration-200"
@@ -351,7 +354,7 @@ const Header = () => {
         ) : (
           <div>
             <button
-              onClick={() => navigate('/login')}
+              onClick={() => navigate("/login")}
               className="font-medium text-[18px] text-white bg-[#04043F] hover:bg-[#03032d] py-2 px-6 rounded-[30px] ml-[80px] transition-colors duration-200"
             >
               Đăng nhập
