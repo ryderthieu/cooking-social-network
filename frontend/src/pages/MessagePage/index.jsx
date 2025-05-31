@@ -19,7 +19,7 @@ import {
   Heart,
   Info,
   Plus,
-  Image,
+  Image as ImageIcon,
   Smile,
   Send,
   MoreHorizontal,
@@ -30,7 +30,14 @@ import {
   Video,
   Paperclip,
   X,
-  MessageSquareText
+  MessageSquareText,
+  Settings,
+  Bell,
+  User,
+  Image,
+  FileText,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { getConversation, getUserConversations } from "@/services/conversationService";
 import { deleteMessage, getMessagesByConversation, searchMessages } from "@/services/messageService";
@@ -77,6 +84,14 @@ export default function MessagePage() {
 
   const fileInputRef = useRef(null);
   const [isUploading, setIsUploading] = useState(false);
+
+  const [showInfoSidebar, setShowInfoSidebar] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('media'); // 'media', 'files', 'links'
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  // Thêm state cho modal tìm kiếm
+  const [showSearchModal, setShowSearchModal] = useState(false);
 
   // Effect để ưu tiên selectedConversationId từ URL params
   useEffect(() => {
@@ -934,7 +949,13 @@ export default function MessagePage() {
       });
 
       if (response.data.success) {
-        setSearchResults(response.data.data.messages);
+        // Lọc bỏ tin nhắn đã xóa và tin nhắn không hợp lệ khỏi kết quả tìm kiếm
+        const filteredResults = response.data.data.messages.filter(msg => {
+          return !isMessageDeleted(msg) && 
+                 ((msg.type === 'text' && msg.text && msg.text.trim() !== '') ||
+                  (msg.type === 'image' && msg.image && msg.image.trim() !== ''));
+        });
+        setSearchResults(filteredResults);
       } else {
         setSearchError(response.data.message || 'Không thể tìm kiếm tin nhắn');
       }
@@ -970,6 +991,7 @@ export default function MessagePage() {
 
   const handleSearchResultClick = (messageId) => {
     scrollToMessage(messageId);
+    setIsSearchOpen(false); // Đóng dropdown sau khi click
   };
 
   const handleCloseSearch = () => {
@@ -1104,9 +1126,20 @@ export default function MessagePage() {
     }
   `;
 
+  // Thêm hàm kiểm tra tin nhắn đã xóa với nhiều điều kiện hơn
+  const isMessageDeleted = (message) => {
+    return message.recalled || 
+           message.text === "Tin nhắn đã được thu hồi" || 
+           message.text === "Tin nhắn này đã bị xóa" ||
+           message.content === "Tin nhắn đã được thu hồi" ||
+           message.content === "Tin nhắn này đã bị xóa" ||
+           (typeof message.text === 'string' && message.text.includes('đã được thu hồi')) ||
+           (typeof message.content === 'string' && message.content.includes('đã được thu hồi'));
+  };
+
   if (loading) { // Only show initial full page loader
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-gray-100 mt-[70px]">
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-100 mt-[80px]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
         <p className="ml-4 text-gray-600 text-lg">Đang tải...</p>
       </div>
@@ -1115,7 +1148,7 @@ export default function MessagePage() {
 
   if (error && conversations.length === 0) { // Show error only if no conversations loaded
     return (
-      <div className="fixed inset-0 flex flex-col items-center justify-center bg-red-50 text-red-700 mt-[70px] p-4">
+      <div className="fixed inset-0 flex flex-col items-center justify-center bg-red-50 text-red-700 mt-[80px] p-4">
         <Info size={48} className="mb-4"/>
         <p className="text-xl font-semibold mb-2">Ối, có lỗi xảy ra!</p>
         <p className="text-center mb-6">{error}</p>
@@ -1130,7 +1163,7 @@ export default function MessagePage() {
   }
 
   return (
-    <div className="fixed inset-0 flex bg-gray-100 mt-[70px] h-[calc(100vh-70px)]">
+    <div className="fixed inset-0 flex bg-gray-100 mt-[80px] h-[calc(100vh-70px)]">
       {/* Sidebar */}
       <div className="w-[360px] bg-white border-r border-gray-200 flex flex-col h-full">
         {/* Sidebar Header */}
@@ -1212,85 +1245,57 @@ export default function MessagePage() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col h-full bg-white relative">
-        {selectedConversationId && conversations.find(c => c._id === selectedConversationId) ? (
-          <>
-            {/* Chat Header with Search */}
-            <div className="px-6 py-3 border-b border-gray-200 bg-white shadow-sm relative">
-              <div className="flex items-center justify-between">
-                {(() => {
-                  const conversation = conversations.find(c => c._id === selectedConversationId);
-                const otherUser = conversation?.otherUser;
-                const isOnline = otherUser?.isOnline;
-                  
-                  return (
-                  <div className="flex items-center">
-                    <div className="relative flex-shrink-0">
-                      <img
-                        src={otherUser?.avatar || "/default-avatar.png"}
-                        alt={otherUser?.name || "Avatar"}
-                        className="w-10 h-10 rounded-full object-cover"
-                        onError={(e) => { e.target.src = "/default-avatar.png" }}
-                        />
-                        {isOnline && (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
-                        )}
+      <div className="flex-1 flex h-full">
+        {/* Main Chat */}
+        <div className={`flex flex-col bg-white transition-all duration-300 ${showInfoSidebar ? 'w-[65%]' : 'w-full'}`}>
+          {selectedConversationId && conversations.find(c => c._id === selectedConversationId) ? (
+            <>
+              {/* Chat Header */}
+              <div className="px-6 py-3 border-b border-gray-200 bg-white shadow-sm">
+                <div className="flex items-center justify-between">
+                  {(() => {
+                    const conversation = conversations.find(c => c._id === selectedConversationId);
+                    const otherUser = conversation?.otherUser;
+                    const isOnline = otherUser?.isOnline;
+                    
+                    return (
+                      <div className="flex items-center">
+                        <div className="relative flex-shrink-0">
+                          <img
+                            src={otherUser?.avatar || "/default-avatar.png"}
+                            alt={otherUser?.name || "Avatar"}
+                            className="w-10 h-10 rounded-full object-cover"
+                            onError={(e) => { e.target.src = "/default-avatar.png" }}
+                          />
+                          {isOnline && (
+                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                          )}
+                        </div>
+                        <div className="ml-3">
+                          <h2 className="font-semibold text-gray-800 text-base">
+                            {otherUser?.name || 'Người dùng'}
+                          </h2>
+                          <p className={`text-xs ${isOnline ? 'text-green-600' : 'text-gray-500'}`}>
+                            {isOnline ? 'Đang hoạt động' : 'Không hoạt động'}
+                          </p>
+                        </div>
                       </div>
-                    <div className="ml-3">
-                      <h2 className="font-semibold text-gray-800 text-base">
-                        {otherUser?.name || 'Người dùng'}
-                        </h2>
-                      <p className={`text-xs ${isOnline ? 'text-green-600' : 'text-gray-500'}`}>
-                        {isOnline ? 'Đang hoạt động' : 'Không hoạt động'}
-                        </p>
-                      </div>
+                    );
+                  })()}
+                  <div className="flex items-center space-x-2">
+                    <button className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600 hover:text-blue-500">
+                      <Phone size={20} />
+                    </button>
+                    <button className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600 hover:text-blue-500">
+                      <Video size={20} />
+                    </button>
+                    <button 
+                      onClick={() => setShowInfoSidebar(prev => !prev)}
+                      className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600 hover:text-blue-500"
+                    >
+                      <Info size={20} />
+                    </button>
                   </div>
-                  );
-                })()}
-                <div className="flex items-center space-x-2">
-                  {/* Search Input */}
-                  <div className="relative mr-2">
-                    <input
-                      type="text"
-                      value={searchText}
-                      onChange={(e) => setSearchText(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                      placeholder="Tìm tin nhắn..."
-                      className="w-48 px-3 py-1.5 pl-8 text-sm bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                    />
-                    <Search 
-                      className="absolute left-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer" 
-                      size={14}
-                      onClick={handleSearch}
-                    />
-                    {isSearching && (
-                      <div className="absolute right-2.5 top-1/2 transform -translate-y-1/2">
-                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-500"></div>
-                      </div>
-                    )}
-                    {searchText && !isSearching && (
-                      <button
-                        onClick={() => {
-                          setSearchText('');
-                          setSearchResults([]);
-                          setSearchError(null);
-                        }}
-                        className="absolute right-2.5 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      >
-                        <X size={14} />
-                      </button>
-                    )}
-                  </div>
-
-                  <button className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600 hover:text-blue-500">
-                    <Phone size={20} />
-                  </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600 hover:text-blue-500">
-                    <Video size={20} />
-                  </button>
-                  <button className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-600 hover:text-blue-500">
-                    <Info size={20} />
-                  </button>
                 </div>
               </div>
 
@@ -1343,363 +1348,569 @@ export default function MessagePage() {
                   <p className="text-sm">{searchError}</p>
                 </div>
               )}
-            </div>
 
-            {/* Style for message highlight */}
-            <style>
-              {`
-                @keyframes highlight {
-                  0% { background-color: rgba(59, 130, 246, 0.1); }
-                  50% { background-color: rgba(59, 130, 246, 0.2); }
-                  100% { background-color: transparent; }
-                }
-                .message-highlighted {
-                  animation: highlight 2s ease-out;
-                }
-              `}
-            </style>
+              {/* Style for message highlight */}
+              <style>
+                {`
+                  @keyframes highlight {
+                    0% { background-color: rgba(59, 130, 246, 0.1); }
+                    50% { background-color: rgba(59, 130, 246, 0.2); }
+                    100% { background-color: transparent; }
+                  }
+                  .message-highlighted {
+                    animation: highlight 2s ease-out;
+                  }
+                `}
+              </style>
 
-            {/* Messages Container */}
-            <div
-              ref={messageContainerRef}
-              className="flex-1 overflow-y-auto p-4 space-y-1 bg-gradient-to-b from-white to-gray-50/50"
-            >
-              {/* Loading indicator cho infinite scroll */}
-              {isLoadingMore && (
-                <div className="flex justify-center items-center py-3">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
-                  <span className="ml-2 text-sm text-gray-500">Đang tải tin nhắn cũ...</span>
-                </div>
-              )}
+              {/* Messages Container */}
+              <div
+                ref={messageContainerRef}
+                className="flex-1 overflow-y-auto p-4 space-y-1 bg-gradient-to-b from-white to-gray-50/50"
+              >
+                {/* Loading indicator cho infinite scroll */}
+                {isLoadingMore && (
+                  <div className="flex justify-center items-center py-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                    <span className="ml-2 text-sm text-gray-500">Đang tải tin nhắn cũ...</span>
+                  </div>
+                )}
 
-              {/* Thông báo khi không còn tin nhắn cũ */}
-              {!isLoadingMore && !hasMoreMessages && messages.length > 0 && (
-                <div className="text-center py-3">
-                  <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                    Bạn đã xem hết tin nhắn
-                  </span>
-                </div>
-              )}
+                {/* Thông báo khi không còn tin nhắn cũ */}
+                {!isLoadingMore && !hasMoreMessages && messages.length > 0 && (
+                  <div className="text-center py-3">
+                    <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                      Bạn đã xem hết tin nhắn
+                    </span>
+                  </div>
+                )}
 
-              {/* Loading indicator cho lần tải đầu tiên */}
-              {isLoading && messages.length === 0 && !isLoadingMore && (
-                <div className="flex justify-center items-center h-full">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-                  <p className="ml-3 text-gray-500">Đang tải tin nhắn...</p>
-                </div>
-              )}
+                {/* Loading indicator cho lần tải đầu tiên */}
+                {isLoading && messages.length === 0 && !isLoadingMore && (
+                  <div className="flex justify-center items-center h-full">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                    <p className="ml-3 text-gray-500">Đang tải tin nhắn...</p>
+                  </div>
+                )}
 
-              {/* Hiển thị khi không có tin nhắn */}
-              {!isLoading && messages.length === 0 && !isLoadingMore && selectedConversationId && (
-                <div className="flex flex-col justify-center items-center h-full text-gray-500">
-                  <MessageSquareText size={48} className="mb-4 text-gray-400"/>
-                  <p className="font-semibold">Không có tin nhắn nào</p>
-                  <p className="text-sm">Hãy bắt đầu cuộc trò chuyện này!</p>
-                </div>
-              )}
+                {/* Hiển thị khi không có tin nhắn */}
+                {!isLoading && messages.length === 0 && !isLoadingMore && selectedConversationId && (
+                  <div className="flex flex-col justify-center items-center h-full text-gray-500">
+                    <MessageSquareText size={48} className="mb-4 text-gray-400"/>
+                    <p className="font-semibold">Không có tin nhắn nào</p>
+                    <p className="text-sm">Hãy bắt đầu cuộc trò chuyện này!</p>
+                  </div>
+                )}
 
-              {/* Danh sách tin nhắn */}
-              {messages.map((message, index) => {
-                const prevMessage = messages[index-1];
-                const nextMessage = messages[index+1];
+                {/* Danh sách tin nhắn */}
+                {messages.map((message, index) => {
+                  const prevMessage = messages[index-1];
+                  const nextMessage = messages[index+1];
 
-                const showSenderInfo = !message.isOwn && 
-                  (index === 0 || prevMessage?.sender._id !== message.sender._id || (prevMessage && message.createdAt && prevMessage.createdAt && new Date(message.createdAt).getTime() - new Date(prevMessage.createdAt).getTime() > 5*60*1000));
-                
-                const isFirstInGroupChain = index === 0 || prevMessage?.sender._id !== message.sender._id || message.isOwn !== prevMessage?.isOwn;
-                const isLastInGroupChain = index === messages.length - 1 || nextMessage?.sender._id !== message.sender._id || message.isOwn !== nextMessage?.isOwn;
+                  const showSenderInfo = !message.isOwn && 
+                    (index === 0 || prevMessage?.sender._id !== message.sender._id || (prevMessage && message.createdAt && prevMessage.createdAt && new Date(message.createdAt).getTime() - new Date(prevMessage.createdAt).getTime() > 5*60*1000));
+                  
+                  const isFirstInGroupChain = index === 0 || prevMessage?.sender._id !== message.sender._id || message.isOwn !== prevMessage?.isOwn;
+                  const isLastInGroupChain = index === messages.length - 1 || nextMessage?.sender._id !== message.sender._id || message.isOwn !== nextMessage?.isOwn;
 
-                let showTimeSeparator = false;
-                if (message.createdAt) {
-                  if (index === 0) {
-                    showTimeSeparator = true;
-                  } else if (prevMessage && prevMessage.createdAt) {
-                    const diffMinutes = differenceInMinutes(new Date(message.createdAt), new Date(prevMessage.createdAt));
-                    if (diffMinutes >= TIME_GROUPING_THRESHOLD_MINUTES) {
+                  let showTimeSeparator = false;
+                  if (message.createdAt) {
+                    if (index === 0) {
                       showTimeSeparator = true;
+                    } else if (prevMessage && prevMessage.createdAt) {
+                      const diffMinutes = differenceInMinutes(new Date(message.createdAt), new Date(prevMessage.createdAt));
+                      if (diffMinutes >= TIME_GROUPING_THRESHOLD_MINUTES) {
+                        showTimeSeparator = true;
+                      }
                     }
                   }
-                }
-                  
-                  return (
-                  <React.Fragment key={message.id}>
-                    {showTimeSeparator && (
-                      <div className="text-center my-3">
-                        <span className="text-xs text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-slate-400 px-2 py-1 rounded-full shadow-sm">
-                          {format(new Date(message.createdAt), 'HH:mm', { locale: vi })}
-                        </span>
-                      </div>
-                    )}
-                    <div
-                      id={`message-item-${message.id}`}
-                      className={`flex ${message.isOwn ? "justify-end" : "justify-start"} ${
-                        showSenderInfo && !showTimeSeparator ? "mt-2" : "mt-px"
-                      } group relative message-item`}
-                    >
-                      {!message.isOwn && (
-                        <div className="flex-shrink-0 w-8 h-8 self-end mr-2">
-                          {showSenderInfo && (
-                            <img
-                              src={message.sender.avatar || "/default-avatar.png"}
-                              alt={`${message.sender.firstName} ${message.sender.lastName}`}
-                              className="w-full h-full rounded-full object-cover"
-                            />
-                          )}
+                    
+                    return (
+                    <React.Fragment key={message.id}>
+                      {showTimeSeparator && (
+                        <div className="text-center my-3">
+                          <span className="text-xs text-gray-500 bg-gray-100 dark:bg-slate-700 dark:text-slate-400 px-2 py-1 rounded-full shadow-sm">
+                            {format(new Date(message.createdAt), 'HH:mm', { locale: vi })}
+                          </span>
                         </div>
                       )}
-                      <div className={`flex flex-col ${message.isOwn ? "items-end" : "items-start"} max-w-xs sm:max-w-sm md:max-w-md relative group`}>
-                        <div className={`flex items-center gap-1`}>
-                          {/* Message bubble */}
-                          <div 
-                            onMouseEnter={(e) => {
-                              if (!message.recalled) {
-                                const rect = e.currentTarget.getBoundingClientRect();
-                                setTooltipConfig({
-                                  visible: true,
-                                  content: formatDetailedMessageTime(message.createdAt),
-                                  top: rect.top + rect.height / 2,
-                                  left: rect.left
-                                });
-                              }
-                            }}
-                            onMouseLeave={() => {
-                              setTooltipConfig(prev => ({ ...prev, visible: false }));
-                            }}
-                            className={`relative px-3 py-2 rounded-lg
-                              ${message.isOwn ? "bg-blue-500 text-white dark:bg-blue-600 dark:text-slate-50" : "bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-100"} 
-                              ${message.recalled ? "italic text-gray-500" : ""} 
-                              ${message.type === 'image' ? 'p-1' : ''}
-                              hover:shadow-md transition-shadow duration-150`}
-                          >
-                            {renderMessageContent(message)}
-                          </div>
-
-                          {/* Message actions */}
-                          {!message.recalled && (
-                            <div className={`absolute ${message.isOwn ? "left-0 -translate-x-full -ml-1" : "right-0 translate-x-full ml-1"} top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150`}>
-                              {!message.isOwn ? (
-                                <>
-                                  <button
-                                    onClick={(e) => { 
-                                      e.stopPropagation(); 
-                                      setReactionPickerTarget({
-                                        messageId: message.id || message._id,
-                                        anchorEl: e.currentTarget
-                                      });
-                                    }}
-                                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-gray-500 dark:text-slate-400"
-                                    title="Thả cảm xúc"
-                                  >
-                                    <Smile size={16} />
-                                  </button>
-                                  <button 
-                                    onClick={(e) => { e.stopPropagation(); handleReply(message); }}
-                                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-gray-500 dark:text-slate-400"
-                                    title="Trả lời"
-                                  >
-                                    <Reply size={16} />
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  <button
-                                    onClick={(e) => { e.stopPropagation(); handleReply(message); }}
-                                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-gray-500 dark:text-slate-400"
-                                    title="Trả lời"
-                                  >
-                                    <Reply size={16} />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteMessage(message)}
-                                    className="p-1.5 hover:bg-red-100 dark:hover:bg-red-700 rounded-full text-red-500 dark:text-red-300"
-                                    title="Thu hồi"
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Reactions */}
-                        {Array.isArray(message.reactions) && message.reactions.length > 0 && !message.recalled && (
-                          <div className={`flex flex-wrap gap-x-0.5 gap-y-1 mt-1 items-center ${message.isOwn ? "justify-end" : "justify-start"}`}>
-                            {message.reactions.slice(0, 4).map((reaction, idx) => {
-                              if (!reaction || typeof reaction.type !== 'string' || !Array.isArray(reaction.users)) {
-                                return null;
-                              }
-                              const userHasReacted = reaction.users.some(u => u._id === user?._id);
-                              return (
-                                <button
-                                  key={`${reaction.type}-${idx}`}
-                                  onClick={(e) => { e.stopPropagation(); if (!message.isOwn) handleReaction(message.id, reaction.type); }}
-                                  disabled={message.isOwn}
-                                  className={`px-1 py-px rounded-full text-xs flex items-center gap-0.5 transition-colors shadow-sm 
-                                    ${userHasReacted
-                                      ? "bg-blue-100 dark:bg-blue-600 border border-blue-400 dark:border-blue-500 text-blue-700 dark:text-blue-100"
-                                      : "bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-200"
-                                    } ${message.isOwn ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
-                                  title={reaction.users.map(u => (u && (u.firstName || u.username)) || "Ai đó").join(", ") + ` đã thả ${reaction.type}`}
-                                >
-                                  <span className="text-xs">{reaction.type}</span>
-                                  {reaction.users.length > 0 && (
-                                    <span className="font-normal text-[10px] ml-px">
-                                      {reaction.users.length}
-                                    </span>
-                                  )}
-                                </button>
-                              );
-                            })}
-                            {message.reactions.length > 4 && !message.recalled && (
-                              <div
-                                className="px-1 py-px rounded-full text-[10px] flex items-center justify-center bg-gray-200 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 cursor-pointer shadow-sm min-w-[20px] h-[18px] ml-0.5"
-                                title={`Xem thêm ${message.reactions.length - 4} cảm xúc khác`}
-                              >
-                                +{message.reactions.length - 4}
-                              </div>
+                      <div
+                        id={`message-item-${message.id}`}
+                        className={`flex ${message.isOwn ? "justify-end" : "justify-start"} ${
+                          showSenderInfo && !showTimeSeparator ? "mt-2" : "mt-px"
+                        } group relative message-item`}
+                      >
+                        {!message.isOwn && (
+                          <div className="flex-shrink-0 w-8 h-8 self-end mr-2">
+                            {showSenderInfo && (
+                              <img
+                                src={message.sender.avatar || "/default-avatar.png"}
+                                alt={`${message.sender.firstName} ${message.sender.lastName}`}
+                                className="w-full h-full rounded-full object-cover"
+                              />
                             )}
                           </div>
                         )}
+                        <div className={`flex flex-col ${message.isOwn ? "items-end" : "items-start"} max-w-xs sm:max-w-sm md:max-w-md relative group`}>
+                          <div className={`flex items-center gap-1`}>
+                            {/* Message bubble */}
+                            <div 
+                              onMouseEnter={(e) => {
+                                if (!message.recalled) {
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  setTooltipConfig({
+                                    visible: true,
+                                    content: formatDetailedMessageTime(message.createdAt),
+                                    top: rect.top + rect.height / 2,
+                                    left: rect.left
+                                  });
+                                }
+                              }}
+                              onMouseLeave={() => {
+                                setTooltipConfig(prev => ({ ...prev, visible: false }));
+                              }}
+                              className={`relative px-3 py-2 rounded-lg
+                                ${message.isOwn ? "bg-blue-500 text-white dark:bg-blue-600 dark:text-slate-50" : "bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-100"} 
+                                ${message.recalled ? "italic text-gray-500" : ""} 
+                                ${message.type === 'image' ? 'p-1' : ''}
+                                hover:shadow-md transition-shadow duration-150`}
+                            >
+                              {renderMessageContent(message)}
+                            </div>
 
-                        {/* Message status */}
-                        {(() => {
-                          if (message.id === lastReadUserMessageId && latestReadTimestamp) {
-                            return (
-                              <div className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5 px-1">
-                                Đã xem {format(new Date(latestReadTimestamp), 'HH:mm', { locale: vi })}
+                            {/* Message actions */}
+                            {!message.recalled && (
+                              <div className={`absolute ${message.isOwn ? "left-0 -translate-x-full -ml-1" : "right-0 translate-x-full ml-1"} top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150`}>
+                                {!message.isOwn ? (
+                                  <>
+                                    <button
+                                      onClick={(e) => { 
+                                        e.stopPropagation(); 
+                                        setReactionPickerTarget({
+                                          messageId: message.id || message._id,
+                                          anchorEl: e.currentTarget
+                                        });
+                                      }}
+                                      className="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-gray-500 dark:text-slate-400"
+                                      title="Thả cảm xúc"
+                                    >
+                                      <Smile size={16} />
+                                    </button>
+                                    <button 
+                                      onClick={(e) => { e.stopPropagation(); handleReply(message); }}
+                                      className="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-gray-500 dark:text-slate-400"
+                                      title="Trả lời"
+                                    >
+                                      <Reply size={16} />
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <button
+                                      onClick={(e) => { e.stopPropagation(); handleReply(message); }}
+                                      className="p-1.5 hover:bg-gray-200 dark:hover:bg-slate-600 rounded-full text-gray-500 dark:text-slate-400"
+                                      title="Trả lời"
+                                    >
+                                      <Reply size={16} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteMessage(message)}
+                                      className="p-1.5 hover:bg-red-100 dark:hover:bg-red-700 rounded-full text-red-500 dark:text-red-300"
+                                      title="Thu hồi"
+                                    >
+                                      <Trash2 size={16} />
+                                    </button>
+                                  </>
+                                )}
                               </div>
-                            );
-                          } else if (index === messages.length - 1 && message.isOwn && !message.recalled) {
-                            return (
-                              <div className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 px-1">
-                                Đã gửi
-                              </div>
-                            );
-                          }
-                          return null;
-                        })()}
+                            )}
+                          </div>
+
+                          {/* Reactions */}
+                          {Array.isArray(message.reactions) && message.reactions.length > 0 && !message.recalled && (
+                            <div className={`flex flex-wrap gap-x-0.5 gap-y-1 mt-1 items-center ${message.isOwn ? "justify-end" : "justify-start"}`}>
+                              {message.reactions.slice(0, 4).map((reaction, idx) => {
+                                if (!reaction || typeof reaction.type !== 'string' || !Array.isArray(reaction.users)) {
+                                  return null;
+                                }
+                                const userHasReacted = reaction.users.some(u => u._id === user?._id);
+                                return (
+                                  <button
+                                    key={`${reaction.type}-${idx}`}
+                                    onClick={(e) => { e.stopPropagation(); if (!message.isOwn) handleReaction(message.id, reaction.type); }}
+                                    disabled={message.isOwn}
+                                    className={`px-1 py-px rounded-full text-xs flex items-center gap-0.5 transition-colors shadow-sm 
+                                      ${userHasReacted
+                                        ? "bg-blue-100 dark:bg-blue-600 border border-blue-400 dark:border-blue-500 text-blue-700 dark:text-blue-100"
+                                        : "bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-200"
+                                      } ${message.isOwn ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'}`}
+                                    title={reaction.users.map(u => (u && (u.firstName || u.username)) || "Ai đó").join(", ") + ` đã thả ${reaction.type}`}
+                                  >
+                                    <span className="text-xs">{reaction.type}</span>
+                                    {reaction.users.length > 0 && (
+                                      <span className="font-normal text-[10px] ml-px">
+                                        {reaction.users.length}
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                              {message.reactions.length > 4 && !message.recalled && (
+                                <div
+                                  className="px-1 py-px rounded-full text-[10px] flex items-center justify-center bg-gray-200 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 cursor-pointer shadow-sm min-w-[20px] h-[18px] ml-0.5"
+                                  title={`Xem thêm ${message.reactions.length - 4} cảm xúc khác`}
+                                >
+                                  +{message.reactions.length - 4}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Message status */}
+                          {(() => {
+                            if (message.id === lastReadUserMessageId && latestReadTimestamp) {
+                              return (
+                                <div className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5 px-1">
+                                  Đã xem {format(new Date(latestReadTimestamp), 'HH:mm', { locale: vi })}
+                                </div>
+                              );
+                            } else if (index === messages.length - 1 && message.isOwn && !message.recalled) {
+                              return (
+                                <div className="text-[10px] text-gray-400 dark:text-slate-500 mt-0.5 px-1">
+                                  Đã gửi
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
+                        </div>
                       </div>
+                    </React.Fragment>
+                  );
+                })}
+                {/* Typing indicator */}
+                {Object.keys(typingUsers).length > 0 && (
+                  <div className="text-sm text-gray-500 italic px-4 pb-2 flex items-center">
+                    <style>{typingIndicatorStyle}</style>
+                    <span>{Object.values(typingUsers).join(", ")}</span>
+                    <span className="typing-ellipsis ml-1"></span>
                     </div>
-                  </React.Fragment>
-                );
-              })}
-              {/* Typing indicator */}
-              {Object.keys(typingUsers).length > 0 && (
-                <div className="text-sm text-gray-500 italic px-4 pb-2 flex items-center">
-                  <style>{typingIndicatorStyle}</style>
-                  <span>{Object.values(typingUsers).join(", ")}</span>
-                  <span className="typing-ellipsis ml-1"></span>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-            </div>
-
-            {/* New Message Button */}
-            {hasNewMessage && (
-              <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2">
-                <button
-                  onClick={handleNewMessageClick}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center space-x-2 transition-all duration-200 animate-bounce"
-                >
-                  <span>Tin nhắn mới</span>
-                  <Send size={16} className="transform rotate-90" />
-                </button>
+                  )}
+                  <div ref={messagesEndRef} />
               </div>
-            )}
 
-            {/* Reply Preview */}
-            {replyingTo && (
-              <div className="px-4 py-2.5 bg-gray-100 flex items-center justify-between border-t border-gray-200">
-                <div className="flex-1 mr-3 overflow-hidden">
-                  <div className="text-xs font-medium text-gray-700">
-                    Đang trả lời <span className="text-blue-600">{replyingTo.sender._id === user?._id ? "chính bạn" : `${replyingTo.sender.firstName} ${replyingTo.sender.lastName}`}</span>
+              {/* New Message Button */}
+              {hasNewMessage && (
+                <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2">
+                  <button
+                    onClick={handleNewMessageClick}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full shadow-lg flex items-center space-x-2 transition-all duration-200 animate-bounce"
+                  >
+                    <span>Tin nhắn mới</span>
+                    <Send size={16} className="transform rotate-90" />
+                  </button>
+                </div>
+              )}
+
+              {/* Reply Preview */}
+              {replyingTo && (
+                <div className="px-4 py-2.5 bg-gray-100 flex items-center justify-between border-t border-gray-200">
+                  <div className="flex-1 mr-3 overflow-hidden">
+                    <div className="text-xs font-medium text-gray-700">
+                      Đang trả lời <span className="text-blue-600">{replyingTo.sender._id === user?._id ? "chính bạn" : `${replyingTo.sender.firstName} ${replyingTo.sender.lastName}`}</span>
+                    </div>
+                    <div className="text-sm text-gray-600 truncate mt-0.5">
+                      {replyingTo.content === "Tin nhắn này đã bị xóa" ? "Tin nhắn đã được thu hồi" : replyingTo.content}
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600 truncate mt-0.5">
-                    {replyingTo.content === "Tin nhắn này đã bị xóa" ? "Tin nhắn đã được thu hồi" : replyingTo.content}
-                  </div>
+                  <button
+                    onClick={() => setReplyingTo(null)}
+                    className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-200 rounded-full transition-colors"
+                  >
+                    <X size={16}/> {/* X icon for close */}
+                  </button>
+                </div>
+              )}
+
+              {/* Message Input */}
+              <div className="p-3 flex items-center gap-2 bg-white border-t border-gray-200">
+                <button className="text-gray-500 hover:text-blue-500 p-2 rounded-full transition-colors hover:bg-gray-100">
+                  <Paperclip size={20} />
+                </button>
+                <button className="text-gray-500 hover:text-blue-500 p-2 rounded-full transition-colors hover:bg-gray-100">
+                  <Image size={20} onClick={() => fileInputRef.current?.click()}/>
+                </button>
+                  <div className="flex-1 relative">
+                  <input
+                    value={newMessage}
+                    onChange={handleTyping}
+                    onKeyPress={handleKeyPress}
+                    onPaste={handlePaste}
+                    placeholder="Nhập tin nhắn..."
+                    className="w-full px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10"
+                  />
+                  <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500 p-1.5 rounded-full hover:bg-gray-200 transition-colors">
+                    <Smile size={20} />
+                  </button>
                 </div>
                 <button
-                  onClick={() => setReplyingTo(null)}
-                  className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-200 rounded-full transition-colors"
+                  onClick={handleSendMessage}
+                  disabled={!newMessage.trim()}
+                  className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white p-2.5 rounded-full transition-colors duration-150 flex items-center justify-center"
                 >
-                  <X size={16}/> {/* X icon for close */}
+                  <Send size={18} />
                 </button>
               </div>
-            )}
-
-            {/* Message Input */}
-            <div className="p-3 flex items-center gap-2 bg-white border-t border-gray-200 shadow- ऊपर">
-              <button className="text-gray-500 hover:text-blue-500 p-2 rounded-full transition-colors hover:bg-gray-100">
-                <Paperclip size={20} />
-              </button>
-              <button className="text-gray-500 hover:text-blue-500 p-2 rounded-full transition-colors hover:bg-gray-100">
-                <Image size={20} onClick={() => fileInputRef.current?.click()}/>
-              </button>
-                <div className="flex-1 relative">
-                <input
-                  value={newMessage}
-                  onChange={handleTyping}
-                  onKeyPress={handleKeyPress}
-                  onPaste={handlePaste}
-                  placeholder="Nhập tin nhắn..."
-                  className="w-full px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10"
-                />
-                <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500 p-1.5 rounded-full hover:bg-gray-200 transition-colors">
-                  <Smile size={20} />
-                </button>
-              </div>
-              <button
-                onClick={handleSendMessage}
-                disabled={!newMessage.trim()}
-                className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white p-2.5 rounded-full transition-colors duration-150 flex items-center justify-center"
-              >
-                <Send size={18} />
-              </button>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-gray-500 bg-white p-8">
+              <Send size={64} className="text-gray-300 mb-6"/>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">Trình nhắn tin của bạn</h3>
+              <p className="text-gray-500 text-center">Gửi tin nhắn riêng tư cho bạn bè hoặc nhóm.</p>
             </div>
-          </>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center text-gray-500 bg-white p-8">
-            <Send size={64} className="text-gray-300 mb-6"/>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Trình nhắn tin của bạn</h3>
-            <p className="text-gray-500 text-center">Gửi tin nhắn riêng tư cho bạn bè hoặc nhóm.</p>
-          </div>
-        )}
+          )}
+        </div>
+
+        {/* Info Sidebar */}
+        <div 
+          className={`bg-white border-l border-gray-200 transition-all duration-300 relative ${
+            showInfoSidebar ? 'w-[35%]' : 'w-0 opacity-0 overflow-hidden'
+          }`}
+        >
+          {selectedConversationId && conversations.find(c => c._id === selectedConversationId) && (
+            <div className="h-full flex flex-col">
+              {/* Phần trên - Avatar và thông tin (40% chiều cao) */}
+              <div className="h-[40%] flex flex-col items-center justify-center border-b border-gray-200 relative">
+                <button 
+                  onClick={() => setShowInfoSidebar(false)}
+                  className="absolute top-2 right-2 p-1.5 hover:bg-gray-100 rounded-full text-gray-500"
+                >
+                  <X size={20} />
+                </button>
+                {(() => {
+                  const conversation = conversations.find(c => c._id === selectedConversationId);
+                  const otherUser = conversation?.otherUser;
+                  return (
+                    <>
+                      <div className="relative mb-4">
+                        <img
+                          src={otherUser?.avatar || "/default-avatar.png"}
+                          alt={otherUser?.name}
+                          className="w-28 h-28 rounded-full object-cover"
+                        />
+                        {otherUser?.isOnline && (
+                          <div className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                        )}
+                      </div>
+                      <h2 className="text-xl font-semibold text-gray-800 mb-2">{otherUser?.name}</h2>
+                      <p className="text-sm text-gray-500">{otherUser?.isOnline ? 'Đang hoạt động' : 'Không hoạt động'}</p>
+                    </>
+                  );
+                })()}
+              </div>
+
+              {/* Phần dưới - Các chức năng */}
+              <div className="flex-1 overflow-y-auto">
+                {/* Các nút chức năng */}
+                <div className="p-4 space-y-2">
+                  <button 
+                    onClick={() => {
+                      const conversation = conversations.find(c => c._id === selectedConversationId);
+                      if (conversation?.otherUser?._id) {
+                        navigate(`/profile/${conversation.otherUser._id}`);
+                      }
+                    }}
+                    className="w-full flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <User size={20} className="text-gray-600" />
+                    <span className="text-gray-700">Trang cá nhân</span>
+                  </button>
+
+                  {/* Nút tìm kiếm */}
+                  <button 
+                    onClick={() => setShowSearchModal(true)}
+                    className="w-full flex items-center space-x-3 p-3 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <Search size={20} className="text-gray-600" />
+                    <span className="text-gray-700">Tìm kiếm tin nhắn</span>
+                  </button>
+
+                  {/* Tabs cho media và links */}
+                  <div className="space-y-2">
+                    <button 
+                      onClick={() => setSelectedTab('media')}
+                      className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                        selectedTab === 'media' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <Image size={20} className={selectedTab === 'media' ? 'text-blue-600' : 'text-gray-600'} />
+                      <span>Ảnh/Video</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setSelectedTab('links')}
+                      className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                        selectedTab === 'links' ? 'bg-blue-50 text-blue-600' : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      <FileText size={20} className={selectedTab === 'links' ? 'text-blue-600' : 'text-gray-600'} />
+                      <span>Liên kết</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Search Modal */}
+                {showSearchModal && (
+                  <div className="absolute inset-0 bg-white z-50 flex flex-col">
+                    {/* Modal Header */}
+                    <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-800">Tìm kiếm tin nhắn</h3>
+                      <button 
+                        onClick={() => {
+                          setShowSearchModal(false);
+                          setSearchText('');
+                          setSearchResults([]);
+                        }}
+                        className="p-1.5 hover:bg-gray-100 rounded-full text-gray-500"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+
+                    {/* Search Input */}
+                    <div className="p-4 border-b border-gray-200">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={searchText}
+                          onChange={(e) => setSearchText(e.target.value)}
+                          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                          placeholder="Nhập từ khóa tìm kiếm..."
+                          className="w-full px-4 py-2 pl-10 pr-4 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          autoFocus
+                        />
+                        <Search 
+                          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer" 
+                          size={18}
+                          onClick={handleSearch}
+                        />
+                        {isSearching && (
+                          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                          </div>
+                        )}
+                        {searchText && !isSearching && (
+                          <button
+                            onClick={() => {
+                              setSearchText('');
+                              setSearchResults([]);
+                            }}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Search Results */}
+                    <div className="flex-1 overflow-y-auto p-2">
+                      {searchResults.length > 0 ? (
+                        <div className="space-y-2">
+                          {searchResults.map((result) => (
+                            <div
+                              key={result._id}
+                              onClick={() => {
+                                handleSearchResultClick(result._id);
+                                // Bỏ dòng setShowSearchModal(false) để không đóng modal
+                              }}
+                              className="p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                            >
+                              <div className="flex items-start space-x-3">
+                                <img
+                                  src={result.sender.avatar || "/default-avatar.png"}
+                                  alt={result.sender.firstName}
+                                  className="w-8 h-8 rounded-full flex-shrink-0"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-800">
+                                    {result.sender.firstName} {result.sender.lastName}
+                                  </p>
+                                  <p className="text-sm text-gray-600 line-clamp-2">{result.text}</p>
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {format(new Date(result.createdAt), 'HH:mm dd/MM/yyyy', { locale: vi })}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : searchText && !isSearching ? (
+                        <div className="text-center py-8 text-gray-500">
+                          <Search size={40} className="mx-auto mb-3 text-gray-400" />
+                          <p>Không tìm thấy kết quả nào</p>
+                        </div>
+                      ) : !searchText ? (
+                        <div className="text-center py-8 text-gray-500">
+                          <Search size={40} className="mx-auto mb-3 text-gray-400" />
+                          <p>Nhập từ khóa để tìm kiếm tin nhắn</p>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                )}
+
+                {/* Content của tab */}
+                <div className="p-4 border-t border-gray-200">
+                  {selectedTab === 'media' && (
+                    <div className="grid grid-cols-3 gap-1">
+                      {messages
+                        .filter(m => {
+                          return m.type === 'image' && 
+                                 !isMessageDeleted(m) && 
+                                 m.image && // Kiểm tra có URL hình ảnh
+                                 typeof m.image === 'string' && // Đảm bảo image là string
+                                 m.image.trim() !== ''; // Đảm bảo image không rỗng
+                        })
+                        .slice(0, 9)
+                        .map((message, index) => (
+                          <div key={message.id} className="aspect-square relative group">
+                            <img 
+                              src={message.image} 
+                              alt="Shared media"
+                              className="w-full h-full object-cover rounded-lg cursor-pointer"
+                              onClick={() => window.open(message.image, '_blank')}
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity rounded-lg" />
+                          </div>
+                        ))}
+                    </div>
+                  )}
+
+                  {selectedTab === 'links' && (
+                    <div className="space-y-2">
+                      {messages
+                        .filter(m => {
+                          return m.text?.includes('http') && 
+                                 !isMessageDeleted(m) &&
+                                 typeof m.text === 'string' && // Đảm bảo text là string
+                                 m.text.trim() !== ''; // Đảm bảo text không rỗng
+                        })
+                        .slice(0, 5)
+                        .map((message, index) => (
+                          <div key={message.id} className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer">
+                            <p className="text-sm text-blue-600 truncate">{message.text}</p>
+                            <p className="text-xs text-gray-500">{format(new Date(message.createdAt), 'dd/MM/yyyy')}</p>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    {renderReactionPicker()}
-
-    {/* Tooltip Portal */}
-    {tooltipConfig.visible && ReactDOM.createPortal(
-      <div 
-        className="fixed z-[9999] px-2.5 py-1.5 text-xs text-white bg-gray-800 dark:bg-slate-900 rounded-md shadow-xl whitespace-nowrap pointer-events-none select-none transition-opacity duration-100"
-        style={{
-          top: `${tooltipConfig.top}px`,
-          left: `${tooltipConfig.left}px`,
-          transform: 'translate(-100%, -50%)',
-          marginLeft: '-8px', // Khoảng cách với cạnh trái của bubble
-          opacity: tooltipConfig.visible ? 1 : 0, 
-        }}
-      >
-        {tooltipConfig.content}
-      </div>,
-      document.getElementById('tooltip-portal')
-    )}
-
-    {/* Thêm input file cho upload ảnh */}
-    <input
-      type="file"
-      ref={fileInputRef}
-      onChange={handleImageUpload}
-      accept="image/*"
-      multiple
-      className="hidden"
-    />
-
-    {/* Thêm style cho hiệu ứng highlight rõ ràng hơn */}
-    <style>
-      {additionalStyles}
-    </style>
-
-</div>
-);
+    </div>
+  );
 }
