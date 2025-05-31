@@ -14,8 +14,6 @@ const AllBlogs = () => {
             <div>
               <p className="font-bold text-[18px] mb-4">Đề xuất bài viết</p>
               <SmallBlogs />
-              <SmallBlogs />
-              <SmallBlogs />
             </div>
           </div>
         </div>
