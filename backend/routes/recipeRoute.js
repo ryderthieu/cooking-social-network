@@ -3,25 +3,28 @@ const { authenticateJWT } = require("../middlewares/authMiddleware");
 const { 
     getAllRecipes, 
     getRecipeById, 
-    searchRecipe,
-    addRecipe,
-    editRecipe,
-    deleteRecipe
+    searchRecipe, 
+    addRecipe, 
+    editRecipe, 
+    deleteRecipe, 
+    getTopRecipes 
 } = require('../controllers/recipeController');
+
 const router = express.Router();
 
-// GET
+// READ
 router.get('/', getAllRecipes);
 router.get('/search', authenticateJWT, searchRecipe);
+router.get('/top', getTopRecipes);
 router.get('/:id', getRecipeById);
 
 // CREATE
-router.post('/add-recipe', authenticateJWT, addRecipe);
+router.post('/', authenticateJWT, addRecipe);
 
 // UPDATE
-router.patch('/edit-recipe/:id', authenticateJWT, editRecipe);
+router.patch('/:id', authenticateJWT, editRecipe);
 
 // DELETE
-router.delete('/delete-recipe/:id', authenticateJWT, deleteRecipe);
+router.delete('/:id', authenticateJWT, deleteRecipe);
 
 module.exports = router;

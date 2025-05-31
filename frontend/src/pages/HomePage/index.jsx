@@ -8,6 +8,9 @@ import VideoShorts from "../../components/sections/Home/VideoShorts.jsx";
 import { Link } from "react-router-dom";
 import CarouselPlugin from "../../components/sections/Home/CarouselHero.jsx";
 import AllBlogs from "../../components/sections/Home/AllBlogs.jsx";
+import TopRecipes from "@/components/sections/Home/TopRecipes.jsx";
+
+
 const HomePage = () => {
   const [search, setSearch] = useState("");
 
@@ -39,28 +42,7 @@ const HomePage = () => {
         <Menu />
         <Explore />
         <VideoShorts />
-        <div className="mt-[50px]">
-          <div className="flex justify-between items-center">
-            <p className="font-bold text-[24px]">
-              Khám phá các công thức đỉnh cao
-            </p>
-            <Link
-              to="/recipes"
-              className="text-[#A46000] text-[16px] font-medium"
-            >
-              Xem tất cả
-            </Link>
-          </div>
-          <div className="grid grid-cols-4 gap-6 mt-4 mb-8">
-            <Recipe />
-            <Recipe />
-            <Recipe />
-            <Recipe />
-            <Recipe />
-            <Recipe />
-            <Recipe />
-          </div>
-        </div>
+        <TopRecipes />
         <AllBlogs />
       </div>
       <Contact />

@@ -1,12 +1,12 @@
 import React from "react";
-import nl1 from "../../../assets/Home/Nglieu1.png";
-import nl2 from "../../../assets/Home/Nglieu2.png";
-import nl3 from "../../../assets/Home/Nglieu3.png";
-import nl4 from "../../../assets/Home/Nglieu4.png";
 import BunQuay from "../../../assets/Home/Bunquay.png";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext"; 
+import { Nglieu1, Nglieu2, Nglieu3, Nglieu4 } from "@/assets/Home";
 
 const Explore = () => {
+  const { user } = useAuth();
+const isLoggedIn = !!user;
   return (
     <div className="flex flex-row gap-10 py-2 px-4 bg-[#F8F5F2] rounded-2xl">
       <div className="ml-6 my-4 max-w-[680px]">
@@ -22,7 +22,7 @@ const Explore = () => {
             <div className="size-20 rounded-full">
               <img
                 className="border-[#D9D9D9] border-4 rounded-full"
-                src={nl1}
+                src={Nglieu1}
                 alt=""
               />
               <p className="text-center mt-2 text-[15px] font-medium">
@@ -33,7 +33,7 @@ const Explore = () => {
             <div className="size-20 rounded-full">
               <img
                 className="border-[#262626] rounded-full border-4"
-                src={nl2}
+                src={Nglieu2}
                 alt=""
               />
               <p className="text-center mt-2 text-[15px] font-medium">Tôm</p>
@@ -42,7 +42,7 @@ const Explore = () => {
             <div className="size-20 rounded-full">
               <img
                 className="border-[#9DBD5A] rounded-full border-4"
-                src={nl3}
+                src={Nglieu3}
                 alt=""
               />
               <p className="text-center mt-2 text-[15px] font-medium">
@@ -53,7 +53,7 @@ const Explore = () => {
             <div className="size-20 rounded-full">
               <img
                 className="border-[#FFD5C3] rounded-full border-4"
-                src={nl4}
+                src={Nglieu4}
                 alt=""
               />
               <p className="text-center mt-2 text-[15px] font-medium">Mực</p>
@@ -119,13 +119,21 @@ const Explore = () => {
         </div>
 
         <div className="mt-6 flex gap-10 mb-4">
-          <Link to="/login">
-            <button className="rounded-3xl bg-[#592500] text-white font-semibold py-3 px-10 hover:bg-[#7A3D00] transition duration-300 ease-in-out text-[14px]">
-              Đăng nhập
-            </button>
-          </Link>
+          {!isLoggedIn && (
+            <Link to="/login">
+              <button className="rounded-3xl bg-[#592500] text-white font-semibold py-3 px-10 hover:bg-[#7A3D00] transition duration-300 ease-in-out text-[14px]">
+                Đăng nhập
+              </button>
+            </Link>
+          )}
           <Link to="/">
-            <button className="rounded-3xl border-[#592500] border-2 text-[#592500] font-semibold py-3 px-10 hover:bg-white transition duration-300 ease-in-out text-[14px]">
+            <button 
+              className={`rounded-3xl font-semibold py-3 text-[14px] transition duration-300 ease-in-out ${
+                isLoggedIn 
+                  ? "bg-[#592500] text-white px-20 hover:bg-[#7A3D00]" 
+                  : "border-[#592500] border-2 px-10 text-[#592500] hover:bg-white"
+              }`}
+            >
               Xem thêm
             </button>
           </Link>

@@ -82,9 +82,10 @@ export default {
         marquee: "marquee 120s linear infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-		'shine': 'shine 8s ease-in-out infinite',
-
-        shine: "shine 8s ease-in-out infinite",
+		    'shine': 'shine 8s ease-in-out infinite',
+        'bounce-slow': 'bounce 3s infinite',
+        'ping': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+        'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
         marquee: {

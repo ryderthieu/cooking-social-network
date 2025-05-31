@@ -287,11 +287,85 @@ const deleteRecipe = async (req, res) => {
 
 }
 
+// ✅ GET: Lấy top recipes (dựa trên lượt thích)
+const getTopRecipes = async (req, res) => {
+    try {
+        const { limit = 4 } = req.query;
+        const limitNumber = parseInt(limit);
+        
+        // Sử dụng aggregate pipeline thay vì find + match + addFields
+        const recipes = await Recipe.aggregate([
+            // Match recipes with at least one image
+            { 
+                $match: { 
+                    image: { $exists: true, $ne: [] } 
+                } 
+            },
+            // Add field to calculate likes count
+            { 
+                $addFields: {
+                    likesCount: { 
+                        $size: { $ifNull: ["$likes", []] } 
+                    }
+                } 
+            },
+            // Sort by likes count and creation date
+            {
+                $sort: { 
+                    likesCount: -1, 
+                    createdAt: -1 
+                }
+            },
+            // Limit results
+            { $limit: limitNumber },
+            // Populate author info
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "author",
+                    foreignField: "_id",
+                    as: "author"
+                }
+            },
+            // Convert author array to object
+            {
+                $addFields: {
+                    author: { $arrayElemAt: ["$author", 0] }
+                }
+            },
+            // Project only needed author fields
+            {
+                $project: {
+                    "author.password": 0,
+                    "author.email": 0,
+                    "author.__v": 0,
+                    // Add other fields you want to exclude
+                }
+            }
+        ]);
+        
+        res.status(200).json({
+            success: true,
+            count: recipes.length,
+            message: "Lấy các công thức nổi bật thành công",
+            data: recipes
+        });
+    } catch (error) {
+        console.error("❌ Error fetching top recipes: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: "Đã xảy ra lỗi khi lấy công thức nổi bật. Xin vui lòng thử lại."
+        });
+    }
+};
+
 module.exports = {
     getAllRecipes,
     getRecipeById,
     searchRecipe,
     addRecipe,
     editRecipe,
-    deleteRecipe
+    deleteRecipe,
+    getTopRecipes
 }

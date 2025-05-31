@@ -1,5 +1,5 @@
 import React from "react";
-import traidep from "../../../assets/Home/park-bogum.png";
+import traidep from "../../../assets/Home/Bogum.png";
 
 const Banner3 = () => {
   return (

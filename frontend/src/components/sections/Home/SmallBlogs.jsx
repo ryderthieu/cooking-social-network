@@ -4,6 +4,7 @@ import botoi from "../../../assets/Blog/botoi.jpg";
 import rc from "../../../assets/Blog/rc.jpg";
 import salad from "../../../assets/Blog/salad.jpg";
 import { Link } from "react-router-dom";
+
 const featuredRecipes = [
   {
     name: "Cách làm bánh sừng bò (bánh croissant) thơm béo đúng chuẩn",
@@ -26,33 +27,26 @@ const featuredRecipes = [
   {
     name: "Cách làm salad tôm bơ nướng healthy chỉ với bếp ga đơn mini",
     author: "Trần Ngọc Anh Thơ",
-    path: "/blog/bai-viet-noi-bat",
+    path: "/blog/4",
     image: salad,
   },
 ];
 
 const SmallBlogs = () => {
   return (
-    <div className="my-2">
+    <div className="space-y-4">
       {featuredRecipes.map((recipe, index) => (
-        <Link
-          to={recipe.path}
-          key={index}
-          className="flex items-center gap-4 cursor-pointer my-4"
-        >
+        <Link to={recipe.path} key={index} className="flex gap-3 pb-4">
           <img
             src={recipe.image}
-            className="w-[160px] h-[110px] object-cover rounded-2xl"
+            className="w-[80px] h-[80px] object-cover rounded-md flex-shrink-0"
             alt={recipe.name}
           />
-          <div className="max-w-[400px]">
-            <h4 className="font-semibold text-[14px]">{recipe.name}</h4>
-            <div className="flex mt-4">
-              <img src="" alt="" />
-              <span className="text-[rgba(0,0,0,0.6)] text-[13px]">
-                {recipe.author}
-              </span>
-            </div>
+          <div>
+            <h4 className="font-medium text-sm line-clamp-2 text-gray-800">
+              {recipe.name}
+            </h4>
+            <p className="text-xs text-gray-500 mt-1">{recipe.author}</p>
           </div>
         </Link>
       ))}
