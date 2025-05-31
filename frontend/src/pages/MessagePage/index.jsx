@@ -34,11 +34,13 @@ import {
 } from "lucide-react";
 import { getConversation, getUserConversations } from "@/services/conversationService";
 import { deleteMessage, getMessagesByConversation, searchMessages } from "@/services/messageService";
+import { useCloudinary } from "../../context/CloudinaryContext";
 
 export default function MessagePage() {
   const navigate = useNavigate();
   const { socket, onlineUsers } = useSocket();
   const { user, loading } = useAuth();
+  const { uploadImage } = useCloudinary();
   const [typingUsers, setTypingUsers] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -72,6 +74,9 @@ export default function MessagePage() {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [searchError, setSearchError] = useState(null);
+
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Effect để ưu tiên selectedConversationId từ URL params
   useEffect(() => {
@@ -200,115 +205,94 @@ export default function MessagePage() {
           messageIsForSelectedConversation = true;
           setMessages(prevMessages => {
             // Kiểm tra xem tin nhắn này có phải là để cập nhật một tin nhắn tạm đã được optimistic update không
-            // Điều này đúng nếu người gửi tin nhắn từ server là user hiện tại
             if (message.sender._id === user?._id) {
-              const tempMessageIdPattern = /^temp-/; // Tin nhắn tạm có id bắt đầu bằng "temp-"
-              // Tìm xem có tin nhắn tạm nào chưa có _id thật không, và nội dung gần giống
-              // Hoặc đơn giản hơn: nếu người gửi là mình, giả định tin nhắn server gửi về là để thay thế tin nhắn tạm cuối cùng mình đã gửi
-              
+              const tempMessageIdPattern = /^temp-/;
               const lastOwnTempMessageIndex = prevMessages.findLastIndex(
-                m => m.isOwn && tempMessageIdPattern.test(m.id) && m.content === message.text // Thêm điều kiện content khớp để chắc chắn hơn
+                m => m.isOwn && tempMessageIdPattern.test(m.id) && 
+                ((message.type === 'text' && m.content === message.text) || 
+                 (message.type === 'image' && m.image === message.image))
               );
 
               if (lastOwnTempMessageIndex !== -1) {
                 const updatedMessages = [...prevMessages];
                 updatedMessages[lastOwnTempMessageIndex] = {
-                  ...updatedMessages[lastOwnTempMessageIndex], // Giữ lại một số thuộc tính client nếu cần
-                  ...message, // Ghi đè bằng dữ liệu từ server
-                  id: message._id, // Quan trọng: cập nhật id thật
-                  content: message.text, // Đảm bảo content là từ server
-                  createdAt: message.createdAt, // Sử dụng createdAt trực tiếp
-                  isOwn: true, // Chắc chắn là của mình
-                  recalled: message.recalled || message.text === "Tin nhắn này đã bị xóa",
-                };
-                // Nếu không ở bottom và tin nhắn mới không phải của mình
-                if (!isAtBottom && message.sender._id !== user?._id) {
-                  setHasNewMessage(true);
-                  setUnreadCount(prev => prev + 1);
-                }
-                return updatedMessages;
-              } else {
-                // Không tìm thấy tin nhắn tạm khớp, hoặc có thể là tin nhắn từ tab khác của chính user
-                // => thêm như bình thường nếu nó chưa tồn tại với _id thật
-                if (!prevMessages.some(m => m.id === message._id)) {
-                  const newMessage = {
-                    id: message._id,
-                    sender: message.sender,
-                    content: message.text,
-                    createdAt: message.createdAt, // Sử dụng createdAt trực tiếp
-                    isOwn: message.sender._id === user._id,
-                    avatar: message.sender.avatar,
-                    reactions: message.reactions || [],
-                    replyTo: message.replyTo,
-                    recalled: message.recalled || message.text === "Tin nhắn này đã bị xóa",
-                  };
-                  // Nếu không ở bottom và tin nhắn mới không phải của mình
-                  if (!isAtBottom && message.sender._id !== user?._id) {
-                    setHasNewMessage(true);
-                    setUnreadCount(prev => prev + 1);
-                  }
-                  return [...prevMessages, newMessage];
-                }
-                return prevMessages; // Đã tồn tại, không làm gì cả
-              }
-            } else {
-              // Tin nhắn từ người khác, thêm nếu chưa có
-              if (!prevMessages.some(m => m.id === message._id)) {
-                const newMessage = {
+                  ...updatedMessages[lastOwnTempMessageIndex],
                   id: message._id,
-                  sender: message.sender,
-                  content: message.text,
-                  createdAt: message.createdAt, // Sử dụng createdAt trực tiếp
-                  isOwn: false,
-                  avatar: message.sender.avatar,
-                  reactions: message.reactions || [],
-                  replyTo: message.replyTo,
-                  recalled: message.recalled || message.text === "Tin nhắn này đã bị xóa",
+                  type: message.type,
+                  text: message.text,
+                  image: message.image,
+                  content: message.type === 'text' ? message.text : message.image,
+                  createdAt: message.createdAt,
+                  isOwn: true,
+                  recalled: message.recalled,
                 };
-                // Nếu không ở bottom và tin nhắn mới không phải của mình
-                if (!isAtBottom && message.sender._id !== user?._id) {
-                  setHasNewMessage(true);
-                  setUnreadCount(prev => prev + 1);
-                }
-                return [...prevMessages, newMessage];
+                return updatedMessages;
               }
-              return prevMessages; // Đã tồn tại, không làm gì cả
             }
+
+            // Tin nhắn từ người khác hoặc không tìm thấy tin nhắn tạm
+            if (!prevMessages.some(m => m.id === message._id)) {
+              const newMessage = {
+                id: message._id,
+                sender: message.sender,
+                type: message.type,
+                text: message.text,
+                image: message.image,
+                content: message.type === 'text' ? message.text : message.image,
+                createdAt: message.createdAt,
+                isOwn: message.sender._id === user?._id,
+                avatar: message.sender.avatar,
+                reactions: message.reactions || [],
+                replyTo: message.replyTo,
+                recalled: message.recalled,
+              };
+
+              if (!isAtBottom && message.sender._id !== user?._id) {
+                setHasNewMessage(true);
+                setUnreadCount(prev => prev + 1);
+              }
+              return [...prevMessages, newMessage];
+            }
+            return prevMessages;
           });
-          
-          // Chỉ tự động cuộn xuống nếu đang ở bottom hoặc là tin nhắn của chính mình
+
           if (isAtBottom || message.sender._id === user?._id) {
             scrollToBottom();
           }
         }
         
-        // Nếu tin nhắn mới đến trong cuộc trò chuyện đang mở và không phải của user hiện tại, đánh dấu đã xem
-        if (messageIsForSelectedConversation && message.sender._id !== user?._id && socket && user) {
-          socket.emit('mark_messages_as_seen', { conversationId: selectedConversationId });
-          console.log(`Auto emitted mark_messages_as_seen for ${selectedConversationId} due to new incoming message.`);
-        }
-        
-        // Cập nhật tin nhắn cuối cùng VÀ UNREAD COUNT cho danh sách cuộc trò chuyện
+        // Cập nhật tin nhắn cuối cùng trong danh sách cuộc trò chuyện
         setConversations(prevConvs => 
           prevConvs.map(conv => {
             if (conv._id === incomingConversationId) {
-              let newUnreadCount = conv.unreadCount; // Giữ nguyên nếu không có unreadCounts từ server hoặc user hiện tại không có trong đó
+              let newUnreadCount = conv.unreadCount;
               if (unreadCounts && unreadCounts.hasOwnProperty(user?._id)) {
                 newUnreadCount = unreadCounts[user._id];
-              } else if (message.sender._id !== user?._id) { 
-                // Fallback: nếu không có unreadCounts từ server, tự tăng cho người nhận
-                // Điều này có thể không cần nếu server luôn gửi unreadCounts chính xác
+              } else if (message.sender._id !== user?._id) {
                 newUnreadCount = (conv.unreadCount || 0) + 1;
               }
-              return { ...conv, lastMessage: message, unreadCount: newUnreadCount };
+              return {
+                ...conv,
+                lastMessage: {
+                  ...message,
+                  text: message.type === 'text' ? message.text : 
+                        message.type === 'image' ? 'Đã gửi một hình ảnh' : message.text
+                },
+                unreadCount: newUnreadCount
+              };
             }
             return conv;
-          }).sort((a, b) => { // Sắp xếp lại để conversation có tin nhắn mới lên đầu
+          }).sort((a, b) => {
             if (!a.lastMessage) return 1;
             if (!b.lastMessage) return -1;
             return new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt);
           })
         );
+
+        // Đánh dấu đã xem nếu đang mở cuộc trò chuyện
+        if (messageIsForSelectedConversation && message.sender._id !== user?._id && socket && user) {
+          socket.emit('mark_messages_as_seen', { conversationId: selectedConversationId });
+        }
       });
 
       const handleUserTyping = ({ userId, userName, conversationId }) => {
@@ -551,7 +535,10 @@ export default function MessagePage() {
         const formattedFetchedMessages = fetchedApiMessages.map(msg => ({
           id: msg._id,
           sender: msg.sender,
-          content: msg.text,
+          type: msg.type,
+          text: msg.text,
+          image: msg.image,
+          content: msg.type === 'text' ? msg.text : msg.image,
           createdAt: msg.createdAt,
           isOwn: msg.sender._id === user._id,
           avatar: msg.sender.avatar,
@@ -959,19 +946,163 @@ export default function MessagePage() {
     }
   };
 
-  // Thêm hàm xử lý khi click vào kết quả tìm kiếm
-  const handleSearchResultClick = (messageId) => {
+  const scrollToMessage = (messageId) => {
     const messageElement = document.getElementById(`message-item-${messageId}`);
-    if (messageElement) {
-      messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (messageElement && messageContainerRef.current) {
+      // Tính toán vị trí cuộn trong container
+      const container = messageContainerRef.current;
+      const messageTop = messageElement.offsetTop;
+      const containerHeight = container.clientHeight;
+      
+      // Cuộn container đến vị trí tin nhắn
+      container.scrollTo({
+        top: messageTop - (containerHeight / 2),
+        behavior: 'smooth'
+      });
+
+      // Thêm hiệu ứng highlight
       messageElement.classList.add('message-highlighted');
       setTimeout(() => {
         messageElement.classList.remove('message-highlighted');
       }, 2000);
     }
+  };
+
+  const handleSearchResultClick = (messageId) => {
+    scrollToMessage(messageId);
+  };
+
+  const handleCloseSearch = () => {
     setSearchResults([]); // Đóng kết quả tìm kiếm
     setSearchText(""); // Reset ô tìm kiếm
   };
+
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      for (const file of files) {
+        const result = await uploadImage(file, "messages");
+        if (result.secure_url) {
+          // Gửi tin nhắn hình ảnh qua socket
+          socket.emit("send_message", {
+            conversationId: selectedConversationId,
+            type: 'image',
+            image: result.secure_url, // Sử dụng trường image thay vì text
+          });
+
+          // Optimistic update UI
+          const tempMessageId = `temp-${Date.now()}`;
+          setMessages(prev => [...prev, {
+            id: tempMessageId,
+            sender: { _id: user._id, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar },
+            type: 'image',
+            image: result.secure_url, // Sử dụng trường image
+            createdAt: new Date().toISOString(),
+            isOwn: true,
+            avatar: user.avatar,
+            reactions: [],
+            recalled: false,
+          }]);
+
+          scrollToBottom();
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setError('Không thể tải ảnh lên. Vui lòng thử lại.');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handlePaste = async (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.indexOf('image') !== -1) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (file) {
+          setIsUploading(true);
+          try {
+            const result = await uploadImage(file, "messages");
+            if (result.secure_url) {
+              // Gửi tin nhắn hình ảnh qua socket
+              socket.emit("send_message", {
+                conversationId: selectedConversationId,
+                type: 'image',
+                image: result.secure_url,
+              });
+
+              // Optimistic update UI
+              const tempMessageId = `temp-${Date.now()}`;
+              setMessages(prev => [...prev, {
+                id: tempMessageId,
+                sender: { _id: user._id, firstName: user.firstName, lastName: user.lastName, avatar: user.avatar },
+                type: 'image',
+                image: result.secure_url,
+                createdAt: new Date().toISOString(),
+                isOwn: true,
+                avatar: user.avatar,
+                reactions: [],
+                recalled: false,
+              }]);
+
+              scrollToBottom();
+            }
+          } catch (error) {
+            console.error('Error uploading pasted image:', error);
+            setError('Không thể tải ảnh lên. Vui lòng thử lại.');
+          } finally {
+            setIsUploading(false);
+          }
+        }
+      }
+    }
+  };
+
+  // Thêm vào phần render message để hiển thị ảnh
+  const renderMessageContent = (message) => {
+    if (message.recalled) {
+      return <div className="whitespace-pre-wrap italic">Tin nhắn đã được thu hồi</div>;
+    }
+
+    if (message.type === 'image') {
+      return (
+        <img 
+          src={message.image} 
+          alt="Message" 
+          className="max-w-[300px] rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+          onClick={() => window.open(message.image, '_blank')}
+          onError={(e) => {
+            e.target.src = "/placeholder-image.png";
+            console.error('Failed to load image:', message.image);
+          }}
+        />
+      );
+    }
+
+    return <div className="whitespace-pre-wrap">{message.text || message.content}</div>;
+  };
+
+  // Thêm style cho hiệu ứng highlight rõ ràng hơn
+  const additionalStyles = `
+    .message-highlighted {
+      background-color: rgba(59, 130, 246, 0.1);
+      transition: background-color 0.5s ease;
+    }
+    .message-highlighted > div {
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+  `;
 
   if (loading) { // Only show initial full page loader
     return (
@@ -1065,7 +1196,7 @@ export default function MessagePage() {
                   </div>
                   <p className={`text-xs truncate mt-0.5 ${conversation.unreadCount > 0 ? "font-bold text-black" : "text-gray-500 "}`} >
                       {lastMessage ? 
-                      (lastMessage.sender._id === user?._id ? "Bạn: " : "") + (lastMessage.text === "Tin nhắn này đã bị xóa" ? "Tin nhắn đã thu hồi" : lastMessage.text || '')
+                      (lastMessage.sender._id === user?._id ? "Bạn: " : "") + (lastMessage.text === "Tin nhắn này đã bị xóa" ? "Tin nhắn đã thu hồi" : lastMessage.text || '') + (lastMessage.type === "image" ? "Đã gửi một hình ảnh" : "")
                         : "Bắt đầu cuộc trò chuyện"}
                     </p>
                   {conversation.unreadCount > 0 && (
@@ -1166,10 +1297,16 @@ export default function MessagePage() {
               {/* Search Results Dropdown */}
               {searchResults.length > 0 && (
                 <div className="absolute right-6 top-16 w-72 max-h-96 overflow-y-auto bg-white rounded-lg shadow-xl border border-gray-200 z-50">
-                  <div className="p-2 border-b border-gray-100">
+                  <div className="p-2 border-b border-gray-100 flex justify-between items-center">
                     <p className="text-sm text-gray-500">
                       Tìm thấy {searchResults.length} kết quả
                     </p>
+                    <button
+                      onClick={handleCloseSearch}
+                      className="text-gray-400 hover:text-gray-600 p-1 hover:bg-gray-100 rounded-full"
+                    >
+                      <X size={14} />
+                    </button>
                   </div>
                   {searchResults.map((result) => (
                     <div
@@ -1297,7 +1434,7 @@ export default function MessagePage() {
                       id={`message-item-${message.id}`}
                       className={`flex ${message.isOwn ? "justify-end" : "justify-start"} ${
                         showSenderInfo && !showTimeSeparator ? "mt-2" : "mt-px"
-                      } group relative`}
+                      } group relative message-item`}
                     >
                       {!message.isOwn && (
                         <div className="flex-shrink-0 w-8 h-8 self-end mr-2">
@@ -1331,46 +1468,10 @@ export default function MessagePage() {
                             className={`relative px-3 py-2 rounded-lg
                               ${message.isOwn ? "bg-blue-500 text-white dark:bg-blue-600 dark:text-slate-50" : "bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-100"} 
                               ${message.recalled ? "italic text-gray-500" : ""} 
+                              ${message.type === 'image' ? 'p-1' : ''}
                               hover:shadow-md transition-shadow duration-150`}
                           >
-                            {message.recalled ? (
-                              <div className="whitespace-pre-wrap italic">Tin nhắn đã được thu hồi</div>
-                            ) : (
-                              <>
-                                {/* Reply preview */}
-                                {message.replyTo && (
-                                  <div 
-                                    onClick={() => handleScrollToOriginalMessage(message.replyTo.id)}
-                                    className={`mb-2 p-2 border-l-4 rounded-r-sm cursor-pointer hover:bg-opacity-80 transition-all
-                                      ${message.isOwn 
-                                        ? 'bg-blue-400/30 hover:bg-blue-400/40 border-blue-300/50' 
-                                        : 'bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 border-gray-400/50 dark:border-slate-500/50'}
-                                    `}
-                                  >
-                                    <span className={`block text-xs font-semibold truncate 
-                                      ${message.isOwn ? 'text-blue-100/90' : 'text-gray-700 dark:text-slate-300'}
-                                    `}>
-                                      {message.replyTo.sender?._id === user?._id ? "Bạn" : (message.replyTo.sender?.firstName || "Ai đó")}
-                                    </span>
-                                    <p className={`mt-0.5 text-xs line-clamp-2 
-                                      ${message.isOwn ? 'text-blue-100/80' : 'text-gray-600 dark:text-slate-400'}
-                                    `}>
-                                      {message.replyTo.recalled 
-                                        ? <span className="italic">Tin nhắn đã được thu hồi</span>
-                                        : message.replyTo.type === 'text'
-                                          ? message.replyTo.content 
-                                          : message.replyTo.type === 'image' ? "Hình ảnh"
-                                          : message.replyTo.type === 'sticker' ? "Nhãn dán"
-                                          : message.replyTo.type === 'share' ? `${message.replyTo.sharedType === 'post' ? 'Bài viết' : 'Video'} được chia sẻ`
-                                          : message.replyTo.content || "Tin nhắn"
-                                      }
-                                    </p>
-                                  </div>
-                                )}
-                                {/* Message content */}
-                                <div className="whitespace-pre-wrap">{message.content}</div>
-                              </>
-                            )}
+                            {renderMessageContent(message)}
                           </div>
 
                           {/* Message actions */}
@@ -1533,13 +1634,14 @@ export default function MessagePage() {
                 <Paperclip size={20} />
               </button>
               <button className="text-gray-500 hover:text-blue-500 p-2 rounded-full transition-colors hover:bg-gray-100">
-                <Image size={20} />
+                <Image size={20} onClick={() => fileInputRef.current?.click()}/>
               </button>
                 <div className="flex-1 relative">
                 <input
                   value={newMessage}
                   onChange={handleTyping}
                   onKeyPress={handleKeyPress}
+                  onPaste={handlePaste}
                   placeholder="Nhập tin nhắn..."
                   className="w-full px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10"
                 />
@@ -1582,6 +1684,22 @@ export default function MessagePage() {
       </div>,
       document.getElementById('tooltip-portal')
     )}
+
+    {/* Thêm input file cho upload ảnh */}
+    <input
+      type="file"
+      ref={fileInputRef}
+      onChange={handleImageUpload}
+      accept="image/*"
+      multiple
+      className="hidden"
+    />
+
+    {/* Thêm style cho hiệu ứng highlight rõ ràng hơn */}
+    <style>
+      {additionalStyles}
+    </style>
+
 </div>
 );
 }

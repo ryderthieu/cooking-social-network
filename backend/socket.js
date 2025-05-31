@@ -94,7 +94,7 @@ const socketServer = (server) => {
           sharedType: type === 'share' ? sharedType : undefined,
           sharedId: type === 'share' ? sharedId : undefined,
           reactions: [],
-          readBy: [{ // Tự động đánh dấu là đã đọc bởi người gửi
+          readBy: [{ 
             userId: socket.userId,
             readAt: new Date()
           }]
@@ -133,34 +133,43 @@ const socketServer = (server) => {
           }
         );
         
-        await newMessage.populate(
-            { path: "sender", select: "firstName lastName avatar _id" }
-        );
+        await newMessage.populate('sender', 'firstName lastName avatar _id');
 
         let populatedMessage = newMessage.toObject();
 
         if (populatedMessage.replyTo) {
-            try {
-                const originalMessage = await Message.findById(populatedMessage.replyTo)
-                                                 .populate('sender', 'firstName _id')
-                                                 .select('text content sender recalled');
-                if (originalMessage) {
-                    populatedMessage.replyTo = {
-                        id: originalMessage._id,
-                        content: originalMessage.recalled ? "Tin nhắn này đã bị xóa" : (originalMessage.text || originalMessage.content),
-                        sender: originalMessage.sender
-                    };
-                } else {
-                    populatedMessage.replyTo = null; 
-                }
-            } catch (populateError) {
-                console.error("Error populating replyTo message:", populateError);
-                populatedMessage.replyTo = null;
+          try {
+            const originalMessage = await Message.findById(populatedMessage.replyTo)
+              .populate('sender', 'firstName _id')
+              .select('text content sender recalled type image');
+            if (originalMessage) {
+              populatedMessage.replyTo = {
+                id: originalMessage._id,
+                content: originalMessage.recalled ? "Tin nhắn này đã bị xóa" : 
+                  (originalMessage.type === 'text' ? originalMessage.text : 
+                   originalMessage.type === 'image' ? 'Đã gửi một hình ảnh' : 
+                   originalMessage.content),
+                sender: originalMessage.sender,
+                type: originalMessage.type,
+                image: originalMessage.image
+              };
+            } else {
+              populatedMessage.replyTo = null;
             }
+          } catch (populateError) {
+            console.error("Error populating replyTo message:", populateError);
+            populatedMessage.replyTo = null;
+          }
         }
 
-        io.to(conversationId.toString()).emit("new_message", { message: populatedMessage, conversationId });
-        console.log(`Message sent in conversation ${conversationId} by ${socket.userId}`);
+        io.to(conversationId.toString()).emit("new_message", { 
+          message: {
+            ...populatedMessage,
+            content: type === 'text' ? text : 
+                    type === 'image' ? image : undefined
+          }, 
+          conversationId 
+        });
 
         // Create notifications for other members
         const otherMembers = conversation.members.filter(id => id.toString() !== socket.userId);
@@ -171,7 +180,7 @@ const socketServer = (server) => {
             type: "message",
             contentObject: newMessage._id,
             contentType: 'Message',
-            message: `${socket.user.firstName} đã gửi cho bạn một tin nhắn.`
+            message: `${socket.user.firstName} đã gửi cho bạn ${type === 'image' ? 'một hình ảnh' : 'một tin nhắn'}.`
           });
           await notification.save();
           await notification.populate("sender", "firstName lastName avatar");
@@ -179,8 +188,8 @@ const socketServer = (server) => {
           const memberSocketIds = onlineUsers.get(memberIdStr);
           if (memberSocketIds) {
             memberSocketIds.forEach(socketId => {
-                io.to(socketId).emit("new_notification", notification);
-            })
+              io.to(socketId).emit("new_notification", notification);
+            });
           }
         }
       } catch (error) {
