@@ -21,6 +21,7 @@ const AccountPage = () => {
   const [otp, setOtp] = useState("");
   const [showOtp, setShowOtp] = useState(false);
   const [pendingData, setPendingData] = useState(null);
+  const [avatar, setAvatar] = useState("");
 
   useEffect(() => {
     getUserInfo()
@@ -32,6 +33,7 @@ const AccountPage = () => {
           email: email || "",
           password: "",
         });
+        setAvatar(avatar || "");
       })
       .catch((error) => {
         console.error("Error fetching user info:", error);
@@ -107,9 +109,9 @@ const AccountPage = () => {
             />
             <div>
               <img
-                src=""
+                src={avatar || "https://via.placeholder.com/140"}
                 className="bg-black rounded-full w-[140px] h-[140px] absolute bottom-[-70px] left-[50px] border-4 border-white"
-                alt=""
+                alt="avatar"
               />
               <div className="flex items-center gap-4 absolute bottom-[-35px] left-[210px]">
                 <h4 className="font-semibold text-[20px] text-gray-800">
