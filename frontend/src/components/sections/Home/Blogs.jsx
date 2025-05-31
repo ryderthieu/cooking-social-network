@@ -1,99 +1,74 @@
 import React from "react";
-import blog9 from "../../../assets/Blog/blog9.png";
-import blog1 from "../../../assets/Blog/blog1.png";
-import blog8 from "../../../assets/Blog/blog8.png";
-import { ArrowRight } from "lucide-react";
+import blog1 from "../../../assets/Home/blog2.png";
+import blog2 from "../../../assets/Home/blog3.png";
+import blog from "../../../assets/Home/blog1.png";
+import avatar from "../../../assets/avatar.jpg";
+import avatar1 from "../../../assets/avatar1.jpg";
+import avatar2 from "../../../assets/avatar2.jpg";
 import { Link } from "react-router-dom";
 const featuredRecipes = [
   {
     name: "Bài viết phổ biến",
     author: "Trịnh Thị Phương Quỳnh",
+    desc: "Khám phá những bài viết phổ biến nhất trong cộng đồng nấu ăn của chúng ta. Từ công thức đơn giản đến mẹo nấu ăn hữu ích, bạn sẽ tìm thấy nhiều thông tin thú vị.",
+    date: "2023-10-01",
     path: "/blog/bai-viet-pho-bien",
-    image: blog9,
+    image: blog1,
+    ava: avatar2,
   },
   {
     name: "Bài viết mới nhất",
     author: "Huỳnh Văn Thiệu",
+    desc: "Cập nhật những bài viết mới nhất từ cộng đồng nấu ăn. Tìm hiểu các công thức mới, mẹo nấu ăn và xu hướng ẩm thực hiện đại.",
     path: "/blog/bai-viet-moi",
-    image: blog1,
+    image: blog,
+    ava: avatar,
+    date: "2023-10-05",
   },
   {
     name: "Bài viết nổi bật",
     author: "Trần Đỗ Phương Nhi",
+    desc: "Khám phá những bài viết nổi bật trong cộng đồng nấu ăn. Những công thức độc đáo và mẹo nấu ăn sáng tạo đang chờ đón bạn.",
     path: "/blog/bai-viet-noi-bat",
-    image: blog8,
-  },
-  {
-    name: "Bài viết nổi bật",
-    author: "Trần Đỗ Phương Nhi",
-    path: "/blog/bai-viet-noi-bat",
-    image: blog8,
+    image: blog2,
+    ava: avatar1,
+    date: "2023-10-10",
   },
 ];
 
 const Blogs = () => {
   return (
     <div>
-      <section className=" py-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-[24px] font-bold text-gray-900 mb-1">
-              Các bài viết nổi bật
-            </h2>
-            <p className="text-gray-600">
-              Khám phá những nội dung được yêu thích nhất
-            </p>
-          </div>
-          <button className="flex items-center text-orange-500 font-medium hover:text-orange-600 transition-colors duration-300 group">
-            Xem tất cả
-            <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {featuredRecipes.map((recipe, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 group"
-            >
-              <div className="relative overflow-hidden">
-                <img
-                  src={recipe.image || "/placeholder.svg"}
-                  alt={recipe.name}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-
-              <div className="p-6">
-                <h3 className="font-bold text-gray-900 mb-2 text-lg group-hover:text-orange-500 transition-colors duration-300">
-                  {recipe.name}
-                </h3>
-                <p className="text-gray-500 text-sm mb-4 flex items-center">
-                  <div className="w-6 h-6 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full mr-2 flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      {recipe.author.charAt(0)}
-                    </span>
-                  </div>
-                  Đăng bởi {recipe.author}
+      {featuredRecipes.map((recipe, index) => (
+        <Link to={recipe.path} key={index} className="flex items-center gap-4">
+          <div className="mt-4 flex gap-4">
+            <img
+              src={recipe.image}
+              className="w-[240px] h-[180px] object-cover rounded-2xl"
+              alt={recipe.name}
+            />
+            <div className="max-w-[550px] my-auto">
+              <h4 className="font-semibold text-[20px]">{recipe.name}</h4>
+              <p className="text-justify leading-6 text-[15px] text-gray-600 mt-2 font-light">
+                {recipe.desc}
+              </p>
+              <div className="flex mt-4 items-center">
+                {recipe.ava && (
+                  <img
+                    src={recipe.ava}
+                    alt={recipe.author}
+                    className="w-8 h-8 rounded-full mr-2"
+                  />
+                )}
+                <span className="mr-4 font-semibold">{recipe.author}</span>
+                <p className="border-l-2 border-l-gray-200 pl-4 my-auto text-[14px] font-semibold text-[rgba(0,0,0,0.6)]">
+                  {recipe.date}
                 </p>
-
-                <Link to={recipe.path}>
-                  <button
-                    className="w-full bg-gradient-to-r from-orange-500
-                    to-pink-500 text-white font-semibold py-3 rounded-xl
-                    hover:from-orange-600 hover:to-pink-600 transition-all
-                    duration-300 transform hover:scale-105 shadow-lg
-                    hover:shadow-xl"
-                  >
-                    Xem chi tiết
-                  </button>
-                </Link>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 };
