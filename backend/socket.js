@@ -191,24 +191,34 @@ const socketServer = (server) => {
     
     socket.on("delete_message", async ({ messageId }) => {
       try {
-        const message = await Message.findById(messageId);
+        const message = await Message.findById(messageId)
+          .populate('sender', 'firstName lastName avatar _id');
+        
         if (!message) {
           return socket.emit("error", { message: "Tin nhắn không tìm thấy." });
         }
-        if (message.sender.toString() !== socket.userId) {
+        if (message.sender._id.toString() !== socket.userId) {
           return socket.emit("error", { message: "Bạn không có quyền xóa tin nhắn này." });
         }
         
         message.text = "Tin nhắn này đã bị xóa";
         message.recalled = true;
-        // Optionally clear other fields like image, sticker if needed
-        // message.image = undefined; 
         await message.save();
+
+        // Populate message with necessary data
+        const populatedMessage = message.toObject();
         
+        // Emit với đầy đủ thông tin tin nhắn
         io.to(message.conversationId.toString()).emit("message_recalled", {
           messageId: message._id,
-          conversationId: message.conversationId.toString()
+          conversationId: message.conversationId.toString(),
+          message: {
+            ...populatedMessage,
+            id: populatedMessage._id, // Thêm id để frontend có thể sử dụng
+            content: "Tin nhắn đã được thu hồi"
+          }
         });
+        
         console.log(`Message ${messageId} recalled by ${socket.userId}`);
       } catch (error) {
         console.error("Error recalling message:", error);
