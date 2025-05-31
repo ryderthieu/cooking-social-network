@@ -12,35 +12,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
-export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete }) => {
-    const [showMenu, setShowMenu] = useState(false);
-    const [isLiked, setIsLiked] = useState(false);
-    
-    useEffect(() => {
-        console.log('post: ', post)
-    }, [])
-
-    const handleLike = () => {
-        setIsLiked(!isLiked);
-        onLike?.();
-    };
-
-    const getGridClass = (length) => {
-        switch (length) {
-            case 1:
-                return "grid-cols-1";
-            case 2:
-                return "grid-cols-2";
-            case 3:
-                return "grid-cols-2";
-            case 4:
-                return "grid-cols-2";
-            default:
-                return "grid-cols-2";
-        }
-    };
-
-    const formatDate = (dateString) => {
+export const formatDate = (dateString) => {
         try {
             const date = new Date(dateString);
             const now = new Date();
@@ -83,6 +55,34 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
             }).format(date);
         } catch (error) {
             return dateString;
+        }
+    };
+
+export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete }) => {
+    const [showMenu, setShowMenu] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
+    
+    useEffect(() => {
+        console.log('post: ', post)
+    }, [])
+
+    const handleLike = () => {
+        setIsLiked(!isLiked);
+        onLike?.();
+    };
+
+    const getGridClass = (length) => {
+        switch (length) {
+            case 1:
+                return "grid-cols-1";
+            case 2:
+                return "grid-cols-2";
+            case 3:
+                return "grid-cols-2";
+            case 4:
+                return "grid-cols-2";
+            default:
+                return "grid-cols-2";
         }
     };
 

@@ -70,7 +70,7 @@ function App() {
     { path: "/explore/*", element: <PostPage /> },
   ];
 
-  const headeronlyRoutes = [{ path: "/messages", element: <MessagePage /> }];
+  const headeronlyRoutes = [{ path: "/messages/", element: <MessagePage /> }, {path: "/messages/:conversationId", element: <MessagePage />}];
 
   return (
     <Routes>

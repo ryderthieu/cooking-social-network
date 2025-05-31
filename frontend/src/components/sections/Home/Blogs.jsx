@@ -69,14 +69,14 @@ const Blogs = () => {
                 <h3 className="font-bold text-gray-900 mb-2 text-lg group-hover:text-orange-500 transition-colors duration-300">
                   {recipe.name}
                 </h3>
-                <p className="text-gray-500 text-sm mb-4 flex items-center">
+                <div className="text-gray-500 text-sm mb-4 flex items-center">
                   <div className="w-6 h-6 bg-gradient-to-br from-orange-400 to-pink-500 rounded-full mr-2 flex items-center justify-center">
                     <span className="text-white text-xs font-bold">
                       {recipe.author.charAt(0)}
                     </span>
                   </div>
-                  Đăng bởi {recipe.author}
-                </p>
+                  <span>Đăng bởi {recipe.author}</span>
+                </div>
 
                 <Link to={recipe.path}>
                   <button

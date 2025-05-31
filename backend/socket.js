@@ -93,7 +93,11 @@ const socketServer = (server) => {
           sticker: type === 'sticker' ? sticker : undefined,
           sharedType: type === 'share' ? sharedType : undefined,
           sharedId: type === 'share' ? sharedId : undefined,
-          reactions: []
+          reactions: [],
+          readBy: [{ // Tự động đánh dấu là đã đọc bởi người gửi
+            userId: socket.userId,
+            readAt: new Date()
+          }]
         });
 
         if (replyTo) {
@@ -101,6 +105,33 @@ const socketServer = (server) => {
         }
 
         await newMessage.save();
+
+        // Đếm lại số tin nhắn chưa đọc cho mỗi thành viên
+        const unreadCounts = {};
+        for (const memberId of conversation.members) {
+          if (memberId.toString() !== socket.userId) {
+            const count = await Message.countDocuments({
+              conversationId,
+              sender: { $ne: memberId },
+              'readBy.userId': { $ne: memberId }
+            });
+            unreadCounts[memberId.toString()] = count;
+          } else {
+            unreadCounts[memberId.toString()] = 0;
+          }
+        }
+
+        // Cập nhật conversation với số tin nhắn chưa đọc mới nhất và tin nhắn cuối
+        await Conversation.findByIdAndUpdate(
+          conversationId,
+          { 
+            $set: { 
+              unreadCounts,
+              lastMessage: newMessage._id,
+              updatedAt: new Date()
+            }
+          }
+        );
         
         await newMessage.populate(
             { path: "sender", select: "firstName lastName avatar _id" }
@@ -260,7 +291,7 @@ const socketServer = (server) => {
     });
 
 
-    socket.on("typing_start", ({ conversationId }) => {
+    socket.on("user_typing", ({ conversationId }) => {
       socket.to(conversationId.toString()).emit("user_typing", {
         userId: socket.userId,
         userName: socket.user.firstName,
@@ -268,22 +299,68 @@ const socketServer = (server) => {
       });
     });
 
-    socket.on("typing_stop", ({ conversationId }) => {
+    socket.on("user_stop_typing", ({ conversationId }) => {
       socket.to(conversationId.toString()).emit("user_stop_typing", {
         userId: socket.userId,
         conversationId
       });
     });
 
-    socket.on("mark_as_read", async ({ conversationId }) => {
-      await Message.updateMany(
-        { conversationId, sender: { $ne: socket.userId } },
-        { isRead: true }
-      );
-      socket.to(conversationId.toString()).emit("messages_read", {
-        conversationId,
-        readBy: socket.userId
-      });
+    socket.on("mark_messages_as_seen", async ({ conversationId }) => {
+      try {
+        // Cập nhật tất cả tin nhắn chưa đọc trong cuộc trò chuyện mà user hiện tại chưa đọc
+        const messagesToUpdate = await Message.find({
+          conversationId,
+          sender: { $ne: socket.userId },
+          'readBy.userId': { $ne: socket.userId } // Chưa được đọc bởi user hiện tại
+        });
+
+        if (messagesToUpdate.length > 0) {
+          const updatePromises = messagesToUpdate.map(message => 
+            Message.findByIdAndUpdate(
+              message._id,
+              {
+                $push: {
+                  readBy: {
+                    userId: socket.userId,
+                    readAt: new Date()
+                  }
+                }
+              },
+              { new: true } // Optional: trả về document đã update
+            )
+          );
+          await Promise.all(updatePromises);
+        }
+
+        // Đếm lại số tin nhắn chưa đọc cho CHÍNH USER VỪA ĐÁNH DẤU XEM
+        const newUnreadCountForCurrentUser = await Message.countDocuments({
+          conversationId,
+          sender: { $ne: socket.userId },       // Tin nhắn không phải của họ
+          'readBy.userId': { $ne: socket.userId } // Và họ vẫn chưa đọc (sau khi đã push ở trên, con số này thường là 0)
+        });
+
+        // Cập nhật trường unreadCounts.{userId} trong conversation model
+        const updateQuery = { $set: {} };
+        updateQuery.$set[`unreadCounts.${socket.userId}`] = newUnreadCountForCurrentUser;
+        
+        await Conversation.findByIdAndUpdate(
+          conversationId,
+          updateQuery
+        );
+
+        // Thông báo cho tất cả client trong cuộc trò chuyện
+        io.to(conversationId.toString()).emit("messages_seen", {
+          conversationId,
+          seenBy: socket.userId,
+          unreadCount: newUnreadCountForCurrentUser // Gửi unread count mới của user vừa xem
+        });
+
+        console.log(`Messages marked as seen in conversation ${conversationId} by ${socket.userId}. Their new unread count: ${newUnreadCountForCurrentUser}`);
+      } catch (error) {
+        console.error("Error marking messages as seen:", error);
+        socket.emit("error", { message: "Lỗi khi đánh dấu tin nhắn đã xem", details: error.message });
+      }
     });
 
     socket.on("send_notification", async (data) => {

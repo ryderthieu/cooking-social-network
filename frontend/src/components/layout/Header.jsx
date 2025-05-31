@@ -312,8 +312,8 @@ const Header = () => {
               className="relative cursor-pointer"
               onClick={() => setIsDropdownOpen((prev) => !prev)}
             >
-              <div className="w-[42px] h-[42px] bg-gray-300 rounded-full flex items-center justify-center">
-                <span className="text-gray-600 font-semibold">U</span>
+              <div className="flex items-center gap-4">
+                <img src={user.avatar || 'https://randomuser.me/api/portraits/men/32.jpg'} className="w-12 h-12 rounded-full object-cover border-2 border-[#FFB800]"/>
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-[20px] h-[20px] bg-[#E2E5E9] rounded-full flex items-center justify-center text-[12px]">
                 <FaChevronDown
@@ -328,7 +328,7 @@ const Header = () => {
               <div className="absolute top-[87px] right-[70px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10 border border-gray-100 overflow-hidden">
                 <div className="p-2">
                   <div className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
-                    Đã lưu
+                    Trang cá nhân
                   </div>
                   <div className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
                     Tài khoản

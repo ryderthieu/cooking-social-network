@@ -78,25 +78,68 @@ const User = require('../models/user');
       }
 
       const conversations = await Conversation.find(searchFilter)
-        .populate('members', 'firstName lastName avatar')
+        .populate('members', 'firstName lastName avatar isOnline')
         .sort({ updatedAt: -1 })
         .limit(limit * 1)
         .skip((page - 1) * limit);
 
-      // Lấy tin nhắn cuối cùng cho mỗi conversation
-      const conversationsWithLastMessage = await Promise.all(
+      // Lấy tin nhắn cuối cùng và đếm tin nhắn chưa đọc cho mỗi conversation
+      const conversationsWithDetails = await Promise.all(
         conversations.map(async (conv) => {
           const lastMessage = await Message.findOne({ conversationId: conv._id })
             .sort({ createdAt: -1 })
             .populate('sender', 'firstName lastName avatar');
+
+          // Đếm số tin nhắn chưa đọc
+          const unreadCount = await Message.countDocuments({
+            conversationId: conv._id,
+            sender: { $ne: userId },
+            'readBy.userId': { $ne: userId }
+          });
+
+          // Lấy thông tin người dùng khác trong cuộc trò chuyện (để hiển thị nhanh)
+          const otherUserMember = conv.members.find(
+            member => member._id.toString() !== userId.toString()
+          );
+
+          const formattedOtherUser = otherUserMember ? {
+            _id: otherUserMember._id,
+            name: `${otherUserMember.firstName} ${otherUserMember.lastName}`.trim(),
+            avatar: otherUserMember.avatar,
+            isOnline: otherUserMember.isOnline || false // Sẽ được cập nhật bởi client qua socket
+          } : null;
+
+          // Format tin nhắn cuối cùng
+          const formattedLastMessage = lastMessage ? {
+            _id: lastMessage._id,
+            type: lastMessage.type,
+            text: lastMessage.text,
+            createdAt: lastMessage.createdAt,
+            sender: {
+              _id: lastMessage.sender._id,
+              name: `${lastMessage.sender.firstName} ${lastMessage.sender.lastName}`.trim(),
+              avatar: lastMessage.sender.avatar
+            }
+          } : null;
           
-          // Đếm tin nhắn chưa đọc (có thể implement sau)
-          const unreadCount = 0; // TODO: implement unread message counting
-          
+          // Lấy danh sách members đã populate gọn nhẹ
+          const populatedMembers = conv.members.map(member => ({
+            _id: member._id,
+            firstName: member.firstName,
+            lastName: member.lastName,
+            avatar: member.avatar
+            // isOnline sẽ do client tự quản lý dựa trên socket events
+          }));
+
           return {
-            ...conv.toObject(),
-            lastMessage,
-            unreadCount
+            _id: conv._id,
+            name: conv.name, // Thêm tên cuộc trò chuyện
+            updatedAt: conv.updatedAt,
+            createdAt: conv.createdAt,
+            unreadCount,
+            otherUser: formattedOtherUser, // User đối diện (trong chat 1-1)
+            lastMessage: formattedLastMessage,
+            members: populatedMembers // Danh sách đầy đủ các thành viên
           };
         })
       );
@@ -106,7 +149,7 @@ const User = require('../models/user');
       res.json({
         success: true,
         data: {
-          conversations: conversationsWithLastMessage,
+          conversations: conversationsWithDetails,
           pagination: {
             currentPage: parseInt(page),
             totalPages: Math.ceil(totalConversations / limit),
@@ -117,6 +160,7 @@ const User = require('../models/user');
         }
       });
     } catch (error) {
+      console.error('Error in getUserConversations:', error);
       res.status(500).json({
         success: false,
         message: error.message

@@ -293,7 +293,7 @@ const getPostById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "ID không hợp lệ" });
     }
-    const post = await Post.findById(id);
+    const post = await Post.findById(id).populate('author', 'avatar lastName firstName');
     if (!post) {
       return res.status(404).json({ message: "Post không được tìm thấy" });
     }
