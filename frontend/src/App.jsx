@@ -37,6 +37,7 @@ import HeaderLayout from "./components/layout/HeaderLayout";
 import ChatPage from "./pages/ChatPage";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
+import RecipeDetail from "./pages/RecipesPage/RecipeDetail";
 
 function App() {
   const { user } = useAuth();
@@ -71,10 +72,12 @@ function App() {
         <Navigate to="/login" replace />
       ),
     },
-
     { path: "/profile/:userId", element: <ProfilePage /> },
+    { path: "/recipes", element: <RecipeCategories />},
+    { path: "/recipes/:categoryType/:item", element: <Recipes />},
     { path: "/recipes/create", element: <CreateRecipe /> },
     { path: "/recipes/saved", element: <SavedRecipes /> },
+    { path: "/recipes/:id", element: <RecipeDetail />},
     // { path: "/posts/:id", element: <PostDetail />}
     { path: "/explore/*", element: <PostPage /> },
   ];
@@ -90,16 +93,11 @@ function App() {
           element={<LayoutRoute element={element} />}
         />
       ))}
+
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/posts/:id" element={<PostDetail />} />
-
-      <Route path="/recipes" element={<RecipeCategories />} />
-
-      <Route path="/recipes/:categoryType/:item" element={<Recipes />} />
-      <Route path="/recipes" element={<RecipeCategories />} />
-      <Route path="/recipes/create" element={<CreateRecipe />} />
       <Route path="/chat" element={<ChatPage />} />
 
       {headeronlyRoutes.map(({ path, element }) => (

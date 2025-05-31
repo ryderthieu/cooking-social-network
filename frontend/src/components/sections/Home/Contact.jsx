@@ -121,7 +121,7 @@ export default function Contact() {
 
         {/* Success Message */}
         {successMessage && (
-          <div className="fixed top-6 right-6 z-50 max-w-sm">
+          <div className="fixed bottom-6 right-6 z-50 max-w-sm ">
             <div className="bg-white rounded-lg shadow-lg border border-green-200 p-4 flex items-center gap-3">
               <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
                 <Check className="h-4 w-4 text-white" />
