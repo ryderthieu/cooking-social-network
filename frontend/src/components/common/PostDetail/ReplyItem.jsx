@@ -1,3 +1,4 @@
+import { formatRelativeTime } from '@/pages/MessagePage';
 import React, { useState } from 'react';
 import { FaHeart, FaEllipsisH } from 'react-icons/fa';
 
@@ -70,7 +71,7 @@ const ReplyItem = ({ reply }) => {
             <span className="font-medium text-xs">{likes}</span>
           </button>
 
-          <span className="text-gray-400 text-xs">• {reply.time || '2 giờ trước'}</span>
+          <span className="text-gray-400 text-xs">• {formatRelativeTime(reply.createdAt) || ''}</span>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import CommentForm from './CommentForm';
 import { useAuth } from '@/context/AuthContext';
 import { createComment } from '@/services/commentService';
 import { useParams } from 'react-router-dom';
+import { formatRelativeTime } from '@/pages/MessagePage';
 
 const CommentItem = ({ comment }) => {
   const [liked, setLiked] = useState(comment.liked || false);
@@ -103,7 +104,7 @@ const CommentItem = ({ comment }) => {
               <span className="font-medium">Trả lời</span>
             </button>
 
-            <span className="text-gray-400">• {comment.time || '2 giờ trước'}</span>
+            <span className="text-gray-400">• {formatRelativeTime(comment.createdAt)  || ''}</span>
           </div>
         </div>
       </div>

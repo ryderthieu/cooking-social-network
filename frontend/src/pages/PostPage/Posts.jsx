@@ -6,7 +6,7 @@ import postsService, { getAllPost } from '@/services/postService';
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
-  const [sharePopup, setSharePopup] = useState({ open: false, postId: null });
+  const [sharePopup, setSharePopup] = useState({ open: false, postId: null, postTitle: null });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,14 +44,15 @@ const Posts = () => {
           post={post}
           onLike={() => handleLike(post._id)}
           onComment={() => navigate(`/posts/${post._id}`)}
-          onShare={() => setSharePopup({ open: true, postId: post._id })}
+          onShare={() => setSharePopup({ open: true, postId: post._id, postTitle: post.content })}
         />
       ))}
 
       <SharePopup
         open={sharePopup.open}
         postId={sharePopup.postId}
-        onClose={() => setSharePopup({ open: false, postId: null })}
+        postTitle={sharePopup.postTitle}
+        onClose={() => setSharePopup({ open: false, postId: null, postTitle: null })}
       />
     </div>
   );

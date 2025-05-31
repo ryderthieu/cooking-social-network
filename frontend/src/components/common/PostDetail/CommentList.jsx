@@ -5,17 +5,14 @@ import { FaSortAmountDown } from 'react-icons/fa';
 const CommentList = ({ postId, comments }) => {
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'popular'
 
-  useEffect(() => {
-    console.log('list',comments)
-  }, [])
   const getSortedComments = () => {
     switch (sortBy) {
       case 'oldest':
-        return [...comments].sort((a, b) => new Date(a.date) - new Date(b.date));
+        return [...comments].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
       case 'popular':
         return [...comments].sort((a, b) => b.likes - a.likes);
       default: // newest
-        return [...comments].sort((a, b) => new Date(b.date) - new Date(a.date));
+        return [...comments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     }
   };
 

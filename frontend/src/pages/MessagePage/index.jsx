@@ -37,12 +37,38 @@ import {
   Image,
   FileText,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Share2
 } from "lucide-react";
 import { getConversation, getUserConversations } from "@/services/conversationService";
 import { deleteMessage, getMessagesByConversation, searchMessages } from "@/services/messageService";
 import { useCloudinary } from "../../context/CloudinaryContext";
+import postsService from "@/services/postService";
 
+export const formatRelativeTime = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const seconds = differenceInSeconds(now, date);
+    if (seconds < 60) return "vừa xong";
+
+    const minutes = differenceInMinutes(now, date);
+    if (minutes < 60) return `${minutes} phút trước`;
+
+    const hours = differenceInHours(now, date);
+    if (hours < 24) return `${hours} giờ trước`;
+
+    const days = differenceInDays(now, date);
+    if (days < 7) return `${days} ngày trước`;
+    
+    const weeks = differenceInWeeks(now, date);
+    if (weeks < 52) return `${weeks} tuần trước`; // Giả sử 1 năm có 52 tuần
+
+    const years = differenceInYears(now, date);
+    return `${years} năm trước`;
+  };
+  
 export default function MessagePage() {
   const navigate = useNavigate();
   const { socket, onlineUsers } = useSocket();
@@ -61,6 +87,7 @@ export default function MessagePage() {
   const [reactionPickerTarget, setReactionPickerTarget] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [sharedPosts, setSharedPosts] = useState({});
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null); // Ref cho typing timeout
   const [tooltipConfig, setTooltipConfig] = useState({ visible: false, content: '', top: 0, left: 0 });
@@ -92,6 +119,19 @@ export default function MessagePage() {
 
   // Thêm state cho modal tìm kiếm
   const [showSearchModal, setShowSearchModal] = useState(false);
+
+  const fetchPostDetails = async (postId) => {
+    try {
+      const response = await postsService.fetchById(postId);
+      console.log(response)
+      setSharedPosts(prev => ({
+        ...prev,
+        [postId]: response.data
+      }));
+    } catch (error) {
+      console.error('Error fetching post details:', error);
+    }
+  };
 
   // Effect để ưu tiên selectedConversationId từ URL params
   useEffect(() => {
@@ -130,29 +170,7 @@ export default function MessagePage() {
   const TIME_GROUPING_THRESHOLD_MINUTES = 30; // Ngưỡng để hiển thị mốc thời gian
   // const {conversationId} = useParams() // Dòng này được thay thế bởi dòng có paramConversationId ở trên
   // Hàm định dạng thời gian tương đối
-  const formatRelativeTime = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const now = new Date();
-
-    const seconds = differenceInSeconds(now, date);
-    if (seconds < 60) return "vừa xong";
-
-    const minutes = differenceInMinutes(now, date);
-    if (minutes < 60) return `${minutes} phút trước`;
-
-    const hours = differenceInHours(now, date);
-    if (hours < 24) return `${hours} giờ trước`;
-
-    const days = differenceInDays(now, date);
-    if (days < 7) return `${days} ngày trước`;
-    
-    const weeks = differenceInWeeks(now, date);
-    if (weeks < 52) return `${weeks} tuần trước`; // Giả sử 1 năm có 52 tuần
-
-    const years = differenceInYears(now, date);
-    return `${years} năm trước`;
-  };
+  
 
   // CSS cho hiệu ứng typing
   const typingIndicatorStyle = `
@@ -544,13 +562,15 @@ export default function MessagePage() {
         page: pageToFetch,
         limit: 50,
       });
-
+      console.log(response)
       if (response.data.success && response.data.data && response.data.data.messages) {
         const fetchedApiMessages = response.data.data.messages;
         const formattedFetchedMessages = fetchedApiMessages.map(msg => ({
           id: msg._id,
           sender: msg.sender,
           type: msg.type,
+          sharedType: msg.sharedType,
+          sharedId: msg.sharedId,
           text: msg.text,
           image: msg.image,
           content: msg.type === 'text' ? msg.text : msg.image,
@@ -1111,6 +1131,68 @@ export default function MessagePage() {
         />
       );
     }
+    
+    if (message.type === 'share' && message.sharedId) {
+      // Fetch post details if not already fetched
+      if (!sharedPosts[message.sharedId]) {
+        fetchPostDetails(message.sharedId);
+      }
+      
+      const sharedPost = sharedPosts[message.sharedId];
+      
+      return (
+        <div 
+          onClick={() => window.open(`/posts/${message.sharedId}`, '_blank')}
+          className="bg-gray-50 hover:bg-gray-100 rounded-lg cursor-pointer transition-all border border-gray-200 overflow-hidden max-w-[300px]"
+        >
+          {/* Preview Image */}
+          {sharedPost?.media?.[0]?.url ? (
+            <div className="w-full aspect-video relative overflow-hidden">
+              <img 
+                src={sharedPost.media[0].url} 
+                alt="Post preview"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-full aspect-video bg-gray-200 flex items-center justify-center">
+              <FileText className="text-gray-400" size={32} />
+            </div>
+          )}
+          
+          {/* Post Info */}
+          <div className="p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Share2 size={16} className="text-blue-500" />
+              <span className="text-sm text-blue-500 font-medium">Bài viết được chia sẻ</span>
+            </div>
+            
+            {sharedPost ? (
+              <>
+                <h4 className="font-medium text-gray-800 line-clamp-2 mb-1">
+                  {sharedPost.content}
+                </h4>
+                <div className="flex items-center gap-2 mt-2">
+                  <img 
+                    src={sharedPost.author?.avatar || "/default-avatar.png"} 
+                    alt={sharedPost.author?.firstName}
+                    className="w-5 h-5 rounded-full"
+                  />
+                  <span className="text-xs text-gray-500">
+                    {sharedPost.author?.firstName} {sharedPost.author?.lastName}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
 
     return <div className="whitespace-pre-wrap">{message.text || message.content}</div>;
   };
@@ -1229,7 +1311,7 @@ export default function MessagePage() {
                   </div>
                   <p className={`text-xs truncate mt-0.5 ${conversation.unreadCount > 0 ? "font-bold text-black" : "text-gray-500 "}`} >
                       {lastMessage ? 
-                      (lastMessage.sender._id === user?._id ? "Bạn: " : "") + (lastMessage.text === "Tin nhắn này đã bị xóa" ? "Tin nhắn đã thu hồi" : lastMessage.text || '') + (lastMessage.type === "image" ? "Đã gửi một hình ảnh" : "")
+                      (lastMessage.sender._id === user?._id ? "Bạn: " : "") + (lastMessage.text === "Tin nhắn này đã bị xóa" ? "Tin nhắn đã thu hồi" : lastMessage.text || '') + (lastMessage.type === "image" ? "Đã gửi một hình ảnh" : "") + (lastMessage.type === "share" ? "Đã chia sẻ một liên kết" : "")
                         : "Bắt đầu cuộc trò chuyện"}
                     </p>
                   {conversation.unreadCount > 0 && (

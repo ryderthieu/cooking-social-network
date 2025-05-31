@@ -7,6 +7,7 @@ import postsService from '@/services/postService';
 import { formatDate } from '@/components/common/Post';
 import { useAuth } from '@/context/AuthContext';
 import { createComment, getCommentsByTarget } from '@/services/commentService';
+import SharePopup from '../../components/common/SharePopup';
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -19,6 +20,8 @@ const PostDetail = () => {
   const [comments, setComments] = useState([])
   const navigate = useNavigate();
   const {user} = useAuth()
+  const [sharePopup, setSharePopup] = useState({ open: false, postId: null, postTitle: null });
+
   useEffect(() => {
     const fetchPost = async () => {
       try {
@@ -81,7 +84,7 @@ const PostDetail = () => {
   };
   
   const handleShare = () => {
-    // Implement share functionality
+    setSharePopup({ open: true, postId: post._id, postTitle: post.content });
   };
 
   const handleAddComment = async (content) => {
@@ -321,6 +324,14 @@ const PostDetail = () => {
           )}
         </div>
       )}
+
+      {/* Add SharePopup component at the end of the component, before the closing div */}
+      <SharePopup
+        open={sharePopup.open}
+        postId={sharePopup.postId}
+        postTitle={sharePopup.postTitle}
+        onClose={() => setSharePopup({ open: false, postId: null, postTitle: null })}
+      />
     </div>
   );
 };
