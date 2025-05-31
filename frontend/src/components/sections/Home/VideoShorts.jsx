@@ -500,7 +500,7 @@ const VideoShorts = () => {
           </div>
 
           {/* Call to action */}
-          <div className="mt-8">
+          <div className="mt-12">
             <h3 className="text-3xl font-semibold mb-4 bg-gradient-to-r from-pink-500 to-orange-500 text-transparent bg-clip-text">
               Hàng ngàn video hấp dẫn khác <br />
               đang chờ bạn
