@@ -15,7 +15,7 @@ const ReplyItem = ({ reply }) => {
     <div className="flex items-start gap-3 group">
       <div className="relative">
         <img 
-          src={reply.avatar} 
+          src={reply.userId?.avatar} 
           className="w-8 h-8 rounded-full object-cover border-2 border-[#FFB800] shadow-lg hover:scale-105 transition-transform duration-300"
         />
         <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#FFB800] rounded-full border-2 border-white shadow-sm"></div>
@@ -24,7 +24,7 @@ const ReplyItem = ({ reply }) => {
       <div className="flex-1">
         <div className="flex items-center justify-between">
           <div className="font-semibold text-gray-800 hover:text-[#FFB800] transition-colors cursor-pointer text-sm">
-            {reply.user}
+            {reply.userId?.lastName} {reply.userId?.firstName}
           </div>
           <div className="relative">
             <button 

@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CommentItem from './CommentItem';
 import { FaSortAmountDown } from 'react-icons/fa';
 
 const CommentList = ({ postId, comments }) => {
   const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'popular'
 
+  useEffect(() => {
+    console.log('list',comments)
+  }, [])
   const getSortedComments = () => {
     switch (sortBy) {
       case 'oldest':
@@ -62,7 +65,7 @@ const CommentList = ({ postId, comments }) => {
       {/* Comments */}
       <div className="px-6 py-4 space-y-6">
         {getSortedComments().map(comment => (
-          <CommentItem key={comment.id} comment={comment} />
+          <CommentItem key={comment._id} comment={comment}/>
         ))}
       </div>
 

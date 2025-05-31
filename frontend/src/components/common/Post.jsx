@@ -11,60 +11,61 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { useAuth } from "@/context/AuthContext";
 
 export const formatDate = (dateString) => {
-        try {
-            const date = new Date(dateString);
-            const now = new Date();
-            
-            // Reset thời gian về 00:00:00 để so sánh ngày
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const yesterday = new Date(today);
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            // Nếu là thời gian trong ngày hôm nay
-            if (date >= today) {
-                const diffMs = now - date;
-                const diffMins = Math.floor(diffMs / (1000 * 60));
-                const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    try {
+        const date = new Date(dateString);
+        const now = new Date();
 
-                if (diffMins < 1) return 'Vừa xong';
-                if (diffHours < 1) return `${diffMins} phút trước`;
-                return `${diffHours} giờ trước`;
-            }
-            
-            // Nếu là ngày hôm qua
-            if (date >= yesterday) {
-                return 'Hôm qua';
-            }
-            
-            // Tính số ngày chênh lệch
-            const diffTime = Math.abs(today - date);
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            
-            // Nếu trong khoảng 2-3 ngày
-            if (diffDays <= 3) {
-                return `${diffDays} ngày trước`;
-            }
-            
-            // Còn lại hiển thị ngày tháng năm
-            return new Intl.DateTimeFormat('vi-VN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            }).format(date);
-        } catch (error) {
-            return dateString;
+        // Reset thời gian về 00:00:00 để so sánh ngày
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        // Nếu là thời gian trong ngày hôm nay
+        if (date >= today) {
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+
+            if (diffMins < 1) return 'Vừa xong';
+            if (diffHours < 1) return `${diffMins} phút trước`;
+            return `${diffHours} giờ trước`;
         }
-    };
+
+        // Nếu là ngày hôm qua
+        if (date >= yesterday) {
+            return 'Hôm qua';
+        }
+
+        // Tính số ngày chênh lệch
+        const diffTime = Math.abs(today - date);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        // Nếu trong khoảng 2-3 ngày
+        if (diffDays <= 3) {
+            return `${diffDays} ngày trước`;
+        }
+
+        // Còn lại hiển thị ngày tháng năm
+        return new Intl.DateTimeFormat('vi-VN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        }).format(date);
+    } catch (error) {
+        return dateString;
+    }
+};
 
 export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete }) => {
+    const { user } = useAuth()
     const [showMenu, setShowMenu] = useState(false);
-    const [isLiked, setIsLiked] = useState(false);
-    
-    useEffect(() => {
-        console.log('post: ', post)
-    }, [])
+    const [isLiked, setIsLiked] = useState(() =>
+        post?.likes?.some(id => id.toString() === user?._id)
+    );
+
 
     const handleLike = () => {
         setIsLiked(!isLiked);
@@ -122,7 +123,7 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
                     </button>
                     {showMenu && (
                         <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-[#FFB800]/10 py-2 z-10 animate-popup">
-                            <button 
+                            <button
                                 onClick={() => {
                                     onEdit?.(post);
                                     setShowMenu(false);
@@ -140,7 +141,7 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
                                 </div>
                                 <span className="font-medium">Lưu bài viết</span>
                             </button>
-                            <button 
+                            <button
                                 onClick={() => {
                                     onDelete?.(post);
                                     setShowMenu(false);
@@ -170,7 +171,7 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
                         style={{ gridAutoRows: imageMedia.length === 1 ? '1fr' : '200px' }}
                     >
                         {imageMedia.slice(0, 4).map((media, index) => (
-                            <Link 
+                            <Link
                                 to={`/posts/${post._id}`}
                                 key={media._id}
                                 className={`relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black cursor-pointer group
@@ -199,13 +200,13 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
                 <button
                     onClick={handleLike}
                     className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-300 group ${isLiked
-                            ? 'bg-[#FFB800]/20 text-[#FFB800] shadow-md'
-                            : 'text-gray-600 hover:text-[#FFB800] hover:bg-[#FFF4D6]/50'
+                        ? 'bg-[#FFB800]/20 text-[#FFB800] shadow-md'
+                        : 'text-gray-600 hover:text-[#FFB800] hover:bg-[#FFF4D6]/50'
                         }`}
                 >
                     <div className={`p-2 rounded-full transition-all duration-300 ${isLiked
-                            ? 'bg-[#FFB800]/30 scale-110'
-                            : 'bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110'
+                        ? 'bg-[#FFB800]/30 scale-110'
+                        : 'bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110'
                         }`}>
                         <FaHeart className={`w-4 h-4 ${isLiked ? 'text-[#FFB800]' : ''}`} />
                     </div>

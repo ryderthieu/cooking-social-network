@@ -5,6 +5,8 @@ import CommentList from '../../components/common/PostDetail/CommentList';
 import CommentForm from '../../components/common/PostDetail/CommentForm';
 import postsService from '@/services/postService';
 import { formatDate } from '@/components/common/Post';
+import { useAuth } from '@/context/AuthContext';
+import { createComment, getCommentsByTarget } from '@/services/commentService';
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -14,18 +16,20 @@ const PostDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showFullImage, setShowFullImage] = useState(false);
+  const [comments, setComments] = useState([])
   const navigate = useNavigate();
-  
+  const {user} = useAuth()
   useEffect(() => {
     const fetchPost = async () => {
       try {
         setLoading(true);
         setError(null);
         const response = await postsService.fetchById(id);
-        console.log(response);
         setPost(response.data);
-        // Kiểm tra xem user hiện tại đã like bài viết chưa
-        // setIsLiked(response.likes.includes(currentUserId));
+        setIsLiked(response.data.likes?.includes(user._id));
+        const commentsData = await getCommentsByTarget({targetId: id, targetType: 'post', page: 1, limit: 10})
+        console.log('commentData', commentsData.data.data.comments)
+        setComments(commentsData.data.data.comments)
       } catch (error) {
         console.error('Error fetching post:', error);
         setError('Không thể tải bài viết. Vui lòng thử lại sau.');
@@ -69,7 +73,7 @@ const PostDetail = () => {
 
   const handleLike = async () => {
     try {
-      await postsService.likePost(post._id);
+      await postsService.toggleLike(post._id);
       setIsLiked(!isLiked);
     } catch (error) {
       console.error('Error liking post:', error);
@@ -82,10 +86,10 @@ const PostDetail = () => {
 
   const handleAddComment = async (content) => {
     try {
-      await postsService.commentPost(post._id, { content });
-      // Refresh post data to get new comment
-      const updatedPost = await postsService.fetchById(id);
-      setPost(updatedPost);
+      console.log(post._id)
+      await createComment({targetId: post._id, targetType: 'post', text: content});
+      const updatedPost = await postsService.fetchById(post._id);
+      setPost(updatedPost.data);
     } catch (error) {
       console.error('Error adding comment:', error);
     }
@@ -252,7 +256,7 @@ const PostDetail = () => {
           
           {/* Enhanced Comments List */}
           <div className="flex-1 overflow-y-auto">
-            <CommentList comments={post.comments || []} />
+            <CommentList comments={comments || []} />
           </div>
           
           {/* Enhanced Comment Form */}
