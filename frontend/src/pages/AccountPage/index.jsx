@@ -6,7 +6,7 @@ import {
   resetPassword,
   forgotPassword,
   confirmOtp,
-} from "@/services/UserService";
+} from "@/services/userService";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
