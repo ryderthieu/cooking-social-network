@@ -5,7 +5,7 @@ const videoSchema = new Schema(
   {
     author: { type: Schema.Types.ObjectId, required: true, ref: "User" },
     caption: { type: String },
-    recipe: { type: Schema.Types.ObjectId, required: true, ref: "Recipe" },
+    recipe: { type: Schema.Types.ObjectId, ref: "Recipe" },
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User", default: [] }],
     comments: [{type: Schema.Types.ObjectId, ref: 'Comment', default: []}],
     shares: [{type: Schema.Types.ObjectId, ref: 'User', default: []}],

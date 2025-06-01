@@ -6,7 +6,7 @@ const slugify = require("slugify");
 
 const getAllVideos = async (req, res) => {
   try {
-    const videos = await Video.find();
+    const videos = await Video.find().populate("author", "avatar firstName lastName").sort({ createdAt: -1 });
     res.status(200).json(videos);
   } catch (error) {
     console.error("Lỗi khi lấy tất cả video:", error);
@@ -64,19 +64,22 @@ const addVideo = async (req, res) => {
   try {
     const { caption, recipe, videoUri } = req.body;
 
-    if (!caption || !recipe || !videoUri) {
+    if (!caption || !videoUri) {
       return res
         .status(400)
         .json({ message: "Vui lòng nhập đầy đủ thông tin" });
     }
 
     const captionSlug = slugify(caption, { lower: true, locale: "vi" });
-    const recipeDoc = await Recipe.findById(recipe);
-    if (!recipeDoc) {
-      return res.status(404).json({ message: "Công thức không tồn tại" });
+    let recipeSlug
+    if (recipe) {
+      const recipeDoc = await Recipe.findById(recipe);
+      if (!recipeDoc) {
+        return res.status(404).json({ message: "Công thức không tồn tại" });
+      }
+      recipeSlug = slugify(recipeDoc.name, { lower: true, locale: "vi" });
     }
-
-    const recipeSlug = slugify(recipeDoc.name, { lower: true, locale: "vi" });
+    
     const user = await User.findById(req.user._id);
     const authorName = `${user.firstName} ${user.lastName}`;
     const authorSlug = slugify(authorName, {
@@ -95,9 +98,9 @@ const addVideo = async (req, res) => {
       recipe,
       videoUri,
       likes: [],
-      likeCount: 0,
       comments: [],
-      shares: 0,
+      shares: [],
+      view: 0,
       captionSlug,
       recipeSlug,
       authorSlug,
@@ -105,7 +108,7 @@ const addVideo = async (req, res) => {
 
     await newVideo.save();
     const video = await Video.findById(newVideo._id)
-      .populate("author", "email firstName lastName")
+      .populate("author", "email firstName lastName avatar")
       .populate("recipe", "name");
 
     res.status(201).json({ message: "Video upload thành công", video });

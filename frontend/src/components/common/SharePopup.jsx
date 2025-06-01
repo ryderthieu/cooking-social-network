@@ -5,7 +5,7 @@ import { createMessage } from '@/services/messageService';
 import { toast } from 'react-toastify';
 import { useAuth } from '@/context/AuthContext';
 
-const SharePopup = ({ open, onClose, postId, postTitle }) => {
+const SharePopup = ({ open, onClose, postId, postTitle, videoId }) => {
   const [activeTab, setActiveTab] = useState('social');
   const [searchQuery, setSearchQuery] = useState('');
   const [conversations, setConversations] = useState([]);
@@ -14,6 +14,7 @@ const SharePopup = ({ open, onClose, postId, postTitle }) => {
   const { user: currentUser } = useAuth();
   
   useEffect(() => {
+    console.log('videoId', videoId)
     if (open && activeTab === 'chat') {
       fetchConversations();
     }
@@ -54,8 +55,8 @@ const SharePopup = ({ open, onClose, postId, postTitle }) => {
       await createMessage({
         conversationId,
         type: 'share',
-        sharedType: 'post',
-        sharedId: postId,
+        sharedType: postId ? 'post' : 'video',
+        sharedId: postId || videoId,
         text: `Đã chia sẻ bài viết "${postTitle}"`
       });
       toast.success('Đã chia sẻ bài viết!');

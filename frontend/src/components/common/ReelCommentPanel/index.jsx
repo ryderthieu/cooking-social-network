@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes, FaUser, FaHeart, FaReply } from 'react-icons/fa';
+import { FaTimes, FaUser } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-import { formatTimeAgo } from '@/utils/timeUtils';
-import CommentList from './PostDetail/CommentList';
-import CommentForm from './PostDetail/CommentForm';
+import CommentList from '../PostDetail/CommentList';
+import CommentForm from '../PostDetail/CommentForm';
 
-const ReelCommentPanel = ({ reel, open, onClose, onAddComment, comments }) => {
-  const [comment, setComment] = useState('');
+const ReelCommentPanel = ({ reel, open, onClose, onAddComment, refreshKey }) => {
   useEffect(() => {
-    console.log(reel);
-  }, []);
+    console.log('Reel in comment panel:', reel);
+  }, [reel]);
 
   if (!reel) return null;
 
@@ -28,7 +26,7 @@ const ReelCommentPanel = ({ reel, open, onClose, onAddComment, comments }) => {
           <FaTimes size={20} />
         </button>
         <div className="flex items-center gap-4">
-          <Link to={`/profile/${reel._id}`} className="relative group">
+          <Link to={`/profile/${reel.user._id}`} className="relative group">
             {reel.user.avatar ? (
               <img 
                 src={reel.user.avatar} 
@@ -46,7 +44,7 @@ const ReelCommentPanel = ({ reel, open, onClose, onAddComment, comments }) => {
           </Link>
           <div>
             <Link 
-              to={`/profile/${reel._id}`}
+              to={`/profile/${reel.user._id}`}
               className="font-bold text-gray-800 text-lg hover:text-[#FFB800] transition-colors"
             >
               {reel.user.name}
@@ -62,10 +60,14 @@ const ReelCommentPanel = ({ reel, open, onClose, onAddComment, comments }) => {
       </div>
 
       {/* Comments List */}
-      <CommentList reel={reel} />
+      <div className="flex-1 overflow-y-auto">
+        <CommentList reel={reel} key={refreshKey} />
+      </div>
 
       {/* Comment Form */}
-      <CommentForm onSubmit={onAddComment} />
+      <div className="border-t border-[#FFB800]/20 bg-gradient-to-r from-[#FFF4D6]/20 to-white">
+        <CommentForm onSubmit={onAddComment} />
+      </div>
     </div>
   );
 };

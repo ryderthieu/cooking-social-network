@@ -3,10 +3,10 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight, FaTimes, FaHeart, FaComment, FaShare, FaBookmark, FaEllipsisH } from 'react-icons/fa';
 import CommentList from '../../components/common/PostDetail/CommentList';
 import CommentForm from '../../components/common/PostDetail/CommentForm';
-import postsService from '@/services/postService';
+import postsService, { getPostById } from '@/services/postService';
 import { formatDate } from '@/components/common/Post';
 import { useAuth } from '@/context/AuthContext';
-import { createComment, getCommentsByTarget } from '@/services/commentService';
+import { createComment } from '@/services/commentService';
 import SharePopup from '../../components/common/SharePopup';
 import { useSocket } from '@/context/SocketContext';
 
@@ -18,9 +18,9 @@ const PostDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [showFullImage, setShowFullImage] = useState(false);
-  const [comments, setComments] = useState([])
+  const [commentRefresh, setCommentRefresh] = useState(0); // Add this to trigger comment refresh
   const navigate = useNavigate();
-  const {user} = useAuth()
+  const { user } = useAuth();
   const [sharePopup, setSharePopup] = useState({ open: false, postId: null, postTitle: null });
   const { sendNotification } = useSocket();
 
@@ -32,9 +32,6 @@ const PostDetail = () => {
         const response = await postsService.fetchById(id);
         setPost(response.data);
         setIsLiked(response.data.likes?.includes(user._id));
-        const commentsData = await getCommentsByTarget({targetId: id, targetType: 'post', page: 1, limit: 10})
-        console.log('commentData', commentsData.data.data.comments)
-        setComments(commentsData.data.data.comments)
       } catch (error) {
         console.error('Error fetching post:', error);
         setError('Không thể tải bài viết. Vui lòng thử lại sau.');
@@ -42,8 +39,11 @@ const PostDetail = () => {
         setLoading(false);
       }
     };
-    fetchPost();
-  }, [id]);
+    
+    if (id) {
+      fetchPost();
+    }
+  }, [id, user._id]);
 
   if (loading) return (
     <div className="h-[100vh] bg-gradient-to-br from-[#FFF4D6] via-white to-[#FFF4D6] py-6 px-2 lg:px-8 flex justify-center items-center">
@@ -78,11 +78,12 @@ const PostDetail = () => {
 
   const handleLike = async () => {
     try {
-      const res = await postsService.toggleLike(post._id);
-      const isLiking = !isLiked; // Trạng thái mới sẽ ngược với trạng thái hiện tại
+      await postsService.toggleLike(post._id);
+      const updatedPost = await postsService.fetchById(post._id);
+      setPost(updatedPost.data);
+      const isLiking = !isLiked;
       setIsLiked(!isLiked);
       
-      // Chỉ gửi thông báo khi like, không gửi khi unlike
       if (isLiking && post.author._id !== user._id) {
         sendNotification({
           receiverId: post.author._id,
@@ -98,7 +99,6 @@ const PostDetail = () => {
   const handleShare = () => {
     setSharePopup({ open: true, postId: post._id, postTitle: post.content });
     
-    // Gửi thông báo khi share bài viết
     if (post.author._id !== user._id) {
       sendNotification({
         receiverId: post.author._id,
@@ -110,12 +110,15 @@ const PostDetail = () => {
 
   const handleAddComment = async (content) => {
     try {
-      console.log(post._id)
-      await createComment({targetId: post._id, targetType: 'post', text: content});
-      const updatedPost = await postsService.fetchById(post._id);
+      await createComment({ targetId: post._id, targetType: 'post', text: content });
+      
+      // Refresh post data to get updated comment count
+      const updatedPost = await postsService.fetchById(id);
       setPost(updatedPost.data);
+      
+      // Trigger comment list refresh
+      setCommentRefresh(prev => prev + 1);
 
-      // Gửi thông báo khi comment bài viết
       if (post.author._id !== user._id) {
         sendNotification({
           receiverId: post.author._id,
@@ -124,6 +127,7 @@ const PostDetail = () => {
           message: `${user.firstName} đã bình luận: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
         });
       }
+      
     } catch (error) {
       console.error('Error adding comment:', error);
     }
@@ -290,7 +294,7 @@ const PostDetail = () => {
           
           {/* Enhanced Comments List */}
           <div className="flex-1 overflow-y-auto">
-            <CommentList comments={comments || []} />
+            <CommentList post={post} key={commentRefresh} />
           </div>
           
           {/* Enhanced Comment Form */}

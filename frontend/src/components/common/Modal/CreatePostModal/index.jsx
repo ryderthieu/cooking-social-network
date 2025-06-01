@@ -5,6 +5,7 @@ import { useCloudinary } from '@/context/CloudinaryContext';
 import { createPost } from '@/services/postService';
 import { getAllRecipes, getMyRecipes, searchRecipes } from '@/services/recipeService';
 import { toast } from 'react-toastify';
+import { addVideo } from '@/services/videoService';
 
 const CreatePostModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();
@@ -161,16 +162,18 @@ const CreatePostModal = ({ isOpen, onClose }) => {
         toast.success('Đã tạo bài viết thành công!');
       } else {
         // Xử lý tạo video
+        console.log(media)
         if (media.length === 0) {
           toast.error('Vui lòng chọn video!');
           return;
         }
 
         // Upload video lên Cloudinary
-        const videoUrl = await uploadVideo(media[0].file, (progress) => {
+        const videoUrlData = await uploadVideo(media[0].file, (progress) => {
           setUploadProgress(progress);
         });
-
+        const videoUrl = videoUrlData.url
+        console.log(videoUrl)
         // Tạo video data
         const videoData = {
           caption: content,
@@ -178,7 +181,7 @@ const CreatePostModal = ({ isOpen, onClose }) => {
           videoUri: videoUrl
         };
 
-        await createPost(videoData);
+        await addVideo(videoData);
         toast.success('Đã tạo video thành công!');
       }
       
@@ -319,7 +322,7 @@ const CreatePostModal = ({ isOpen, onClose }) => {
                     ) : (
                       <video
                         src={item.preview}
-                        className="w-full h-48 object-cover rounded-xl"
+                        className="aspect-[9/16] w-full object-contain rounded-xl"
                         controls
                       />
                     )}
