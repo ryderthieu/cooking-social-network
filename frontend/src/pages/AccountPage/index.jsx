@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import anhbia from "../../assets/Account/anhbia.jpg";
 import { MdEdit } from "react-icons/md";
 import {
   editProfile,
@@ -22,11 +21,12 @@ const AccountPage = () => {
   const [showOtp, setShowOtp] = useState(false);
   const [pendingData, setPendingData] = useState(null);
   const [avatar, setAvatar] = useState("");
+  const [originalEmail, setOriginalEmail] = useState("");
 
   useEffect(() => {
     getUserInfo()
       .then((response) => {
-        const { firstName, lastName, email } = response.data;
+        const { firstName, lastName, email, avatar } = response.data;
         setForm({
           firstName: firstName || "",
           lastName: lastName || "",
@@ -34,6 +34,7 @@ const AccountPage = () => {
           password: "",
         });
         setAvatar(avatar || "");
+        setOriginalEmail(email || "");
       })
       .catch((error) => {
         console.error("Error fetching user info:", error);
@@ -49,7 +50,7 @@ const AccountPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.email || form.password) {
+    if (form.email !== originalEmail || form.password) {
       try {
         await forgotPassword({ email: form.email });
         setShowOtp(true);
@@ -101,12 +102,8 @@ const AccountPage = () => {
     <div className="px-[110px] bg-gray-100 h-screen">
       <div className="flex gap-4 pt-[30px]">
         <div className="bg-white rounded-md w-[70%] h-[600px]">
-          <div className="relative">
-            <img
-              src={anhbia}
-              className="p-4 w-full h-[250px] object-cover"
-              alt=""
-            />
+          <div className="relative p-4">
+            <div className="w-full h-[250px] rounded-3xl bg-gradient-to-r from-amber-200 via-orange-200 to-yellow-200"></div>
             <div>
               <img
                 src={avatar || "https://via.placeholder.com/140"}
