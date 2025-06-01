@@ -142,6 +142,27 @@ export default function Contact() {
           </p>
         </div>
 
+        {/* Success Message */}
+        {successMessage && (
+          <div className="fixed bottom-6 right-6 z-50 max-w-sm ">
+            <div className="bg-white rounded-lg shadow-lg border border-green-200 p-4 flex items-center gap-3">
+              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                <Check className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-800">
+                  {successMessage.message}
+                </p>
+              </div>
+              <button
+                onClick={() => setSuccessMessage(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )}
         {/* Main Content */}
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Contact Form */}

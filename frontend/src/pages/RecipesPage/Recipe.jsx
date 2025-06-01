@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import MainLayout from "../../components/layout/MainLayout";
 import BreadCrumb from "../../components/common/BreadCrumb.jsx";
 import CategoryCard from "../../components/sections/Recipe/CategoriesCard.jsx";
 import RecipeGrid from "../../components/sections/Recipe/RecipeGrid.jsx";
@@ -136,7 +135,7 @@ const Recipes = () => {
   };
 
   return (
-    <MainLayout>
+    <>
       {/* Banner */}
       <div className="relative h-[520px]" style={getBannerStyles()}>
         <div
@@ -188,7 +187,7 @@ const Recipes = () => {
           onLoadMore={handleLoadMoreRecipes}
         />
       </div>
-    </MainLayout>
+    </>
   );
 };
 

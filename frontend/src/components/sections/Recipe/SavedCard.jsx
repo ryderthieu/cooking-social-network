@@ -214,12 +214,12 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
 
         {/* Action button */}
         <div className="mt-4 pt-4 border-t border-gray-100">
-          <Link
-            to={`/recipes/${recipe._id || recipe.id}`}
+          <a
+            href={`/recipes/${recipe._id || recipe.id}`}
             className="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-orange-400 to-yellow-400 text-white text-sm font-semibold rounded-xl hover:from-orange-500 hover:to-yellow-500 transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
           >
             Xem công thức
-          </Link>
+          </a>
         </div>
       </div>
 
