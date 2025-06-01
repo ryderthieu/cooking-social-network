@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route, Navigate } from "react-router";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import HomePage from "./pages/HomePage/index";
 import NewBlog from "./pages/BlogPage/NewBlog";
 import HighlightBlog from "./pages/BlogPage/HighlightBlog";
@@ -40,8 +40,19 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 import RecipeDetail from "./pages/RecipesPage/RecipeDetail";
 
+import Loader from "./components/loader/Loader";
+import { useState, useEffect } from "react";
+
 function App() {
   const { user } = useAuth();
+  const location = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timeout = setTimeout(() => setIsLoading(false), 500);
+    return () => clearTimeout(timeout);
+  }, [location.pathname]);
 
   const routes = [
     { path: "/", element: <HomePage /> },
@@ -75,41 +86,49 @@ function App() {
     },
     { path: "/account", element: <AccountPage /> },
     { path: "/profile/:userId", element: <ProfilePage /> },
-    { path: "/recipes", element: <RecipeCategories />},
-    { path: "/recipes/:categoryType/:item", element: <Recipes />},
+    { path: "/recipes", element: <RecipeCategories /> },
+    { path: "/recipes/:categoryType/:item", element: <Recipes /> },
     { path: "/recipes/create", element: <CreateRecipe /> },
     { path: "/recipes/saved", element: <SavedRecipes /> },
-    { path: "/recipes/:id", element: <RecipeDetail />},
+    { path: "/recipes/:id", element: <RecipeDetail /> },
     // { path: "/posts/:id", element: <PostDetail />}
     { path: "/explore/*", element: <PostPage /> },
   ];
 
-  const headeronlyRoutes = [{ path: "/messages/", element: <MessagePage /> }, {path: "/messages/:conversationId", element: <MessagePage />}];
+  const headeronlyRoutes = [
+    { path: "/messages/", element: <MessagePage /> },
+    { path: "/messages/:conversationId", element: <MessagePage /> },
+  ];
 
   return (
-    <Routes>
-      {routes.map(({ path, element }) => (
-        <Route
-          key={path}
-          path={path}
-          element={<LayoutRoute element={element} />}
-        />
-      ))}
+    <>
+      {isLoading && <Loader />}
+      {!isLoading && (
+        <Routes>
+          {routes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={<LayoutRoute element={element} />}
+            />
+          ))}
 
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/posts/:id" element={<PostDetail />} />
-      <Route path="/chat" element={<ChatPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/posts/:id" element={<PostDetail />} />
+          <Route path="/chat" element={<ChatPage />} />
 
-      {headeronlyRoutes.map(({ path, element }) => (
-        <Route
-          key={path}
-          path={path}
-          element={<HeaderLayout>{element}</HeaderLayout>}
-        />
-      ))}
-    </Routes>
+          {headeronlyRoutes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={<HeaderLayout>{element}</HeaderLayout>}
+            />
+          ))}
+        </Routes>
+      )}
+    </>
   );
 }
 
