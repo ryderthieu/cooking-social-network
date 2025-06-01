@@ -33,7 +33,7 @@ const ContactsPage = () => {
   return (
     <div>
       <Hero />
-      <div className="mx-[110px] my-[60px]">
+      <div className="mx-[120px] my-[60px]">
         <h2 className="text-2xl font-semibold mb-4">Cách thức liên hệ</h2>
         <div className="grid md:grid-cols-2 gap-6 mb-12">
           {contactInfo.map((item, index) => (

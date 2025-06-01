@@ -241,7 +241,7 @@ const TermsPage = () => {
   return (
     <div>
       <Hero />
-      <div className="mx-[110px] my-[40px] flex gap-10">
+      <div className="mx-[120px] my-[40px] flex gap-10">
         <div className="max-w-[35%]">
           <h2 className="text-[28px] font-bold pb-2">Danh mục</h2>
           {termContent.map((item, index) => (

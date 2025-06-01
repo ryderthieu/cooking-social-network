@@ -21,6 +21,7 @@ import nhatBan from "../../assets/Header/nhat-ban.jpg";
 import baiVietMoi from "../../assets/Header/bai-viet-moi.jpg";
 import baiVietNoiBat from "../../assets/Header/bai-viet-noi-bat.jpg";
 import baiVietPhoBien from "../../assets/Header/bai-viet-pho-bien.jpg";
+import hero from "../../assets/Support/hero.png";
 
 const categories = [
   {
@@ -129,29 +130,29 @@ const supports = [
   {
     name: "Điều kiện điều khoản",
     items: [
-      { name: "Điều kiện", path: "/support/dieu-kien" },
-      { name: "Điều khoản", path: "/support/dieu-khoan" },
+      { name: "Điều kiện", path: "/support/dieu-kien", src: hero },
+      { name: "Điều khoản", path: "/support/dieu-khoan", src: hero },
     ],
   },
   {
     name: "Hướng dẫn sử dụng",
     items: [
-      { name: "Hướng dẫn sử dụng", path: "/support/huong-dan" },
-      { name: "Chức năng tiêu biểu", path: "/support/chuc-nang" },
+      { name: "Hướng dẫn sử dụng", path: "/support/huong-dan", src: hero },
+      { name: "Chức năng tiêu biểu", path: "/support/chuc-nang", src: hero },
     ],
   },
   {
     name: "Câu hỏi thường gặp",
     items: [
-      { name: "Câu hỏi", path: "/support/cau-hoi" },
-      { name: "Feedback", path: "/support/phan-hoi" },
+      { name: "Câu hỏi", path: "/support/cau-hoi", src: hero },
+      { name: "Feedback", path: "/support/phan-hoi", src: hero },
     ],
   },
   {
     name: "Liên hệ",
     items: [
-      { name: "Liên hệ", path: "/support/lien-he" },
-      { name: "Hỗ trợ", path: "/support/ho-tro" },
+      { name: "Liên hệ", path: "/support/lien-he", src: hero },
+      { name: "Hỗ trợ", path: "/support/ho-tro", src: hero },
     ],
   },
 ];

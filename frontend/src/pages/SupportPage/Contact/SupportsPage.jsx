@@ -22,22 +22,10 @@ const SupportsPage = () => {
       description:
         "Hướng dẫn mời bạn bè, tạo nhóm nấu ăn và chia sẻ công thức dễ dàng.",
     },
-    {
-      icon: <FaUsers className="text-[rgba(246,60,60,0.9)] text-2xl" />,
-      title: "Người dùng & Cộng tác",
-      description:
-        "Hướng dẫn mời bạn bè, tạo nhóm nấu ăn và chia sẻ công thức dễ dàng.",
-    },
-    {
-      icon: <FaUsers className="text-[rgba(246,60,60,0.9)] text-2xl" />,
-      title: "Người dùng & Cộng tác",
-      description:
-        "Hướng dẫn mời bạn bè, tạo nhóm nấu ăn và chia sẻ công thức dễ dàng.",
-    },
   ];
 
   return (
-    <div className="min-h-screen mt-[20px] mx-[110px]">
+    <div className="min-h-screen mt-[20px] mx-[120px]">
       <div
         className=" text-white py-16 px-4 text-center h-[320px]  rounded-2xl"
         style={{
