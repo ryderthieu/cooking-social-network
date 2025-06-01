@@ -5,10 +5,11 @@ import { Plus, MoreVertical, Clock } from "lucide-react";
 import SavedCard from "../../components/sections/Recipe/SavedCard";
 import ActionButton from "../../components/common/ActionButton";
 import AddCollectionModal from "../../components/common/Modal/Recipe/AddCollectionModal";
-import { Love, Matcha, Ramen } from "@/assets/Recipe/images";
+import { Korea1, Love, Matcha, Ramen } from "@/assets/Recipe/images";
 import { useNavigate } from "react-router-dom";
 
 const collections = [
+  { id: "tat-ca", name: "Tất cả", thumbnail: Korea1},
   { id: "yeu-thich", name: "Yêu thích", thumbnail: Love },
   { id: "trang-mieng", name: "Tráng miệng", thumbnail: Matcha },
   { id: "bo-suu-tap-moi", name: "Bộ sưu tập mới", thumbnail: null },
@@ -18,24 +19,24 @@ const recipesMock = [
   {
     id: 1,
     title: "Mì ramen chuẩn Nhật siêu đơn giản ai cũng có thể làm",
-    time: "30 phút",
-    type: "Bữa sáng",
+    time: "30",
+    categories: "Bữa sáng",
     image: Ramen,
     author: "Bạn",
   },
   {
     id: 2,
     title: "Mì ramen chuẩn Nhật siêu đơn giản ai cũng có thể làm",
-    time: "30 phút",
-    type: "Bữa sáng",
+    time: "30",
+    categories: "Bữa sáng",
     image: Ramen,
     author: "Bạn",
   },
   {
     id: 3,
     title: "Mì ramen chuẩn Nhật siêu đơn giản ai cũng có thể làm",
-    time: "30 phút",
-    type: "Bữa sáng",
+    time: "30",
+    categories: "Bữa sáng",
     image: Ramen,
     author: "Bạn",
   },

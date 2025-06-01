@@ -6,6 +6,7 @@ import avatar from "../../../assets/avatar.jpg";
 import avatar1 from "../../../assets/avatar1.jpg";
 import avatar2 from "../../../assets/avatar2.jpg";
 import { Link } from "react-router-dom";
+
 const featuredRecipes = [
   {
     name: "Bài viết phổ biến",
@@ -38,21 +39,25 @@ const featuredRecipes = [
 
 const Blogs = () => {
   return (
-    <div>
+    <div className="space-y-4">
       {featuredRecipes.map((recipe, index) => (
-        <Link to={recipe.path} key={index} className="flex items-center gap-4">
-          <div className="mt-4 flex gap-4">
-            <img
-              src={recipe.image}
-              className="w-[240px] h-[180px] object-cover rounded-2xl"
-              alt={recipe.name}
-            />
-            <div className="max-w-[550px] my-auto">
-              <h4 className="font-semibold text-[20px]">{recipe.name}</h4>
-              <p className="text-justify leading-6 text-[15px] text-gray-600 mt-2 font-light">
+        <a href={recipe.path} key={index} className="block">
+          <div className="flex gap-5 pb-6 border-b border-gray-100">
+            <div className="flex-shrink-0">
+              <img
+                src={recipe.image}
+                className="w-[240px] h-[180px] object-cover rounded-lg"
+                alt={recipe.name}
+              />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-xl text-gray-800 mb-2">
+                {recipe.name}
+              </h3>
+              <p className="text-gray-600 text-sm mb-3 line-clamp-3">
                 {recipe.desc}
               </p>
-              <div className="flex mt-4 items-center">
+              <div className="flex items-center">
                 {recipe.ava && (
                   <img
                     src={recipe.ava}
@@ -60,14 +65,16 @@ const Blogs = () => {
                     className="w-8 h-8 rounded-full mr-2"
                   />
                 )}
-                <span className="mr-4 font-semibold">{recipe.author}</span>
-                <p className="border-l-2 border-l-gray-200 pl-4 my-auto text-[14px] font-semibold text-[rgba(0,0,0,0.6)]">
+                <span className="text-sm font-medium text-gray-700 mr-4">
+                  {recipe.author}
+                </span>
+                <span className="text-sm text-gray-500 border-l border-gray-200 pl-4">
                   {recipe.date}
-                </p>
+                </span>
               </div>
             </div>
           </div>
-        </Link>
+        </a>
       ))}
     </div>
   );

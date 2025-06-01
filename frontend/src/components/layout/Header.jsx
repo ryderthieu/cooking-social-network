@@ -228,7 +228,7 @@ const Header = () => {
                         <img
                           src={item.src}
                           alt={item.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                         />
                       ) : (
                         <span className="text-gray-400">No image</span>
