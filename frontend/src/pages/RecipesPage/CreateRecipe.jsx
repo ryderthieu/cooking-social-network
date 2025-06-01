@@ -8,7 +8,7 @@ import BreadCrumb from "@/components/common/BreadCrumb"
 export default function CreateRecipeForm() {
   const [recipeName, setRecipeName] = useState("")
   const [description, setDescription] = useState("")
-  const [servings, setServings] = useState("4")
+  const [servings, setServings] = useState("1")
   const [cookingTime, setCookingTime] = useState("")
   const [ingredients, setIngredients] = useState([{ name: "", amount: "" }])
   const [steps, setSteps] = useState([{ summary: "", detail: "", time: "" }])
@@ -170,13 +170,12 @@ export default function CreateRecipeForm() {
                       <label className="block text-lg font-semibold text-gray-700 mb-2">
                         <Users className="w-4 h-4 inline mr-1" />
                         Số người ăn
-                      </label>
-                      <input
+                      </label>                      <input
                         type="text"
                         value={servings}
                         onChange={(e) => setServings(e.target.value)}
                         className="w-full px-4 py-3 border outline-none border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
-                        placeholder="4"
+                        placeholder="1"
                       />
                     </div>
                     <div>

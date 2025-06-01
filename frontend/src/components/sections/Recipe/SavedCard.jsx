@@ -1,61 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { Clock, Heart, MoreVertical } from "lucide-react";
 import { Link } from "react-router-dom";
-import { getUserById } from "../../../services/userService"; 
+import { getUserById } from "../../../services/userService";
+import { toggleRecipeInFavorites, checkRecipeInFavorites } from "../../../services/collectionService";
+import { useAuth } from "../../../context/AuthContext";
+import CollectionDropdown from "../../common/Modal/Recipe/CollectionDropdown";
+import { toast } from 'react-toastify';
 
 const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
   const [authorData, setAuthorData] = useState(null);
   const [isLoadingAuthor, setIsLoadingAuthor] = useState(false);
+  const [isInFavorites, setIsInFavorites] = useState(false);
+  const [isLoadingFavorites, setIsLoadingFavorites] = useState(false);
+  const [showCollectionDropdown, setShowCollectionDropdown] = useState(false);
+  
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
 
-  // Format categories for display
-  const renderCategories = () => {
-    if (!recipe.categories) return "Hấp dẫn";
-    
-    // Handle if categories is an array
-    if (Array.isArray(recipe.categories)) {
-      if (recipe.categories.length === 0) return "Hấp dẫn";
-      if (recipe.categories.length === 1) return recipe.categories[0];
-      
-      // If there are multiple categories, show the first one and a count
-      return (
-        <>
-          {recipe.categories[0]} <span className="text-orange-600 ml-1">+{recipe.categories.length - 1}</span>
-        </>
-      );
-    }
-    
-    // Handle if categories is an object (from MongoDB)
-    if (recipe.categories && typeof recipe.categories === 'object' && !Array.isArray(recipe.categories)) {
-      return "Hấp dẫn";
-    }
-    
-    // Handle if categories is a string (might be comma separated)
-    if (typeof recipe.categories === 'string') {
-      const categoryArray = recipe.categories.split(',').map(cat => cat.trim());
-      if (categoryArray.length === 1) return recipe.categories;
-      
-      return (
-        <>
-          {categoryArray[0]} <span className="text-orange-600 ml-1">+{categoryArray.length - 1}</span>
-        </>
-      );
-    }
-    
-    return "Hấp dẫn";
-  };
-
-  // Get difficulty level (1-3)
+  // Debug logging
+  console.log("SavedCard received recipe:", recipe);
+  console.log("Recipe categories:", recipe.categories);// Get difficulty level (1-3)
   const getDifficultyLevel = () => {
+    // First check if difficulty is directly on recipe object
     const difficulty = recipe.difficultyLevel || recipe.difficulty;
-    if (!difficulty) return 2;
+    
+    // If not found, check inside categories object
+    const categoryDifficulty = recipe.categories?.difficultyLevel;
+    
+    const finalDifficulty = difficulty || categoryDifficulty;
+    
+    if (!finalDifficulty) return 2;
+    
     const difficultyMap = {
       "Dễ": 1,
       "Trung bình": 2,
       "Khó": 3
     };
-    return difficultyMap[difficulty] || 2;
+    return difficultyMap[finalDifficulty] || 2;
   };
-
   // Fetch author data if we only have the author ID
   useEffect(() => {
     const fetchAuthorData = async () => {
@@ -84,6 +66,70 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
     fetchAuthorData();
   }, [recipe.author]);
 
+  // Check if recipe is in favorites
+  useEffect(() => {
+    const checkFavorites = async () => {
+      if (isLoggedIn && recipe._id) {
+        try {
+          const response = await checkRecipeInFavorites(recipe._id);
+          if (response.success) {
+            setIsInFavorites(response.isInFavorites);
+          }
+        } catch (error) {
+          console.error("Error checking favorites:", error);
+        }
+      }
+    };
+    
+    checkFavorites();
+  }, [recipe._id, isLoggedIn]);
+
+  const handleToggleFavorites = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isLoggedIn) {
+      toast.info('Vui lòng đăng nhập để lưu công thức');
+      return;
+    }
+
+    try {
+      setIsLoadingFavorites(true);
+      const response = await toggleRecipeInFavorites(recipe._id);
+      if (response.success) {
+        setIsInFavorites(response.isInFavorites);
+        toast.success(response.message);
+      }
+    } catch (error) {
+      console.error("Error toggling favorites:", error);
+      toast.error('Không thể cập nhật yêu thích');
+    } finally {
+      setIsLoadingFavorites(false);
+    }
+  };
+
+  const handleShowCollections = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!isLoggedIn) {
+      toast.info('Vui lòng đăng nhập để lưu công thức');
+      return;
+    }
+    
+    setShowCollectionDropdown(true);
+  };
+  const handleCollectionSuccess = () => {
+    // Refresh favorites status
+    if (isLoggedIn && recipe._id) {
+      checkRecipeInFavorites(recipe._id).then(response => {
+        if (response.success) {
+          setIsInFavorites(response.isInFavorites);
+        }
+      });
+    }
+  };
+
   const difficultyLevel = getDifficultyLevel();
   
   // Helper to get the recipe title
@@ -106,15 +152,32 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
   
   // Helper to get recipe cooking time
   const getCookingTime = () => recipe.cookingTime || recipe.time || "30";
-  
-  // Helper to get mealType or cuisine for display
+    // Helper to get mealType or cuisine for display
   const getRecipeType = () => {
+    // Handle new categories object structure
+    if (recipe.categories && typeof recipe.categories === 'object' && !Array.isArray(recipe.categories)) {
+      const { mealType, cuisine, mainIngredients } = recipe.categories;
+      
+      // Priority order: mealType > cuisine > mainIngredients
+      if (mealType && Array.isArray(mealType) && mealType.length > 0) {
+        return mealType[0];
+      }
+      if (cuisine && Array.isArray(cuisine) && cuisine.length > 0) {
+        return cuisine[0];
+      }
+      if (mainIngredients && Array.isArray(mainIngredients) && mainIngredients.length > 0) {
+        return mainIngredients[0];
+      }
+    }
+    
+    // Legacy support for direct properties
     if (recipe.mealType && Array.isArray(recipe.mealType) && recipe.mealType.length > 0) {
       return recipe.mealType[0];
     }
     if (recipe.cuisine && Array.isArray(recipe.cuisine) && recipe.cuisine.length > 0) {
       return recipe.cuisine[0];
     }
+    
     return "Món ăn";
   };
   
@@ -130,26 +193,45 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
           src={(recipe.image && Array.isArray(recipe.image) && recipe.image.length > 0) ? recipe.image[0] : (recipe.image || "/placeholder.svg")}
           alt={getTitle()}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-        />
-
-        {/* Top action buttons */}
-        <div className="absolute top-4 right-4 z-20 flex gap-2">
-          {/* Using heart icon for save/unsave */}
-          <button 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onRemove && onRemove();
-            }}
-            className={`p-2.5 ${showRemoveOption ? 'bg-white/90 backdrop-blur-md' : 'bg-white/90 backdrop-blur-md'} rounded-full hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg ${showRemoveOption ? 'hover:bg-red-50' : ''}`}
-            title={showRemoveOption ? "Bỏ lưu công thức" : "Đã lưu"}
-          >
-            <Heart size={16} className={showRemoveOption ? "text-red-500" : "text-orange-500"} fill="currentColor" />
-          </button>
-          <button className="p-2.5 bg-white/90 backdrop-blur-md rounded-full hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg">
-            <MoreVertical size={16} className="text-gray-600" />
-          </button>
-        </div>
+        />        {/* Top action buttons - Only show when logged in */}
+        {isLoggedIn && (
+          <div className="absolute top-4 right-4 z-20 flex gap-2">
+            {/* Heart button for favorites */}
+            <button 
+              onClick={showRemoveOption ? (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onRemove && onRemove();
+              } : handleToggleFavorites}
+              className={`p-2.5 bg-white/90 backdrop-blur-md rounded-full hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg ${
+                showRemoveOption ? 'hover:bg-red-50' : isInFavorites ? 'hover:bg-red-50' : 'hover:bg-orange-50'
+              }`}
+              title={
+                showRemoveOption ? "Bỏ lưu công thức" : 
+                isInFavorites ? "Bỏ khỏi yêu thích" : "Thêm vào yêu thích"
+              }
+              disabled={isLoadingFavorites}
+            >
+              <Heart 
+                size={16} 
+                className={
+                  showRemoveOption ? "text-red-500" :
+                  isInFavorites ? "text-red-500" : "text-gray-400 hover:text-red-500"
+                } 
+                fill={isInFavorites || showRemoveOption ? "currentColor" : "none"} 
+              />
+            </button>
+            
+            {/* More options button for collection dropdown */}
+            <button 
+              onClick={handleShowCollections}
+              className="p-2.5 bg-white/90 backdrop-blur-md rounded-full hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg"
+              title="Lưu vào bộ sưu tập"
+            >
+              <MoreVertical size={16} className="text-gray-600" />
+            </button>
+          </div>
+        )}
 
         {/* Recipe type badge */}
         <div className="absolute top-4 left-4 z-20">
@@ -221,10 +303,16 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
             Xem công thức
           </a>
         </div>
-      </div>
-
-      {/* Subtle border glow on hover */}
+      </div>      {/* Subtle border glow on hover */}
       <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-orange-300/10 to-yellow-300/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+      
+      {/* Collection Dropdown */}
+      <CollectionDropdown
+        isOpen={showCollectionDropdown}
+        onClose={() => setShowCollectionDropdown(false)}
+        recipeId={recipe._id}
+        onSuccess={handleCollectionSuccess}
+      />
     </div>
   );
 };

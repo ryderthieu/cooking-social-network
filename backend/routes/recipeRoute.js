@@ -7,7 +7,8 @@ const {
     addRecipe, 
     editRecipe, 
     deleteRecipe, 
-    getTopRecipes 
+    getTopRecipes,
+    getSimilarRecipes 
 } = require('../controllers/recipeController');
 
 const router = express.Router();
@@ -16,6 +17,7 @@ const router = express.Router();
 router.get('/', getAllRecipes);
 router.get('/search', authenticateJWT, searchRecipe);
 router.get('/top', getTopRecipes);
+router.get('/:id/similar', getSimilarRecipes);
 router.get('/:id', getRecipeById);
 
 // CREATE

@@ -31,6 +31,8 @@ app.use("/api/comments", require("./routes/commentRoute"))
 app.use("/api/messages", require("./routes/messageRoute"))
 app.use("/api/conversations", require("./routes/conversationRoute"))
 app.use("/api/notifications", require('./routes/notificationRoute'))
+app.use("/api/reviews", require('./routes/reviewRoute'))
+app.use("/api/collections", require('./routes/collectionRoute'))
 // Start server
 server.listen(PORT, () => {
     console.log(`Server started at http://localhost:${PORT}`);

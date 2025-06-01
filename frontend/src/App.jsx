@@ -30,9 +30,9 @@ import PostPage from "./pages/PostPage";
 import PostDetail from "./pages/PostPage/PostDetail";
 
 import Recipes from "./pages/RecipesPage/Recipe";
-import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
 import RecipeCategories from "./pages/RecipesPage";
 import CreateRecipe from "./pages/RecipesPage/CreateRecipe";
+import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
 import ProfilePage from "./pages/ProfilePage";
 import HeaderLayout from "./components/layout/HeaderLayout";
 import ChatPage from "./pages/ChatPage";

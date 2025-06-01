@@ -76,9 +76,9 @@ const Header = () => {
 
   return (
     <div className="flex justify-between px-[110px] py-[20px] fixed bg-white z-50 right-0 left-0">
-      <Link to="/">
+      <a href="/">
         <img src={logo} alt="Oshisha" />
-      </Link>
+      </a>
       <div className="flex items-center gap-10" ref={navRef}>
         <Link
           to="/"

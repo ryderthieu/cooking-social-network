@@ -87,7 +87,7 @@ export default function RecipeCategories() {
   };
 
   return (
-    <MainLayout>
+    <>
       <div className="mx-auto w-full">
         {/* Banner */}
         <div className="relative overflow-hidden" style={getBannerStyles()}>
@@ -156,6 +156,6 @@ export default function RecipeCategories() {
           ))}
         </main>
       </div>
-    </MainLayout>
+    </>
   );
 }

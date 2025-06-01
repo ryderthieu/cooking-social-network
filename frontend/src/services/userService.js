@@ -78,12 +78,24 @@ export const editProfile = ({ firstName, lastName, gender, birthDay, avatar }) =
     return API.patch('/users/edit-profile', newInfo)
 }
 
+export const saveRecipe = ({recipeId}) => {
+    return API.patch('/users/save-recipe', {recipeId})
+}
+
 export const deleteSavedRecipe = ({recipeId}) => {
     return API.patch('/users/delete-saved-recipe', {recipeId})
 }
 
+export const savePost = ({postId}) => {
+    return API.patch('/users/save-post', {postId})
+}
+
 export const deleteSavedPost = ({postId}) => {
     return API.patch('/users/delete-saved-post', {postId})
+}
+
+export const saveReel = ({reelId}) => {
+    return API.patch('/users/save-video', {videoId: reelId})
 }
 
 export const deleteSavedReel = ({reelId}) => {

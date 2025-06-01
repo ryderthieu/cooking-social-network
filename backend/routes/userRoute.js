@@ -1,5 +1,5 @@
 const express = require('express')
-const {login, register, forgotPassword, resetPassword, confirmOtp, getUserById, getUserInfo, searchUser, editProfile, deleteSavedRecipe, getSavedRecipe, getSavedPost, getFollowers, getFollowing, toggleFollow, deleteSavedPost, deleteSavedVideo, getSavedVideo, getUserStats} = require('../controllers/userController')
+const {login, register, forgotPassword, resetPassword, confirmOtp, getUserById, getUserInfo, searchUser, editProfile, saveRecipe, deleteSavedRecipe, getSavedRecipe, savePost, getSavedPost, saveVideo, getFollowers, getFollowing, toggleFollow, deleteSavedPost, deleteSavedVideo, getSavedVideo, getUserStats} = require('../controllers/userController')
 const { authenticateJWT } = require('../middlewares/authMiddleware')
 
 const router = express.Router()
@@ -22,7 +22,10 @@ router.get('/:userId', getUserById)
 router.get('/:userId/stats', getUserStats);
 
 router.patch('/edit-profile', authenticateJWT, editProfile)
+router.patch('/save-recipe', authenticateJWT, saveRecipe)
 router.patch('/delete-saved-recipe', authenticateJWT, deleteSavedRecipe)
+router.patch('/save-post', authenticateJWT, savePost)
 router.patch('/delete-saved-post', authenticateJWT, deleteSavedPost)
+router.patch('/save-video', authenticateJWT, saveVideo)
 router.patch('/delete-saved-video', authenticateJWT, deleteSavedVideo)
 module.exports = router
