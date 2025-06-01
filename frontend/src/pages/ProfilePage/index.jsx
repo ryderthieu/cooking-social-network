@@ -14,7 +14,7 @@ import {
   toggleFollow,
   getUserStats,
   editProfile,
-} from "../../services/UserService";
+} from "../../services/userService";
 import { useAuth } from "../../context/AuthContext";
 import { useSocket } from "../../context/SocketContext";
 import { toast } from "react-toastify";
@@ -75,8 +75,8 @@ export default function ProfilePage() {
   // );
 
   useEffect(() => {
-    console.log(currentUser)
-  }, [])
+    console.log(currentUser);
+  }, []);
 
   // Fetch user data and stats
   useEffect(() => {
@@ -160,7 +160,7 @@ export default function ProfilePage() {
         if (willFollow) {
           sendNotification({
             receiverId: userId,
-            type: 'follow',
+            type: "follow",
           });
         }
 
@@ -270,27 +270,27 @@ export default function ProfilePage() {
   const handleSaveProfile = async (formData) => {
     try {
       // Gọi API để update profile
-      console.log('Saving profile:', formData);
+      console.log("Saving profile:", formData);
       // await updateUserProfile(formData);
-      
+
       setIsEditModalOpen(false);
     } catch (error) {
-      console.error('Error saving profile:', error);
+      console.error("Error saving profile:", error);
     }
   };
 
   // Loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="h-12 w-12 rounded-full bg-amber-300 mb-4"></div>
-          <div className="h-4 w-32 bg-amber-200 rounded mb-2"></div>
-          <div className="h-3 w-24 bg-amber-100 rounded"></div>
-        </div>
-      </div>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <div className="min-h-screen bg-[#F5F1E8] flex items-center justify-center">
+  //       <div className="animate-pulse flex flex-col items-center">
+  //         <div className="h-12 w-12 rounded-full bg-amber-300 mb-4"></div>
+  //         <div className="h-4 w-32 bg-amber-200 rounded mb-2"></div>
+  //         <div className="h-3 w-24 bg-amber-100 rounded"></div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   // User not found state
   if (!userData) {
@@ -332,7 +332,7 @@ export default function ProfilePage() {
               onToggleFollowInModal={handleToggleFollowInModal}
             />
           </div>
-            
+
           {/* Main Content */}
           <div className="col-span-2">
             <div className="">
@@ -368,7 +368,7 @@ export default function ProfilePage() {
               ...
             </div>
           </div>
-          
+
           {isEditModalOpen && (
             <EditProfileModal
               isOpen={isEditModalOpen}

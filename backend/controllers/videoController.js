@@ -38,7 +38,7 @@ const searchVideos = async (req, res) => {
     if (!keyword || keyword.trim() === "") {
       return res.status(400).json({ message: "Vui lòng nhập từ khóa" });
     }
-
+    console.log(keyword)
     const slug = slugify(keyword, { lower: true, locale: "vi" });
     const filter = {
       $or: [
@@ -50,7 +50,7 @@ const searchVideos = async (req, res) => {
 
     const videos = await Video.find(filter)
       .sort({ createdAt: -1 })
-      .populate("author", "email firstName lastName")
+      .populate("author", "avatar firstName lastName")
       .populate("recipe", "name");
 
     res.status(200).json({ message: "Kết quả tìm kiếm", videos });
@@ -108,7 +108,7 @@ const addVideo = async (req, res) => {
 
     await newVideo.save();
     const video = await Video.findById(newVideo._id)
-      .populate("author", "email firstName lastName avatar")
+      .populate("author", "firstName lastName avatar")
       .populate("recipe", "name");
 
     res.status(201).json({ message: "Video upload thành công", video });
@@ -133,14 +133,36 @@ const editVideo = async (req, res) => {
       return res.status(404).json({ message: "Video không tồn tại" });
     }
 
-    video.caption = caption || video.caption;
-    video.recipe = recipe || video.recipe;
-    video.videoUri = videoUri || video.videoUri;
+    if (caption !== undefined) {
+        video.caption = caption;
+        video.captionSlug = slugify(caption, { lower: true, locale: "vi" });
+    }
+
+    if (recipe !== undefined) {
+        if (recipe) {
+            if (!mongoose.Types.ObjectId.isValid(recipe)) {
+                return res.status(400).json({ message: "ID công thức không hợp lệ." });
+            }
+            const recipeDoc = await Recipe.findById(recipe);
+            if (!recipeDoc) {
+                return res.status(404).json({ message: "Công thức được chỉ định không tìm thấy." });
+            }
+            video.recipe = recipeDoc._id;
+            video.recipeSlug = slugify(recipeDoc.name, { lower: true, locale: "vi" });
+        } else {
+            video.recipe = null;
+            video.recipeSlug = null;
+        }
+    }
+    
+    if (videoUri !== undefined) {
+        video.videoUri = videoUri;
+    }
 
     if (!video.caption || !video.recipe || !video.videoUri) {
       return res
         .status(400)
-        .json({ message: "Vui lòng nhập đầy đủ thông tin" });
+        .json({ message: "Vui lòng nhập đầy đủ thông tin (phụ đề, công thức, URL video)." });
     }
 
     const isValidUrl = /^(https?:\/\/)/.test(video.videoUri);
@@ -149,7 +171,11 @@ const editVideo = async (req, res) => {
     }
 
     await video.save();
-    res.status(200).json({ message: "Video cập nhật thành công", video });
+    const updatedVideo = await Video.findById(video._id)
+        .populate("author", "email firstName lastName avatar")
+        .populate("recipe", "name");
+
+    res.status(200).json({ message: "Video cập nhật thành công", video: updatedVideo });
   } catch (error) {
     console.error("Lỗi khi cập nhật video:", error);
     res

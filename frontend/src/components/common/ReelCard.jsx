@@ -1,7 +1,8 @@
+import { formatRelativeTime } from '@/pages/MessagePage';
 import React, { useState, useRef, useEffect } from 'react';
 import { FaPlay, FaHeart, FaComment, FaShare, FaBookmark, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
-
+import { useNavigate } from 'react-router-dom';
 const ReelCard = ({ reel, onLike, onComment, onShare }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -156,5 +157,59 @@ const ReelCard = ({ reel, onLike, onComment, onShare }) => {
     </div>
   );
 };
+
+export const ReelCardReview = ({reel}) => {
+  const navigate = useNavigate()
+  return (
+    <div
+      key={reel._id} // Assuming API returns _id
+      className="relative group cursor-pointer"
+      onClick={() => navigate(`/explore/reels/${reel._id}`)} // Assuming this route exists
+    >
+      <div className="aspect-[9/16] relative overflow-hidden rounded-xl">
+        <img
+          src={reel.videoUri.replace('mp4', 'jpg')} // API might use thumbnailUrl
+          alt={reel.caption || 'Video Title'}
+          className="w-full h-full object-cover"
+        />
+        {reel.videoUri && ( // API might use videoUrl
+          <video
+            className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-  opacity duration-300"
+            src={reel.videoUri}
+            loop
+            muted
+            autoPlay
+            playsInline
+            onMouseEnter={(e) => e.target.play()}
+            onMouseLeave={(e) => { e.target.pause(); e.target.currentTime = 0; }}
+          />
+        )}
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+            {reel.author && ( // Check if author info exists
+              <div className="flex items-center space-x-2 mb-2">
+                <img
+                  src={reel.author.avatar || 'https://via.placeholder.com/32'}
+                  alt={reel.author.name || 'User'}
+                  className="w-8 h-8 rounded-full"
+                />
+                <span className="font-medium">{reel.author.lastName + " " + reel.author.firstName || 'Tác giả'}</span>
+              </div>
+            )}
+            <p className="text-sm line-clamp-2">{reel.caption || 'Không có tiêu đề'}</p>
+            <div className="flex items-center space-x-3 mt-2 text-sm justify-between">
+              <span className="flex items-center">
+                <FaHeart className="mr-1" /> {reel.likes.length || 0}
+              </span>
+              <span>
+                {formatRelativeTime(reel.createdAt)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default ReelCard; 

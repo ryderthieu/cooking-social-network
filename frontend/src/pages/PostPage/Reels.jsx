@@ -14,6 +14,7 @@ import {
 import { createComment, getCommentsByTarget } from "@/services/commentService";
 import { toast } from "react-toastify";
 import Spinner from "../../components/common/Spinner";
+import { formatRelativeTime } from "../MessagePage";
 
 const Reels = () => {
   const { id } = useParams();
@@ -42,13 +43,13 @@ const Reels = () => {
           const formattedReels = response.data.map(reel => ({
             ...reel,
             user: {
-              name: `${reel.author?.firstName || ''} ${reel.author?.lastName || ''}`.trim(),
+              name: `${reel.author?.lastName || ''} ${reel.author?.firstName || ''}`.trim(),
               avatar: reel.author?.avatar,
               _id: reel.author?._id
             },
             video: reel.videoUri || reel.video,
             title: reel.caption || reel.title,
-            date: new Date(reel.createdAt).toLocaleDateString(),
+            date: formatRelativeTime(reel.createdAt),
             likes: Array.isArray(reel.likes) ? reel.likes.length : 0,
             commentCount: Array.isArray(reel.comments) ? reel.comments.length : 0,
             shares: reel.shares?.length || 0,

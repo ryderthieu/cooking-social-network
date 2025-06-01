@@ -13,10 +13,10 @@ const MessageDropdown = () => {
   const { socket } = useSocket();
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
-  
+
   // Đảm bảo conversations là một mảng trước khi filter
-  const unreadCount = Array.isArray(conversations) 
-    ? conversations.filter((conv) => conv?.unreadCount > 0).length 
+  const unreadCount = Array.isArray(conversations)
+    ? conversations.filter((conv) => conv?.unreadCount > 0).length
     : 0;
 
   useEffect(() => {
@@ -24,15 +24,19 @@ const MessageDropdown = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await getUserConversations({page: 1, limit: 10});
-        
+        const response = await getUserConversations({ page: 1, limit: 10 });
+
         if (response?.data?.success && response.data?.data?.conversations) {
-          const fetchedConversations = response.data.data.conversations.map(conv => ({
-            ...conv,
-            // Client sẽ tự cập nhật isOnline dựa trên socket events
-            members: conv.members.map(m => ({...m, isOnline: false})), // Khởi tạo isOnline là false
-            otherUser: conv.otherUser ? {...conv.otherUser, isOnline: false} : null
-          }));
+          const fetchedConversations = response.data.data.conversations.map(
+            (conv) => ({
+              ...conv,
+              // Client sẽ tự cập nhật isOnline dựa trên socket events
+              members: conv.members.map((m) => ({ ...m, isOnline: false })), // Khởi tạo isOnline là false
+              otherUser: conv.otherUser
+                ? { ...conv.otherUser, isOnline: false }
+                : null,
+            })
+          );
           setConversations(fetchedConversations);
         } else {
           console.error("Invalid conversations data format:", response);
@@ -72,63 +76,77 @@ const MessageDropdown = () => {
             // Tạm thời bỏ qua việc thêm conversation mới ở đây, chỉ cập nhật nếu đã tồn tại.
             // Hoặc, cần emit thêm thông tin conversation đầy đủ khi có tin nhắn đầu tiên của conv mới.
             // For now, if not found, we might need to refetch or handle it differently.
-            console.warn("New message for a conversation not in dropdown list:", data.conversationId);
+            console.warn(
+              "New message for a conversation not in dropdown list:",
+              data.conversationId
+            );
             // Tìm cách lấy đầy đủ thông tin conversation hoặc bỏ qua nếu không có
             // Để đơn giản, nếu không tìm thấy, không làm gì cả với dropdown này
-            return prevConvs; 
+            return prevConvs;
           }
-          
+
           targetConv.lastMessage = data.message;
           targetConv.updatedAt = new Date().toISOString();
           targetConv.unreadCount = (targetConv.unreadCount || 0) + 1;
-          
+
           convsToUpdate.unshift(targetConv); // Đưa lên đầu
           return convsToUpdate;
         });
       });
 
-      socket.on("messages_seen", ({ conversationId, unreadCount }) => { // Nhận unreadCount từ server
+      socket.on("messages_seen", ({ conversationId, unreadCount }) => {
+        // Nhận unreadCount từ server
         setConversations((prevConvs) => {
           if (!Array.isArray(prevConvs)) return [];
-          return prevConvs.map((conv) =>
-            conv?._id === conversationId ? { ...conv, unreadCount: unreadCount } : conv // Cập nhật unreadCount
+          return prevConvs.map(
+            (conv) =>
+              conv?._id === conversationId
+                ? { ...conv, unreadCount: unreadCount }
+                : conv // Cập nhật unreadCount
           );
         });
       });
 
       const updateUserOnlineStatusInDropdown = (userId, isOnline) => {
-        setConversations(prevConvs =>
-          prevConvs.map(conv => ({
+        setConversations((prevConvs) =>
+          prevConvs.map((conv) => ({
             ...conv,
-            members: conv.members.map(member =>
+            members: conv.members.map((member) =>
               member._id === userId ? { ...member, isOnline } : member
             ),
-            otherUser: conv.otherUser && conv.otherUser._id === userId 
-              ? { ...conv.otherUser, isOnline }
-              : conv.otherUser
+            otherUser:
+              conv.otherUser && conv.otherUser._id === userId
+                ? { ...conv.otherUser, isOnline }
+                : conv.otherUser,
           }))
         );
       };
 
-      socket.on('user_online', (userId) => updateUserOnlineStatusInDropdown(userId, true));
-      socket.on('user_offline', (userId) => updateUserOnlineStatusInDropdown(userId, false));
-      
+      socket.on("user_online", (userId) =>
+        updateUserOnlineStatusInDropdown(userId, true)
+      );
+      socket.on("user_offline", (userId) =>
+        updateUserOnlineStatusInDropdown(userId, false)
+      );
+
       // Lắng nghe danh sách người dùng online ban đầu
-      socket.on('initial_online_users', (activeOnlineUserIds) => {
-        setConversations(prevConvs =>
-          prevConvs.map(conv => ({
+      socket.on("initial_online_users", (activeOnlineUserIds) => {
+        setConversations((prevConvs) =>
+          prevConvs.map((conv) => ({
             ...conv,
-            members: conv.members.map(member => ({
+            members: conv.members.map((member) => ({
               ...member,
-              isOnline: activeOnlineUserIds.includes(member._id)
+              isOnline: activeOnlineUserIds.includes(member._id),
             })),
-            otherUser: conv.otherUser 
-              ? { ...conv.otherUser, isOnline: activeOnlineUserIds.includes(conv.otherUser._id) }
-              : null
+            otherUser: conv.otherUser
+              ? {
+                  ...conv.otherUser,
+                  isOnline: activeOnlineUserIds.includes(conv.otherUser._id),
+                }
+              : null,
           }))
         );
       });
-
     }
 
     return () => {
@@ -207,7 +225,9 @@ const MessageDropdown = () => {
           {/* Header */}
           <div className="p-4 border-b border-gray-100">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-800">Tin nhắn</h3>
+              <h3 className="text-[16px] font-semibold text-gray-800">
+                Tin nhắn
+              </h3>
             </div>
           </div>
 
@@ -218,9 +238,7 @@ const MessageDropdown = () => {
                 Đang tải tin nhắn...
               </div>
             ) : error ? (
-              <div className="p-4 text-center text-red-500">
-                {error}
-              </div>
+              <div className="p-4 text-center text-red-500">{error}</div>
             ) : !Array.isArray(conversations) || conversations.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 Chưa có cuộc trò chuyện nào
@@ -238,7 +256,9 @@ const MessageDropdown = () => {
                     {/* Avatar with online status */}
                     <div className="relative flex-shrink-0">
                       <img
-                        src={conversation?.otherUser?.avatar || "/placeholder.svg"}
+                        src={
+                          conversation?.otherUser?.avatar || "/placeholder.svg"
+                        }
                         alt={conversation?.otherUser?.name || "User avatar"}
                         className="w-10 h-10 rounded-full object-cover"
                       />
@@ -293,7 +313,7 @@ const MessageDropdown = () => {
                 navigate("/messages");
                 setIsOpen(false);
               }}
-              className="text-sm text-orange-500 font-semibold hover:text-orange-600 py-2 rounded transition-colors"
+              className="text-sm text-[#FF6363] font-semibold hover:text-[#fa5555] py-2 rounded transition-colors"
             >
               Xem tất cả tin nhắn
             </button>
