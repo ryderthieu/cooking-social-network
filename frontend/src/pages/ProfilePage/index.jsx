@@ -14,7 +14,7 @@ import {
   toggleFollow,
   getUserStats,
   editProfile,
-} from "../../services/UserService";
+} from "../../services/userService";
 import { useAuth } from "../../context/AuthContext";
 import { useSocket } from "../../context/SocketContext";
 import { toast } from "react-toastify";
@@ -75,8 +75,8 @@ export default function ProfilePage() {
   // );
 
   useEffect(() => {
-    console.log(currentUser)
-  }, [])
+    console.log(currentUser);
+  }, []);
 
   // Fetch user data and stats
   useEffect(() => {
@@ -160,7 +160,7 @@ export default function ProfilePage() {
         if (willFollow) {
           sendNotification({
             receiverId: userId,
-            type: 'follow',
+            type: "follow",
           });
         }
 
@@ -270,12 +270,12 @@ export default function ProfilePage() {
   const handleSaveProfile = async (formData) => {
     try {
       // Gọi API để update profile
-      console.log('Saving profile:', formData);
+      console.log("Saving profile:", formData);
       // await updateUserProfile(formData);
-      
+
       setIsEditModalOpen(false);
     } catch (error) {
-      console.error('Error saving profile:', error);
+      console.error("Error saving profile:", error);
     }
   };
 
@@ -332,7 +332,7 @@ export default function ProfilePage() {
               onToggleFollowInModal={handleToggleFollowInModal}
             />
           </div>
-            
+
           {/* Main Content */}
           <div className="col-span-2">
             <div className="">
@@ -368,7 +368,7 @@ export default function ProfilePage() {
               ...
             </div>
           </div>
-          
+
           {isEditModalOpen && (
             <EditProfileModal
               isOpen={isEditModalOpen}

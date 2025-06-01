@@ -5,13 +5,16 @@ import facebook from "../../assets/IconSocial/fb.png";
 import instagram from "../../assets/IconSocial/ins.png";
 import tiktok from "../../assets/IconSocial/tiktok.png";
 import linkedin from "../../assets/IconSocial/linkedin.png";
+import { useNavigate } from "react-router-dom";
 
 const Footer = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-[#03051A]">
-      <img src={logo} alt="logo" className="py-[50px] px-[110px]" />
+      <img src={logo} alt="logo" className="py-[50px] px-[120px]" />
 
-      <div className="grid grid-cols-4 gap-6 text-white pb-8 px-[110px]">
+      <div className="grid grid-cols-4 text-white pb-8 px-[120px]">
         <div>
           <div>
             <h1 className="font-bold text-[20px]">ĐỊA CHỈ</h1>
@@ -29,64 +32,72 @@ const Footer = () => {
           </div>
         </div>
 
-        <div>
-          <h1 className="text-[20px] font-bold">Khám phá công thức</h1>
-          <p className="pt-4 font-bold text-[#FFFFFF] text-opacity-50">
-            Món mặn
-          </p>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
-            Món chay
-          </p>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
-            Món Âu
-          </p>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
-            Thức uống
-          </p>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
-            Ăn vặt
-          </p>
+        <div className="ml-[30px] mr-[20px]">
+          <h1 className="text-[20px] font-bold">Các mục nổi bật</h1>
+          <a href="/">
+            <p className="pt-4 hover:text-white text-[#FFFFFF] text-opacity-50">
+              Trang chủ
+            </p>
+          </a>
+          <a href="/recipes">
+            <p className="pt-4 hover:text-white text-[#FFFFFF] text-opacity-50">
+              Công thức
+            </p>
+          </a>
+          <a href="/explore/posts">
+            <p className="pt-4 hover:text-white text-[#FFFFFF] text-opacity-50">
+              Lướt tin
+            </p>
+          </a>
+          <a href="/about">
+            <p className="pt-4 hover:text-white text-[#FFFFFF] text-opacity-50">
+              Về chúng tôi
+            </p>
+          </a>
         </div>
 
         <div>
           <h1 className="text-[20px] font-bold">Blog ẩm thực</h1>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
-            Hướng dẫn sử dụng
-          </p>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
-            Điều kiện & điều khoản
-          </p>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
-            Câu hỏi thường gặp
-          </p>
-          <p className="pt-4 font-semibold text-[#FFFFFF] text-opacity-50">
-            Liên hệ
-          </p>
+          <a href="/blog/bai-viet-moi">
+            <p className="pt-4 hover:text-white text-[#FFFFFF] text-opacity-50">
+              Bài viết mới nhất
+            </p>
+          </a>
+          <a href="/blog/bai-viet-noi-bat">
+            <p className="pt-4 hover:text-white text-[#FFFFFF] text-opacity-50">
+              Bài viết nổi bật
+            </p>
+          </a>
+          <a href="/blog/bai-viet-pho-bien">
+            <p className="pt-4 hover:text-white text-[#FFFFFF] text-opacity-50">
+              Bài viết phổ biến
+            </p>
+          </a>
         </div>
 
         <div>
           <h1 className="text-[20px] font-bold">Hỗ trợ</h1>
           <a
             href="/support/huong-dan"
-            className="block pt-4 font-semibold text-[#FFFFFF] text-opacity-50 hover:text-white"
+            className="block pt-4 text-[#FFFFFF] text-opacity-50 hover:text-white"
           >
             Hướng dẫn sử dụng
           </a>
           <a
             href="/support/dieu-kien"
-            className="block pt-4 font-semibold text-[#FFFFFF] text-opacity-50 hover:text-white"
+            className="block pt-4 text-[#FFFFFF] text-opacity-50 hover:text-white"
           >
             Điều kiện & điều khoản
           </a>
           <a
             href="/support/cau-hoi"
-            className="block pt-4 font-semibold text-[#FFFFFF] text-opacity-50 hover:text-white"
+            className="block pt-4 text-[#FFFFFF] text-opacity-50 hover:text-white"
           >
             Câu hỏi thường gặp
           </a>
           <a
             href="/support/lien-he"
-            className="block pt-4 font-semibold text-[#FFFFFF] text-opacity-50 hover:text-white"
+            className="block pt-4 text-[#FFFFFF] text-opacity-50 hover:text-white"
           >
             Liên hệ
           </a>
@@ -94,12 +105,37 @@ const Footer = () => {
       </div>
 
       <div className="border-t border-[rgba(77,120,146,0.54)] text-white flex justify-between">
-        <div className="flex px-[100px] py-8">
-          <img className="pr-2" src={facebook} alt="" />
-          <img className="px-2" src={instagram} alt="" />
-          <img className="px-2" src={tiktok} alt="" />
-          <img className="px-2" src={youtube} alt="" />
-          <img className="px-2" src={linkedin} alt="" />
+        <div className="flex px-[120px] py-8">
+          <img
+            onClick={() => window.open("https://facebook.com", "_blank")}
+            className="pr-2 cursor-pointer"
+            src={facebook}
+            alt="facebook"
+          />
+          <img
+            onClick={() => window.open("https://instagram.com", "_blank")}
+            className="px-2 cursor-pointer"
+            src={instagram}
+            alt="instagram"
+          />
+          <img
+            onClick={() => window.open("https://tiktok.com", "_blank")}
+            className="px-2 cursor-pointer"
+            src={tiktok}
+            alt="tiktok"
+          />
+          <img
+            onClick={() => window.open("https://youtube.com", "_blank")}
+            className="px-2 cursor-pointer"
+            src={youtube}
+            alt="youtube"
+          />
+          <img
+            onClick={() => window.open("https://linkedin.com", "_blank")}
+            className="px-2 cursor-pointer"
+            src={linkedin}
+            alt="linkedin"
+          />
         </div>
 
         <div className="font-semibold pr-[100px] text-[16px] py-8">

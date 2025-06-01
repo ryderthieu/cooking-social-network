@@ -104,13 +104,17 @@ export default function NotificationDropdown() {
         console.error("Error marking notification as read:", error);
       }
     }
-    if (notification.type === 'like' || notification.type === 'comment' || notification.type === 'share') {
+    if (
+      notification.type === "like" ||
+      notification.type === "comment" ||
+      notification.type === "share"
+    ) {
       if (notification.postId) {
         navigate(`/posts/${notification.postId}`);
       } else if (notification.videoId) {
         navigate(`/reels/${notification.videoId}`);
       }
-    } else if (notification.type === 'follow') {
+    } else if (notification.type === "follow") {
       navigate(`/profile/${notification.sender._id}`);
     }
     setOpen(false);
@@ -136,16 +140,37 @@ export default function NotificationDropdown() {
       : "Ai đó";
     switch (notification.type) {
       case "like":
-        return `${senderName} đã thích bài viết của bạn`;
-      case "comment":
         return (
-          notification.message ||
-          `${senderName} đã bình luận về bài viết của bạn`
+          <>
+            <span className="font-semibold">{senderName}</span> đã thích bài
+            viết của bạn
+          </>
+        );
+      case "comment":
+        return notification.message ? (
+          <>
+            <span className="font-semibold">{senderName}</span>:{" "}
+            {notification.message}
+          </>
+        ) : (
+          <>
+            <span className="font-semibold">{senderName}</span> đã bình luận về
+            bài viết của bạn
+          </>
         );
       case "share":
-        return `${senderName} đã chia sẻ bài viết của bạn`;
+        return (
+          <>
+            <span className="font-semibold">{senderName}</span> đã chia sẻ bài
+            viết của bạn
+          </>
+        );
       case "follow":
-        return `${senderName} đã theo dõi bạn`;
+        return (
+          <>
+            <span className="font-semibold">{senderName}</span> đã theo dõi bạn
+          </>
+        );
       default:
         return notification.message || "Có thông báo mới";
     }

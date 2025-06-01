@@ -11,6 +11,7 @@ export default function Contact() {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscribeEmail, setSubscribeEmail] = useState("");
   const [formErrors, setFormErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState(null);
 
   // Form validation
   const validateForm = (type) => {
@@ -53,9 +54,10 @@ export default function Contact() {
           Accept: "application/json",
         },
         body: JSON.stringify(formData),
-      }).then((res) => res.json());
-      console.log(res);
-      if (res.success) {
+      });
+      const data = await res.json();
+      console.log("Kết quả trả về:", data);
+      if (data.success) {
         toast.success(
           "Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể."
         );
@@ -64,7 +66,7 @@ export default function Contact() {
         setMessage("");
         setFormErrors({});
       } else {
-        toast.error(res.message || "Gửi thất bại. Vui lòng thử lại!");
+        toast.error("Gửi thất bại. Vui lòng thử lại!");
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
@@ -96,16 +98,17 @@ export default function Contact() {
           Accept: "application/json",
         },
         body: JSON.stringify(formData),
-      }).then((res) => res.json());
-
-      if (res.success) {
+      });
+      const data = await res.json();
+      console.log("Kết quả trả về:", data);
+      if (data.success) {
         toast.success(
           "Cảm ơn bạn đã đăng ký! Chúng tôi sẽ gửi những công thức ngon nhất."
         );
         setSubscribeEmail("");
         setFormErrors({});
       } else {
-        toast.error(res.message || "Đăng ký thất bại. Vui lòng thử lại!");
+        toast.error("Đăng ký thất bại. Vui lòng thử lại!");
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
