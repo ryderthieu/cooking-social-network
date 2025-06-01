@@ -21,7 +21,7 @@ export const createNotification = ({receiver, type, postId, videoId, commentId})
 }
 
 export const markAsRead = ({notificationId}) => {
-    return API.patch(`/notificaitons/read/${notificationId}`)
+    return API.patch(`/notifications/read/${notificationId}`)
 }
 
 export const markAllAsRead = () => {

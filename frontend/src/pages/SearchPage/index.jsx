@@ -415,6 +415,7 @@ const SearchPage = () => {
             <SharePopup
                 open={sharePopup.open}
                 postId={sharePopup.postId}
+                postTitle={mockPosts.find(p => p.id === sharePopup.postId)?.content}
                 onClose={() => setSharePopup({ open: false, postId: null })}
             />
         </div>

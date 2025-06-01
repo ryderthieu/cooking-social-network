@@ -5,8 +5,9 @@ const { locales } = require('validator/lib/isIBAN');
 
 // ✅ GET: Lấy tất cả công thức
 const getAllRecipes = async (req, res) => {
-    try {
-        const recipes = await Recipe.find();
+    try {        const recipes = await Recipe.find()
+            .populate('author', 'firstName lastName  avatar')
+            .populate('ingredients.ingredient', 'name unit');
         res.status(200).json({ success: true, count: recipes.length, data: recipes});
     } catch (error) {
         console.error(`❌ Error fetching recipe: `, error);
@@ -20,10 +21,10 @@ const getRecipeById = async (req, res) => {
 
     if(!mongoose.Types.ObjectId.isValid(id)){
         res.status(404).json({success: false, message: "Invalid Id"})
-    }
-
-    try {
-        const recipe = await Recipe.findById(id);
+    }    try {
+        const recipe = await Recipe.findById(id)
+            .populate('author', 'firstName lastName avatar')
+            .populate('ingredients.ingredient', 'name unit');
         if(!recipe){
             return res.status(404).json({
                 success: false, 
@@ -31,7 +32,6 @@ const getRecipeById = async (req, res) => {
                 error: "Không thể tìm thấy công thức."
             })
         }
-        
         
         res.status(200).json({success: true, data: recipe});
         
@@ -116,9 +116,9 @@ const searchRecipe = async (req, res) => {
         const total = await Recipe.countDocuments(filter);
 
         // Tổng số trang cần thiết để hiện thị kết quả, dùng ceil để làm tròn lên
-        const totalPages = Math.ceil(total / parseInt(limit));
-    
-        const recipes = await Recipe.find(filter)
+        const totalPages = Math.ceil(total / parseInt(limit));        const recipes = await Recipe.find(filter)
+            .populate('author', 'firstName lastName avatar')
+            .populate('ingredients.ingredient', 'name unit')
             .sort({createdAt: -1})
             .skip(skip)
             .limit(parseInt(limit));
@@ -186,9 +186,13 @@ const addRecipe = async (req, res) => {
             utensils,
             time,
             author: req.user ? req.user._id : null
-        })
+        })        const newRecipe = await recipe.save();
 
-        const newRecipe = await recipe.save();
+        // Automatically add recipe to "Công thức của tôi" collection
+        if (req.user && req.user._id) {
+            const { addRecipeToMyRecipes } = require('./collectionController');
+            await addRecipeToMyRecipes(req.user._id, newRecipe._id);
+        }
 
         res.status(201).json({
             success: true,
@@ -360,6 +364,131 @@ const getTopRecipes = async (req, res) => {
     }
 };
 
+// ✅ GET: Lấy các công thức tương tự dựa trên categories
+const getSimilarRecipes = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { limit = 6 } = req.query;
+        
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Invalid recipe ID" 
+            });
+        }
+
+        // Lấy recipe hiện tại để biết categories
+        const currentRecipe = await Recipe.findById(id);
+        
+        if (!currentRecipe) {
+            return res.status(404).json({
+                success: false,
+                message: "Recipe not found"
+            });
+        }
+
+        // Tạo query để tìm recipes tương tự
+        const similarityQuery = {
+            _id: { $ne: id }, // Loại bỏ recipe hiện tại
+        };
+
+        // Tạo điều kiện OR để tìm recipes có ít nhất 1 category giống
+        const orConditions = [];
+
+        if (currentRecipe.categories.mealType?.length > 0) {
+            orConditions.push({
+                'categories.mealType': { $in: currentRecipe.categories.mealType }
+            });
+        }
+
+        if (currentRecipe.categories.cuisine?.length > 0) {
+            orConditions.push({
+                'categories.cuisine': { $in: currentRecipe.categories.cuisine }
+            });
+        }
+
+        if (currentRecipe.categories.occasions?.length > 0) {
+            orConditions.push({
+                'categories.occasions': { $in: currentRecipe.categories.occasions }
+            });
+        }
+
+        if (currentRecipe.categories.dietaryPreferences?.length > 0) {
+            orConditions.push({
+                'categories.dietaryPreferences': { $in: currentRecipe.categories.dietaryPreferences }
+            });
+        }
+
+        if (currentRecipe.categories.mainIngredients?.length > 0) {
+            orConditions.push({
+                'categories.mainIngredients': { $in: currentRecipe.categories.mainIngredients }
+            });
+        }
+
+        if (currentRecipe.categories.cookingMethod?.length > 0) {
+            orConditions.push({
+                'categories.cookingMethod': { $in: currentRecipe.categories.cookingMethod }
+            });
+        }
+
+        if (currentRecipe.categories.timeBased?.length > 0) {
+            orConditions.push({
+                'categories.timeBased': { $in: currentRecipe.categories.timeBased }
+            });
+        }
+
+        if (currentRecipe.categories.difficultyLevel) {
+            orConditions.push({
+                'categories.difficultyLevel': currentRecipe.categories.difficultyLevel
+            });
+        }
+
+        // Nếu có điều kiện tương tự, thêm vào query
+        if (orConditions.length > 0) {
+            similarityQuery.$or = orConditions;
+        }
+
+        // Tìm recipes tương tự
+        const similarRecipes = await Recipe.find(similarityQuery)
+            .populate('author', 'firstName lastName avatar')
+            .populate('ingredients.ingredient', 'name unit')
+            .sort({ averageRating: -1, createdAt: -1 }) // Ưu tiên rating cao và mới
+            .limit(parseInt(limit));
+
+        // Nếu không đủ recipes tương tự, lấy thêm random recipes
+        if (similarRecipes.length < parseInt(limit)) {
+            const remainingLimit = parseInt(limit) - similarRecipes.length;
+            const randomRecipes = await Recipe.find({
+                _id: { 
+                    $ne: id, 
+                    $nin: similarRecipes.map(recipe => recipe._id) 
+                }
+            })
+            .populate('author', 'firstName lastName avatar')
+            .populate('ingredients.ingredient', 'name unit')
+            .sort({ createdAt: -1 })
+            .limit(remainingLimit);
+
+            similarRecipes.push(...randomRecipes);
+        }
+
+        res.status(200).json({
+            success: true,
+            count: similarRecipes.length,
+            message: "Lấy công thức tương tự thành công",
+            data: similarRecipes
+        });
+
+    } catch (error) {
+        console.error("❌ Error fetching similar recipes: ", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: "Đã xảy ra lỗi khi lấy công thức tương tự. Xin vui lòng thử lại."
+        });
+    }
+};
+
 module.exports = {
     getAllRecipes,
     getRecipeById,
@@ -367,5 +496,6 @@ module.exports = {
     addRecipe,
     editRecipe,
     deleteRecipe,
-    getTopRecipes
+    getTopRecipes,
+    getSimilarRecipes
 }

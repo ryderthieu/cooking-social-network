@@ -1,27 +1,24 @@
 import React from "react";
 import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
-import b1 from "../../assets/Blog/b1.jpg";
-import b2 from "../../assets/Blog/b2.jpg";
-import b3 from "../../assets/Blog/b3.jpg";
-import b4 from "../../assets/Blog/b4.jpg";
-import b5 from "../../assets/Blog/b5.jpg";
-import b6 from "../../assets/Blog/b6.jpg";
-import b7 from "../../assets/Blog/b7.jpg";
-import avatar1 from "../../assets/avatar1.jpg";
+import bt1 from "../../assets/Blog/bt1.jpg";
+import bt2 from "../../assets/Blog/bt2.jpg";
+import bt3 from "../../assets/Blog/bt3.jpg";
+import avatar from "../../assets/avatar.jpg";
 import Recipe from "../../components/common/Recipe";
 import { Link } from "react-router-dom";
-import banh from "../../assets/Blog/banh.jpg";
+import botoi from "../../assets/Blog/botoi.jpg";
 
 const Blog2 = () => {
   return (
     <div className="px-[300px] pt-[20px] pb-[20px]">
       <h1 className="font-semibold text-center text-[30px]">
-        Cách làm bánh sừng bò (bánh croissant) <br /> thơm béo đúng chuẩn
+        Cách làm bánh mì bơ tỏi - Garlic Bread <br /> thơm ngon giòn rụm cho bữa
+        ăn sáng
       </h1>
       <div className="flex justify-center items-center gap-10 mt-[25px]">
         <div className="flex items-center gap-4">
-          <img className="w-12 h-12 rounded-full" src={avatar1} alt="" />
-          <p className="text-[16px] font-bold">Trần Đỗ Phương Nhi</p>
+          <img className="w-12 h-12 rounded-full" src={avatar} alt="" />
+          <p className="text-[16px] font-bold">Huỳnh Văn Thiệu</p>
         </div>
         <div className="text-[16px] text-[rgba(0,0,0,0.6)] border-l-2 border-gray-200 pl-8 font-medium">
           Ngày 15 tháng 3 năm 2025
@@ -32,117 +29,45 @@ const Blog2 = () => {
       </p>
       <img
         className="mb-[30px] h-[350px] w-full object-cover rounded-3xl"
-        src={banh}
+        src={botoi}
         alt=""
       />
       <div className="flex">
         <div className="w-[70%]">
-          <h3 className="text-[20px] font-semibold mb-1">Nhào bột, nghỉ bột</h3>
+          <h3 className="text-[20px] font-semibold mb-1">Làm hỗn hợp bơ tỏi</h3>
           <p className="text-[rgba(0,0,0,0.6)] mb-4 leading-7 text-justify">
-            Pha sữa tươi với nước cốt chanh. Khuấy đều và để yên 10 - 15 phút
-            cho sữa lên men và kết tủa. Dùng sữa này làm, bánh sẽ có độ xốp mềm
-            ẩm và hương vị ngon hơn so với sữa thông thường.
-            <br />
-            Hòa tan men với 1 muỗng cà phê đường cùng với 6 muỗng canh nước ấm.
-            Để khoảng 5 - 10 phút cho men nở.
-            <br />
-            Sau đó cho 1/2 lượng bột mì, phần đường trắng còn lại, bơ đun chảy,
-            sữa tươi lên men, muối, 1 lòng đỏ trứng gà vào, trộn đều cho các
-            nguyên liệu hòa quyện vào nhau.
-            <br />
-            Cho 1/2 lượng bột mì còn lại vào, nhào 10 - 15 phút cho bột thành
-            hỗn hợp mềm, mịn.
-            <br />
-            Khối bột sau khi nhào xong sẽ dẻo và có độ đàn hồi tốt, ấn thử ngón
-            tay lên mặt khối bột sẽ thấy phồng trở lại. Sau đó cho bột nghỉ
-            khoảng 1 tiếng.
+            Đầu tiên, bạn để bơ lạt ngoài nhiệt độ phòng cho mềm. Sau đó, bạn
+            trộn đều bơ cùng với tỏi bằng máy xay thịt.
           </p>
           <img
-            src={b1}
+            src={bt1}
             className="h-[300px] w-full object-cover rounded-2xl"
             alt=""
           />
           <h3 className="text-[20px] font-semibold mt-6 mb-1">
-            Cán bơ lạt, ủ bột lần 1
+            Quét bơ, nướng bánh
           </h3>
           <p className="text-[rgba(0,0,0,0.6)] mb-3 leading-7 text-justify">
-            Cho bơ lạt vào túi zip cán cho nát đều. Sau đó để ngăn mát tủ lạnh
-            30 phút.
+            Làm nóng lò nướng trước ở nhiệt độ 180 độ C trong 10 phút. Bạn cắt
+            bánh mì thành các lát xéo vừa ăn.
             <br />
-            Khi bột nghỉ đủ thời gian, bạn lấy bột ra, cán mỏng, cho vào ngăn
-            mát tủ lạnh ủ khoảng 15 phút.
+            Tiếp theo, bạn phết hỗn hợp bơ tỏi lên mặt bánh mì đã cắt xéo, rắc
+            thêm lá oregano khô. Sau đó, bạn cho bánh vào lò và nướng bánh ở 180
+            độ C đến khi bánh vàng đều là được.
           </p>
           <img
-            src={b2}
-            className="h-[300px] w-full object-cover rounded-2xl"
-            alt=""
-          />
-          <h3 className="text-[20px] font-semibold mt-6">
-            Cán bột, gấp và ủ lần 2
-          </h3>
-          <p className="text-[rgba(0,0,0,0.6)] mb-3 leading-7 text-justify">
-            Sau 30 phút, lấy bơ lạt ra, dùng dao cắt xung quanh và bóc túi ni
-            lông ra.
-            <br />
-            Lấy bột ra, cán mỏng. Đặt bơ lạt vào 1 bên hỗn hợp bột đã cán, gấp
-            làm 3, bím xung quanh viền cho kín. Đặt vào tủ lạnh ủ thêm 30 phút.
-          </p>
-          <img
-            src={b3}
-            className="h-[300px] w-full object-cover rounded-2xl"
-            alt=""
-          />
-          <h3 className="text-[20px] font-semibold mt-6">
-            Cán bột, gấp và ủ lần 3
-          </h3>
-          <p className="text-[rgba(0,0,0,0.6)] mb-3 leading-7 text-justify">
-            Sau 30 phút, bạn lấy bột ra, cán theo chiều dài và gấp đôi lại. Bọc
-            kín bột bánh bằng màng bọc thực phẩm, ủ lạnh thêm 30 phút nữa.
-            <br />
-            Sau đó, lấy bột ra, cán mỏng tiếp, rồi bọc kín bỏ lại vào ngăn mát
-            tủ lạnh, ủ 6 - 7 tiếng.
-          </p>
-          <img
-            src={b4}
-            className="h-[300px] w-full object-cover rounded-2xl"
-            alt=""
-          />
-          <h3 className="text-[20px] font-semibold mt-6">Tạo hình</h3>
-          <p className="text-[rgba(0,0,0,0.6)] mb-3 leading-7 text-justify">
-            Bột sau 6 - 7 tiếng, lấy ra để lên mặt phẳng có sẵn bột áo. Cán bột
-            mỏng khoảng 3mm, rồi dùng dao cắt bột thành 12 miếng hình tam giác.
-            <br />
-            Quết bột áo lên trên. Cuộn từ phần đáy tam giác lên đỉnh, uốn hơi
-            cong 2 đầu.
-          </p>
-          <img
-            src={b5}
-            className="h-[300px] w-full object-cover rounded-2xl"
-            alt=""
-          />
-          <h3 className="text-[20px] font-semibold mt-6">Nướng bánh</h3>
-          <p className="text-[rgba(0,0,0,0.6)] mb-3 leading-7 text-justify">
-            Xếp bánh lên khay nướng có lót sẵn giấy nến. Nướng bánh ở nhiệt độ
-            150 - 170 độ C.
-            <br />
-            7 phút đầu, nướng bánh ở 170 độ C, sau đó chỉnh lò xuống 150 độ C.
-            <br />
-            Tổng thời gian nướng bánh là 15 - 20 phút với chế độ 2 lửa (trên và
-            dưới).
-          </p>
-          <img
-            src={b6}
+            src={bt2}
             className="h-[300px] w-full object-cover rounded-2xl"
             alt=""
           />
           <h3 className="text-[20px] font-semibold mt-6">Thành phẩm</h3>
           <p className="text-[rgba(0,0,0,0.6)] mb-3 leading-7 text-justify">
-            Chiếc bánh sừng bò đã hoàn thành. Bánh xốp, mềm mịn, thơm, xé thành
-            từng lớp mỏng và béo vị bơ. Các bạn có thể dùng không hoặc chấm với
-            sữa đặc cho tăng thêm bị béo ngậy nhé!
+            Bánh mì bơ tỏi vừa nướng chín có mùi thơm nức mũi. Từng miếng bánh
+            vàng ươm, cắn vào giòn rụm cùng vị bùi thơm của hỗn hợp bơ tỏi và lá
+            oregano, đảm bảo nếm thử là mê tít.
           </p>
           <img
-            src={b7}
+            src={bt3}
             className="h-[300px] w-full object-cover rounded-2xl"
             alt=""
           />
@@ -154,7 +79,7 @@ const Blog2 = () => {
           <FaInstagram className="w-8 h-8 my-2 cursor-pointer" />
         </div>
       </div>
-      <div className="mb-8 mt-10">
+      <div className="mb-8 mt-16">
         <h1 className="text-center text-[24px] font-semibold ">
           Gợi ý các món ăn
         </h1>

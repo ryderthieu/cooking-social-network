@@ -15,7 +15,7 @@ export const getCommentById = ({commentId}) => {
 }
 
 export const getCommentsByTarget = ({targetId, targetType, page = 1, limit = 10}) => {
-    return API.get(`/comments/${targetType}/${targetId}?page=${page}&limit=${limit}`)
+    return API.get(`/comments/target/${targetType}/${targetId}?page=${page}&limit=${limit}`)
 }
 
 export const createComment = ({ targetId, targetType, text, sticker, replyOf }) => {

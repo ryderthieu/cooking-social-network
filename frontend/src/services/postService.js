@@ -23,11 +23,11 @@ const postsService = {
     API.get(`${endpoint}/search`, { params: { keyword } }),
 
   // Like or unlike a post
-  toggleLike: (id) => API.patch(`${endpoint}/${id}/like`),
+  toggleLike: (id) => API.patch(`${endpoint}/like-post/${id}`),
 
   // Add a comment to a post
   comment: (id, commentData) => 
-    API.post(`${endpoint}/${id}/comment`, commentData),
+    API.post(`${endpoint}/commet-post/${id}`, commentData),
 
   // Share a post
   share: (id) => API.post(`${endpoint}/${id}/share`),

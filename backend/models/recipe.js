@@ -14,7 +14,7 @@ const recipeSchema = new Schema({
     ],
     steps: [{
        step: {type: String, required: true}, // Mô tả bước nấu
-       image: {type: String}   // Link ảnh minh họa (optional)
+       image: [{type: String}]   // Array of image links (tối đa 4 hình)
     }],
     image: [{type: String}],
     categories: {
@@ -29,7 +29,10 @@ const recipeSchema = new Schema({
     },
     utensils: [{type: String}],  // Dụng cụ nấu ăn cần thiết
     time: {type: Number}, // Thời gian nấu (đơn vị phút)
-    likes: [{type: Schema.Types.ObjectId, ref: 'User'}]
+    servings: {type: Number, default: 1}, // Khẩu phần dành cho bao nhiêu người (mặc định 1 người)
+    likes: [{type: Schema.Types.ObjectId, ref: 'User'}],
+    averageRating: {type: Number, default: 0}, // Điểm đánh giá trung bình
+    totalReviews: {type: Number, default: 0} // Tổng số đánh giá
 }, {      
     timestamps: true
 });

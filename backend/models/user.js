@@ -19,7 +19,7 @@ const userSchema = new Schema(
     followers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     following: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     birthday: { type: Date },
-    avatar: { type: String },
+    avatar: { type: String, default: 'https://res.cloudinary.com/dfaq5hbmx/image/upload/v1748692877/sushi_x1k4mg.png' },
   },
   {
     timestamps: true,

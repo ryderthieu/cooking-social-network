@@ -7,7 +7,7 @@ import {
   forgotPassword,
   resetPassword,
   confirmOtp,
-} from '../services/UserService';
+} from '../services/userService';
 
 const AuthContext = createContext();
 

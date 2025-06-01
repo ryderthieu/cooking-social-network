@@ -12,12 +12,12 @@ const Notification = require('../models/notification');
 
       // Kiểm tra target có tồn tại
       let target;
-      if (targetType === 'post') {
+      if (targetType == 'post') {
         target = await Post.findById(targetId);
-      } else if (targetType === 'video') {
+      } else if (targetType == 'video') {
         target = await Video.findById(targetId);
       }
-
+      console.log(targetType)
       if (!target) {
         return res.status(404).json({
           success: false,
@@ -101,6 +101,7 @@ const Notification = require('../models/notification');
       const { page = 1, limit = 10, sortBy = 'newest' } = req.query;
 
       // Kiểm tra target có tồn tại
+      console.log(targetId, targetType)
       let target;
       if (targetType === 'post') {
         target = await Post.findById(targetId);

@@ -28,7 +28,6 @@ export default function CarouselPlugin() {
         className="w-full mx-auto"
         onMouseEnter={plugin.current.stop}
         onMouseLeave={plugin.current.reset}
-        defaultIndex={0}
       >
         <CarouselContent>
           {banners.map((banner, index) => (

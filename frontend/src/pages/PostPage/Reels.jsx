@@ -242,6 +242,7 @@ const Reels = () => {
       <SharePopup
         open={sharePopup.open}
         postId={sharePopup.postId}
+        postTitle={currentReel?.content}
         onClose={() => setSharePopup({ open: false, postId: null })}
       />
 
