@@ -164,7 +164,7 @@ const searchPosts = async (req, res) => {
 
     const posts = await Post.find(filter)
       .sort({ createdAt: -1 })
-      .populate("author", "email firstName lastName")
+      .populate("author", "avatar firstName lastName")
       .populate("recipe", "name");
 
     res.status(200).json({

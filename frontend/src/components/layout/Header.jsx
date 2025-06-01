@@ -269,7 +269,7 @@ const Header = () => {
                     className="flex-1 bg-transparent outline-none text-sm placeholder-gray-400"
                     autoFocus
                     onKeyDown={(event) => {
-                      if (event.key === "Enter") navigate("/search");
+                      if (event.key === "Enter") navigate(`/search?q=${searchQuery}`);
                     }}
                   />
                   {searchQuery && (

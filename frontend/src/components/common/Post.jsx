@@ -9,8 +9,6 @@ import {
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { formatDistanceToNow } from 'date-fns';
-import { vi } from 'date-fns/locale';
 import { useAuth } from "@/context/AuthContext";
 
 export const formatDate = (dateString) => {

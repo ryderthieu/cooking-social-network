@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaSearch, FaFilter, FaNewspaper, FaVideo, FaBook, FaUser, FaHeart } from 'react-icons/fa';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { PostCard } from '../../components/common/Post';
-import ReelCard from '../../components/common/ReelCard';
+import { ReelCardReview } from '../../components/common/ReelCard';
 import SharePopup from '../../components/common/SharePopup';
+import postsService from '../../services/postService'; // Assuming default export
+import recipeService from '../../services/recipeService'; // Assuming default export
+import { searchUsers } from '../../services/userService';
+import { searchVideos } from '../../services/videoService';
+import UserCard from '../../components/common/UserCard';
+import SavedCard from '@/components/sections/Recipe/SavedCard';
 
 const SearchPage = () => {
-    const [searchQuery, setSearchQuery] = useState('');
+    const [searchQuery, setSearchQuery] = useState(''); // From URL, drives API calls
+    const [pageSearchQuery, setPageSearchQuery] = useState(''); // For the input on this page
     const [activeFilter, setActiveFilter] = useState('posts');
     const [isFilterOpen, setIsFilterOpen] = useState(true);
     const [sharePopup, setSharePopup] = useState({ open: false, postId: null });
+
     const navigate = useNavigate();
+    const location = useLocation();
 
     // Sub-filter state
     const [postSort, setPostSort] = useState('recent');
@@ -19,117 +28,162 @@ const SearchPage = () => {
     const [recipeTime, setRecipeTime] = useState('all');
     const [recipeDifficulty, setRecipeDifficulty] = useState('all');
 
-    // Mock data cho posts và reels
-    const mockPosts = [
-        {
-            id: 1,
-            user: {
-                name: 'Chef A',
-                avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-            },
-            date: '2024-03-20',
-            content: 'Khám phá bí quyết làm bánh mì thơm ngon, giòn rụm với công thức đơn giản...',
-            images: [
-                'https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'
-            ],
-            likes: 120,
-            comments: [
-                { id: 1, user: 'Lê Minh', avatar: 'https://randomuser.me/api/portraits/men/45.jpg', text: 'Nhìn ngon quá!' }
-            ],
-            shares: 15,
-            liked: false
-        },
-        {
-            id: 2,
-            user: {
-                name: 'Chef B',
-                avatar: 'https://randomuser.me/api/portraits/men/33.jpg',
-            },
-            date: '2024-03-19',
-            content: 'Học cách nấu nước dùng phở đậm đà, thơm ngon chuẩn vị...',
-            images: [
-                'https://images.unsplash.com/photo-1512058564366-18510be2db19?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60'
-            ],
-            likes: 85,
-            comments: [
-                { id: 1, user: 'Mai Hương', avatar: 'https://randomuser.me/api/portraits/women/44.jpg', text: 'Tuyệt vời!' }
-            ],
-            shares: 8,
-            liked: false
-        }
-    ];
+    // Results state
+    const [postResult, setPostResult] = useState([]);
+    const [reelResult, setReelResult] = useState([]);
+    const [recipeResult, setRecipeResult] = useState([]);
+    const [userResult, setUserResult] = useState([]);
 
-    const mockReels = [
-        {
-            id: 1,
-            user: {
-                name: 'Chef Tony',
-                avatar: 'https://randomuser.me/api/portraits/men/50.jpg',
-            },
-            date: '2024-03-20',
-            title: 'Cách làm bánh mì Việt Nam tại nhà',
-            thumbnail: 'https://images.unsplash.com/photo-1509440159596-0249088772ff',
-            video: 'https://www.youtube.com/shorts/KSt9oH2CYus?feature=share',
-            likes: '1.7M',
-            comments: [
-                {
-                    id: 1,
-                    user: 'Lê Minh',
-                    avatar: 'https://randomuser.me/api/portraits/men/45.jpg',
-                    text: 'Video hay quá!',
-                    likes: 5,
-                    time: '2 giờ trước',
-                    replies: []
+    // Loading and error states
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    // Effect to sync state from URL parameters
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const queryFromUrl = params.get('q') || '';
+        const filterFromUrl = params.get('filter') || 'posts';
+
+        setSearchQuery(queryFromUrl);
+        setPageSearchQuery(queryFromUrl); // Sync input field on page load
+        setActiveFilter(filterFromUrl);
+
+        // Sync sub-filters from URL or set to default
+        setPostSort(params.get('postSort') || 'recent');
+        setVideoSort(params.get('videoSort') || 'recent');
+        setRecipeIngredient(params.get('recipeIngredient') || 'all');
+        setRecipeTime(params.get('recipeTime') || 'all');
+        setRecipeDifficulty(params.get('recipeDifficulty') || 'all');
+
+    }, [location.search]);
+
+    // Effect to fetch data when searchQuery or filters change
+    useEffect(() => {
+        const fetchData = async () => {
+            if (!searchQuery) {
+                // Clear results if search query is empty
+                setPostResult([]);
+                setReelResult([]);
+                setRecipeResult([]);
+                setUserResult([]);
+                setLoading(false);
+                return;
+            }
+
+            setLoading(true);
+            setError(null);
+
+            try {
+                switch (activeFilter) {
+                    case 'posts':
+                        // Note: postsService.search might need adjustment if it expects an object for params
+                        // For now, assuming it takes keyword and potentially other options if backend supports
+                        const postData = await postsService.search(searchQuery);
+                        console.log(postData.data.posts)
+                        setPostResult(Array.isArray(postData?.data.posts) ? postData.data.posts : []);
+                        break;
+                    case 'videos':
+                        const videoData = await searchVideos(searchQuery); // searchVideos returns { success: true, data: response.data }
+                        console.log(videoData)
+                        setReelResult(videoData.success && Array.isArray(videoData.data.videos) ? videoData.data.videos : []);
+                        break;
+                    case 'recipes':
+                        const recipeParams = { keyword: searchQuery };
+                        if (recipeIngredient !== 'all') recipeParams.ingredient = recipeIngredient;
+                        if (recipeTime !== 'all') recipeParams.time = recipeTime;
+                        if (recipeDifficulty !== 'all') recipeParams.difficulty = recipeDifficulty;
+                        const recipeData = await recipeService.searchRecipes(recipeParams);
+                        console.log(recipeData)
+                        setRecipeResult(Array.isArray(recipeData?.data.data) ? recipeData.data.data : []);
+                        break;
+                    case 'users':
+                        const userData = await searchUsers({ key: searchQuery });
+                        setUserResult(Array.isArray(userData?.data?.users) ? userData.data.users : []);
+                        break;
+                    default:
+                        setPostResult([]);
+                        setReelResult([]);
+                        setRecipeResult([]);
+                        setUserResult([]);
                 }
-            ],
-            shares: 45,
-            liked: false
-        },
-        {
-            id: 2,
-            user: {
-                name: 'Chef Anna',
-                avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-            },
-            date: '2024-03-19',
-            title: 'Bí quyết làm sushi ngon tại nhà',
-            thumbnail: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c',
-            video: 'https://www.youtube.com/shorts/abc123',
-            likes: '4.9K',
-            comments: [],
-            shares: 28,
-            liked: false
-        },
-        {
-            id: 3,
-            user: {
-                name: 'Chef Mike',
-                avatar: 'https://randomuser.me/api/portraits/men/35.jpg',
-            },
-            date: '2024-03-18',
-            title: 'Cách làm phở gà truyền thống',
-            thumbnail: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43',
-            video: 'https://www.youtube.com/shorts/xyz789',
-            likes: '7.1K',
-            comments: [],
-            shares: 56,
-            liked: false
-        }
-    ];
+            } catch (err) {
+                console.error("Search API error:", err);
+                setError(err.message || 'Đã có lỗi xảy ra khi tìm kiếm.');
+                setPostResult([]);
+                setReelResult([]);
+                setRecipeResult([]);
+                setUserResult([]);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    const handleSearch = (e) => {
+        fetchData();
+    }, [searchQuery, activeFilter, postSort, videoSort, recipeIngredient, recipeTime, recipeDifficulty]);
+
+    const updateUrlParams = (newParams) => {
+        const params = new URLSearchParams(location.search);
+        Object.keys(newParams).forEach(key => {
+            if (newParams[key] !== undefined && newParams[key] !== null && newParams[key] !== '') {
+                params.set(key, newParams[key]);
+            } else {
+                params.delete(key);
+            }
+        });
+        navigate(`${location.pathname}?${params.toString()}`);
+    };
+
+    const handlePageSearchSubmit = (e) => {
         e.preventDefault();
-        console.log('Searching for:', searchQuery);
+        updateUrlParams({ q: pageSearchQuery });
     };
 
-    const handleLike = (id) => {
-        // Xử lý like post
-        console.log('Liked post:', id);
+    const handleActiveFilterChange = (newFilter) => {
+        updateUrlParams({ filter: newFilter, q: searchQuery }); // Keep current searchQuery
     };
 
-    const handleReelLike = (id) => {
-        // Xử lý like reel
-        console.log('Liked reel:', id);
+    const handlePostSortChange = (newSort) => {
+        updateUrlParams({ postSort: newSort, filter: 'posts', q: searchQuery });
+    };
+
+    const handleVideoSortChange = (newSort) => {
+        updateUrlParams({ videoSort: newSort, filter: 'videos', q: searchQuery });
+    };
+
+    const handleRecipeIngredientChange = (e) => {
+        updateUrlParams({ recipeIngredient: e.target.value, filter: 'recipes', q: searchQuery });
+    };
+
+    const handleRecipeTimeChange = (e) => {
+        updateUrlParams({ recipeTime: e.target.value, filter: 'recipes', q: searchQuery });
+    };
+
+    const handleRecipeDifficultyChange = (e) => {
+        updateUrlParams({ recipeDifficulty: e.target.value, filter: 'recipes', q: searchQuery });
+    };
+
+
+    const handleLike = async (id) => {
+        try {
+            const res = await postsService.toggleLike(id);
+            const updatedPost = res.data.post;
+            const isLiking = res.data.message === "Đã like bài viết";
+            console.log('update', updatedPost);
+            setPostResult(prevPosts =>
+                prevPosts.map(post => (post._id === id ? updatedPost : post))
+            );
+
+            if (isLiking && updatedPost.author._id !== res.data.userId) {
+                sendNotification({
+                    receiverId: updatedPost.author._id,
+                    type: 'like',
+                    postId: id,
+                });
+            }
+        }
+        catch (error) {
+            console.log(error.message)
+        }
     };
 
     // Sub-filter UI cho sidebar
@@ -139,19 +193,19 @@ const SearchPage = () => {
                 <div className="mt-3 space-y-2 pl-2">
                     <button
                         className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium mr-2 ${postSort === 'recent' ? 'bg-[#FFB800] text-white border-[#FFB800]' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'}`}
-                        onClick={() => setPostSort('recent')}
+                        onClick={() => handlePostSortChange('recent')}
                     >
                         Gần nhất
                     </button>
                     <button
                         className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium mr-2 ${postSort === 'time' ? 'bg-[#FFB800] text-white border-[#FFB800]' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'}`}
-                        onClick={() => setPostSort('time')}
+                        onClick={() => handlePostSortChange('time')}
                     >
                         Thời gian
                     </button>
                     <button
                         className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${postSort === 'followed' ? 'bg-[#FFB800] text-white border-[#FFB800]' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'}`}
-                        onClick={() => setPostSort('followed')}
+                        onClick={() => handlePostSortChange('followed')}
                     >
                         Đã follow
                     </button>
@@ -163,19 +217,19 @@ const SearchPage = () => {
                 <div className="mt-3 space-y-2 pl-2">
                     <button
                         className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium mr-2 ${videoSort === 'recent' ? 'bg-[#FFB800] text-white border-[#FFB800]' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'}`}
-                        onClick={() => setVideoSort('recent')}
+                        onClick={() => handleVideoSortChange('recent')}
                     >
                         Gần nhất
                     </button>
                     <button
                         className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium mr-2 ${videoSort === 'time' ? 'bg-[#FFB800] text-white border-[#FFB800]' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'}`}
-                        onClick={() => setVideoSort('time')}
+                        onClick={() => handleVideoSortChange('time')}
                     >
                         Thời gian
                     </button>
                     <button
                         className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${videoSort === 'followed' ? 'bg-[#FFB800] text-white border-[#FFB800]' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'}`}
-                        onClick={() => setVideoSort('followed')}
+                        onClick={() => handleVideoSortChange('followed')}
                     >
                         Đã follow
                     </button>
@@ -187,7 +241,7 @@ const SearchPage = () => {
                 <div className="mt-3 space-y-2 pl-2">
                     <select
                         value={recipeIngredient}
-                        onChange={e => setRecipeIngredient(e.target.value)}
+                        onChange={handleRecipeIngredientChange}
                         className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-[#FFB800] focus:border-[#FFB800] mb-2"
                     >
                         <option value="all">Nguyên liệu</option>
@@ -198,7 +252,7 @@ const SearchPage = () => {
                     </select>
                     <select
                         value={recipeTime}
-                        onChange={e => setRecipeTime(e.target.value)}
+                        onChange={handleRecipeTimeChange}
                         className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-[#FFB800] focus:border-[#FFB800] mb-2"
                     >
                         <option value="all">Thời gian</option>
@@ -208,7 +262,7 @@ const SearchPage = () => {
                     </select>
                     <select
                         value={recipeDifficulty}
-                        onChange={e => setRecipeDifficulty(e.target.value)}
+                        onChange={handleRecipeDifficultyChange}
                         className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-[#FFB800] focus:border-[#FFB800]"
                     >
                         <option value="all">Độ khó</option>
@@ -223,78 +277,55 @@ const SearchPage = () => {
     };
 
     const renderResults = () => {
+        if (loading) return <p className="text-center text-gray-600">Đang tải kết quả...</p>;
+        if (error) return <p className="text-center text-red-500">Lỗi: {error}</p>;
+        if (!searchQuery) return <p className="text-center text-gray-500">Nhập từ khóa để bắt đầu tìm kiếm.</p>;
+
         switch (activeFilter) {
             case 'posts':
+                if (postResult.length === 0) return <p className="text-center text-gray-500">Không tìm thấy bài viết nào.</p>;
                 return (
                     <div className="space-y-6">
-                        {mockPosts.map(post => (
+                        {postResult?.map(post => (
                             <PostCard
-                                key={post.id}
+                                key={post._id}
                                 post={post}
-                                onLike={() => handleLike(post.id)}
-                                onComment={() => navigate(`/posts/${post.id}`)}
-                                onShare={() => setSharePopup({ open: true, postId: post.id })}
+                                onLike={() => handleLike(post._id)}
+                                onComment={() => navigate(`/posts/${post._id}`)}
+                                onShare={() => setSharePopup({ open: true, postId: post._id })}
                             />
                         ))}
                     </div>
                 );
             case 'videos':
+                if (reelResult.length === 0) return <p className="text-center text-gray-500">Không tìm thấy video nào.</p>;
                 return (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        {mockReels.map(reel => (
-                            <div
-                                key={reel.id}
-                                className="relative group cursor-pointer"
-                                onClick={() => navigate(`/explore/reels/${reel.id}`)}
-                            >
-                                <div className="aspect-[9/16] relative overflow-hidden rounded-xl">
-                                    {/* Thumbnail */}
-                                    <img
-                                        src={reel.thumbnail}
-                                        alt={reel.title}
-                                        className="w-full h-full object-cover"
-                                    />
-                                    
-                                    {/* Video Preview on Hover */}
-                                    <video
-                                        className="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                        src={reel.video}
-                                        loop
-                                        muted
-                                        playsInline
-                                        onMouseEnter={(e) => e.target.play()}
-                                        onMouseLeave={(e) => {
-                                            e.target.pause();
-                                            e.target.currentTime = 0;
-                                        }}
-                                    />
-
-                                    {/* Overlay with Info */}
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                                            <div className="flex items-center space-x-2 mb-2">
-                                                <img
-                                                    src={reel.user.avatar}
-                                                    alt={reel.user.name}
-                                                    className="w-8 h-8 rounded-full"
-                                                />
-                                                <span className="font-medium">{reel.user.name}</span>
-                                            </div>
-                                            <p className="text-sm line-clamp-2">{reel.title}</p>
-                                            <div className="flex items-center space-x-3 mt-2 text-sm">
-                                                <span className="flex items-center">
-                                                    <FaHeart className="mr-1" /> {reel.likes}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {reelResult?.map(reel => (
+                            <ReelCardReview reel={reel} key={reel._id} />
+                        ))}
+                    </div>
+                );
+            case 'recipes':
+                if (recipeResult.length === 0) return <p className="text-center text-gray-500">Không tìm thấy công thức nào.</p>;
+                return (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {recipeResult?.map(recipe => (
+                            <SavedCard recipe={recipe} key={recipe._id}/>
+                        ))}
+                    </div>
+                );
+            case 'users':
+                if (userResult.length === 0) return <p className="text-center text-gray-500">Không tìm thấy người dùng nào.</p>;
+                return (
+                    <div className="space-y-4">
+                        {userResult?.map(user => (
+                            <UserCard key={user._id} user={user} />
                         ))}
                     </div>
                 );
             default:
-                return null;
+                return <p className="text-center text-gray-500">Chọn một bộ lọc để xem kết quả.</p>;
         }
     };
 
@@ -311,11 +342,11 @@ const SearchPage = () => {
                     <h1 className="text-3xl font-bold text-white mb-8 text-center">Tìm kiếm</h1>
                     {/* Search Bar */}
                     <div className="max-w-3xl mx-auto">
-                        <form onSubmit={handleSearch} className="relative">
+                        <form onSubmit={handlePageSearchSubmit} className="relative">
                             <input
                                 type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                value={pageSearchQuery}
+                                onChange={(e) => setPageSearchQuery(e.target.value)}
                                 placeholder="Tìm kiếm bài viết, video, công thức, người dùng..."
                                 className="w-full px-6 py-4 rounded-xl border-2 border-white/30 bg-white/90 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent shadow-lg text-lg placeholder-gray-500"
                             />
@@ -333,9 +364,9 @@ const SearchPage = () => {
             {/* Main Content */}
             <div className="py-8 px-[110px]">
                 <div className="container mx-auto">
-                    <div className="flex gap-8">
+                    <div className="flex flex-col md:flex-row gap-8">
                         {/* Filter Sidebar */}
-                        <div className={`w-72 flex-shrink-0 ${isFilterOpen ? 'block' : 'hidden md:block'}`}>
+                        <div className={`w-full md:w-72 flex-shrink-0 ${isFilterOpen ? 'block' : 'hidden md:block'}`}>
                             <div className="bg-white rounded-xl shadow-lg p-6 sticky top-4 border border-gray-100">
                                 <div className="flex items-center justify-between mb-6">
                                     <h2 className="text-xl font-semibold text-gray-800">Bộ lọc</h2>
@@ -348,48 +379,44 @@ const SearchPage = () => {
                                 </div>
                                 <div className="space-y-3">
                                     <button
-                                        onClick={() => setActiveFilter('posts')}
-                                        className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${
-                                            activeFilter === 'posts'
-                                                ? 'bg-[#FFF4D6] text-[#FFB800] shadow-md border border-[#FFB800]/20'
-                                                : 'hover:bg-gray-50 border border-transparent'
-                                        }`}
+                                        onClick={() => handleActiveFilterChange('posts')}
+                                        className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${activeFilter === 'posts'
+                                            ? 'bg-[#FFF4D6] text-[#FFB800] shadow-md border border-[#FFB800]/20'
+                                            : 'hover:bg-gray-50 border border-transparent'
+                                            }`}
                                     >
                                         <FaNewspaper size={20} />
                                         <span>Bài viết</span>
                                     </button>
                                     {activeFilter === 'posts' && renderSidebarSubFilter()}
                                     <button
-                                        onClick={() => setActiveFilter('videos')}
-                                        className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${
-                                            activeFilter === 'videos'
-                                                ? 'bg-[#FFF4D6] text-[#FFB800] shadow-md border border-[#FFB800]/20'
-                                                : 'hover:bg-gray-50 border border-transparent'
-                                        }`}
+                                        onClick={() => handleActiveFilterChange('videos')}
+                                        className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${activeFilter === 'videos'
+                                            ? 'bg-[#FFF4D6] text-[#FFB800] shadow-md border border-[#FFB800]/20'
+                                            : 'hover:bg-gray-50 border border-transparent'
+                                            }`}
                                     >
                                         <FaVideo size={20} />
                                         <span>Video</span>
                                     </button>
                                     {activeFilter === 'videos' && renderSidebarSubFilter()}
                                     <button
-                                        onClick={() => setActiveFilter('recipes')}
-                                        className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${
-                                            activeFilter === 'recipes'
-                                                ? 'bg-[#FFF4D6] text-[#FFB800] shadow-md border border-[#FFB800]/20'
-                                                : 'hover:bg-gray-50 border border-transparent'
-                                        }`}
+                                        onClick={() => handleActiveFilterChange('recipes')}
+                                        className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${activeFilter === 'recipes'
+                                            ? 'bg-[#FFF4D6] text-[#FFB800] shadow-md border border-[#FFB800]/20'
+                                            : 'hover:bg-gray-50 border border-transparent'
+                                            }`}
                                     >
                                         <FaBook size={20} />
                                         <span>Công thức</span>
                                     </button>
                                     {activeFilter === 'recipes' && renderSidebarSubFilter()}
                                     <button
-                                        onClick={() => setActiveFilter('users')}
-                                        className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${
-                                            activeFilter === 'users'
-                                                ? 'bg-[#FFF4D6] text-[#FFB800] shadow-md border border-[#FFB800]/20'
-                                                : 'hover:bg-gray-50 border border-transparent'
-                                        }`}
+                                        onClick={() => handleActiveFilterChange('users')}
+                                        className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${activeFilter === 'users'
+                                            ? 'bg-[#FFF4D6] text-[#FFB800] shadow-md border border-[#FFB800]/20'
+                                            : 'hover:bg-gray-50 border border-transparent'
+                                            }`}
                                     >
                                         <FaUser size={20} />
                                         <span>Người dùng</span>
@@ -400,10 +427,10 @@ const SearchPage = () => {
 
                         {/* Results Area */}
                         <div className="flex-1">
-                            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+                            <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 min-h-[300px]"> {/* Added min-h for better loading/empty state visibility */}
                                 <h2 className="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
                                     <span className="text-[#FFB800] mr-2">Kết quả tìm kiếm</span>
-                                    <span className="text-gray-600">cho "{searchQuery}"</span>
+                                    {searchQuery && <span className="text-gray-600">cho "{searchQuery}"</span>}
                                 </h2>
                                 {renderResults()}
                             </div>
@@ -415,7 +442,8 @@ const SearchPage = () => {
             <SharePopup
                 open={sharePopup.open}
                 postId={sharePopup.postId}
-                postTitle={mockPosts.find(p => p.id === sharePopup.postId)?.content}
+                // Ensure postResult is not empty and the post exists before trying to access its properties
+                postTitle={postResult.find(p => p._id === sharePopup.postId)?.content || postResult.find(p => p._id === sharePopup.postId)?.title || ''}
                 onClose={() => setSharePopup({ open: false, postId: null })}
             />
         </div>

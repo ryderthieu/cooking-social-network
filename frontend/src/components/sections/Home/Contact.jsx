@@ -142,7 +142,7 @@ export default function Contact() {
           </p>
         </div>
 
-        {/* Success Message */}
+        {/* Success Message
         {successMessage && (
           <div className="fixed bottom-6 right-6 z-50 max-w-sm ">
             <div className="bg-white rounded-lg shadow-lg border border-green-200 p-4 flex items-center gap-3">
@@ -162,7 +162,7 @@ export default function Contact() {
               </button>
             </div>
           </div>
-        )}
+        )} */}
         {/* Main Content */}
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Contact Form */}
