@@ -1,29 +1,15 @@
-import { useState, useEffect } from "react";
-import {
-  Mail,
-  User,
-  Send,
-  Gift,
-  X,
-  Check,
-  Bell,
-  Sparkles,
-  Phone,
-  Clock,
-} from "lucide-react";
 import { useState } from "react";
+import { Send, Bell, Sparkles } from "lucide-react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Contact() {
-  // State management
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [name, setName] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscribeEmail, setSubscribeEmail] = useState("");
-  const [successMessage, setSuccessMessage] = useState(null);
   const [formErrors, setFormErrors] = useState({});
 
   // Form validation
@@ -51,22 +37,40 @@ export default function Contact() {
 
     setIsSubmitting(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Contact form submitted:", { name, email, message });
+    const formData = {
+      access_key: "ec50783c-36db-4d7d-82b7-f06c8d80ef67",
+      name,
+      email,
+      message,
+      subject: "Liên hệ từ Oshisha",
+    };
+
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(formData),
+      }).then((res) => res.json());
+      console.log(res);
+      if (res.success) {
+        toast.success(
+          "Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể."
+        );
+        setName("");
+        setEmail("");
+        setMessage("");
+        setFormErrors({});
+      } else {
+        toast.error(res.message || "Gửi thất bại. Vui lòng thử lại!");
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
+    } finally {
       setIsSubmitting(false);
-      setName("");
-      setEmail("");
-      setMessage("");
-
-      setSuccessMessage({
-        type: "contact",
-        message:
-          "Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.",
-      });
-
-      setTimeout(() => setSuccessMessage(null), 4000);
-    }, 1000);
+    }
   };
 
   const handleSubscribe = async (e) => {
@@ -78,20 +82,36 @@ export default function Contact() {
 
     setIsSubscribing(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Recipe subscription:", { subscribeEmail });
+    const formData = {
+      access_key: "ec50783c-36db-4d7d-82b7-f06c8d80ef67",
+      email: subscribeEmail,
+      subject: "Đăng ký nhận công thức mới",
+    };
+
+    try {
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(formData),
+      }).then((res) => res.json());
+
+      if (res.success) {
+        toast.success(
+          "Cảm ơn bạn đã đăng ký! Chúng tôi sẽ gửi những công thức ngon nhất."
+        );
+        setSubscribeEmail("");
+        setFormErrors({});
+      } else {
+        toast.error(res.message || "Đăng ký thất bại. Vui lòng thử lại!");
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
+    } finally {
       setIsSubscribing(false);
-      setSubscribeEmail("");
-
-      setSuccessMessage({
-        type: "subscribe",
-        message:
-          "Cảm ơn bạn đã đăng ký! Chúng tôi sẽ gửi những công thức ngon nhất.",
-      });
-
-      setTimeout(() => setSuccessMessage(null), 4000);
-    }, 1000);
+    }
   };
 
   return (
@@ -121,28 +141,6 @@ export default function Contact() {
             tuyệt vời
           </p>
         </div>
-
-        {/* Success Message */}
-        {successMessage && (
-          <div className="fixed top-6 right-6 z-50 max-w-sm">
-            <div className="bg-white rounded-lg shadow-lg border border-green-200 p-4 flex items-center gap-3">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <Check className="h-4 w-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-800">
-                  {successMessage.message}
-                </p>
-              </div>
-              <button
-                onClick={() => setSuccessMessage(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Main Content */}
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
@@ -261,11 +259,12 @@ export default function Contact() {
               </button>
             </form>
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mt-4">
-                <p className="text-sm text-orange-800 leading-relaxed">
-                  <strong>Cam kết bảo mật:</strong> Chúng tôi tôn trọng quyền riêng tư của bạn và cam kết không chia sẻ
-                  thông tin với bên thứ ba.
-                </p>
-              </div>
+              <p className="text-sm text-orange-800 leading-relaxed">
+                <strong>Cam kết bảo mật:</strong> Chúng tôi tôn trọng quyền
+                riêng tư của bạn và cam kết không chia sẻ thông tin với bên thứ
+                ba.
+              </p>
+            </div>
           </div>
 
           {/* Newsletter Section */}
@@ -320,6 +319,7 @@ export default function Contact() {
           </div>
         </div>
       </div>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }
