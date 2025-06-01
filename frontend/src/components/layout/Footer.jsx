@@ -32,7 +32,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="ml-[30px] mr-[20px]">
+        <div className="ml-[30px] mr-[60px]">
           <h1 className="text-[20px] font-bold">Các mục nổi bật</h1>
           <a href="/">
             <p className="pt-4 hover:text-white text-[#FFFFFF] text-opacity-50">
