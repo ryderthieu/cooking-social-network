@@ -1,8 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const {
     getUserCollections,
     createCollection,
+    updateCollection,
+    updateCollectionImage,
     addRecipeToCollection,
     removeRecipeFromCollection,
     getCollectionRecipes,
@@ -12,6 +15,22 @@ const {
 } = require('../controllers/collectionController');
 const { authenticateJWT } = require('../middlewares/authMiddleware');
 
+// Configure multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'), false);
+        }
+    }
+});
+
 // All routes require authentication
 router.use(authenticateJWT);
 
@@ -20,6 +39,12 @@ router.get('/', getUserCollections);
 
 // POST /api/collections - Create new collection
 router.post('/', createCollection);
+
+// PUT /api/collections/:collectionId - Update collection
+router.put('/:collectionId', updateCollection);
+
+// PUT /api/collections/:collectionId/image - Update collection image
+router.put('/:collectionId/image', updateCollectionImage);
 
 // GET /api/collections/:collectionId/recipes - Get recipes in collection
 router.get('/:collectionId/recipes', getCollectionRecipes);

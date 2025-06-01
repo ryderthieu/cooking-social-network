@@ -225,7 +225,7 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
             {/* More options button for collection dropdown */}
             <button 
               onClick={handleShowCollections}
-              className="p-2.5 bg-white/90 backdrop-blur-md rounded-full hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg hover:bg-gray-50"
+              className="p-2.5 bg-white/90 backdrop-blur-md rounded-full hover:bg-white hover:scale-110 transition-all duration-300 shadow-lg"
               title="Lưu vào bộ sưu tập"
             >
               <MoreVertical size={16} className="text-gray-600" />

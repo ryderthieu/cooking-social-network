@@ -31,8 +31,7 @@ const collectionSchema = new Schema({
     isDefault: {
         type: Boolean,
         default: false // For system default collections like "Yêu thích", "Đã xem"
-    },
-    defaultType: {
+    },    defaultType: {
         type: String,
         enum: ['favorites', 'viewed', 'created'],
         default: null

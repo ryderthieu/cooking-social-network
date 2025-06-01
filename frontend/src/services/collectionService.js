@@ -70,6 +70,30 @@ export const deleteCollection = async (collectionId) => {
     }
 };
 
+// Update collection
+export const updateCollection = async (collectionId, collectionData) => {
+    try {
+        const response = await api.put(`/collections/${collectionId}`, collectionData);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating collection:', error);
+        throw error.response?.data || error;
+    }
+};
+
+// Update collection image
+export const updateCollectionImage = async (collectionId, imageUrl) => {
+    try {
+        const response = await api.put(`/collections/${collectionId}/image`, {
+            thumbnail: imageUrl
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error updating collection image:', error);
+        throw error.response?.data || error;
+    }
+};
+
 // Toggle recipe in favorites (heart button)
 export const toggleRecipeInFavorites = async (recipeId) => {
     try {
