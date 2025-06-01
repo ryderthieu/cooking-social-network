@@ -101,7 +101,7 @@ const AccountPage = () => {
   return (
     <div className="px-[110px] bg-gray-100 h-screen">
       <div className="flex gap-4 pt-[30px]">
-        <div className="bg-white rounded-md w-[70%] h-[600px]">
+        <div className="bg-white rounded-md w-[70%] h-[650px]">
           <div className="relative p-4">
             <div className="w-full h-[250px] rounded-3xl bg-gradient-to-r from-amber-200 via-orange-200 to-yellow-200"></div>
             <div>
