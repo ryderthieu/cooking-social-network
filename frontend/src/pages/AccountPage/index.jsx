@@ -99,7 +99,7 @@ const AccountPage = () => {
   };
 
   return (
-    <div className="px-[110px] bg-gray-100 h-screen">
+    <div className="px-[110px] bg-[#F5F1E8] h-screen">
       <div className="flex gap-4 pt-[30px]">
         <div className="bg-white rounded-md w-[70%] h-[650px]">
           <div className="relative p-4">
@@ -222,17 +222,27 @@ const AccountPage = () => {
         <div className="w-[30%] rounded-md">
           <div className="bg-white h-[60%] mb-4 rounded-md">
             <div className="p-4">
-              <h3 className="text-lg font-semibold mb-2">Lịch sử cập nhật</h3>
-              <p className="text-sm text-gray-600">
-                Bạn có thể cập nhật thông tin cá nhân của mình tại đây.
+              <h3 className="text-lg font-semibold mb-2">Phiên bản cập nhật</h3>
+              <p className="text-sm text-gray-600 my-2 text-justify leading-6">
+                v2.3.1 - Cập nhật giao diện người dùng và sửa lỗi bảo mật.
+              </p>
+              <p className="text-sm text-gray-600 my-2 text-justify leading-6">
+                v2.3.0 - Thêm tính năng tìm kiếm nâng cao và tối ưu hóa hiệu
+                suất.
+              </p>
+              <p className="text-sm text-gray-600 my-2 text-justify leading-6">
+                v2.2.0 - Cải thiện tốc độ tải trang và sửa lỗi nhỏ.
               </p>
             </div>
           </div>
           <div className="bg-white h-[calc(40%-16px)] rounded-md">
             <div className="p-4">
               <h3 className="text-lg font-semibold mb-2">Thông báo</h3>
-              <p className="text-sm text-gray-600">
-                Bạn có thể cập nhật thông tin cá nhân của mình tại đây.
+              <p className="text-sm text-gray-600 my-2 text-justify leading-6">
+                Hệ thống sẽ bảo trì vào lúc 02:00 sáng mai.
+              </p>
+              <p className="text-sm text-gray-600 my-2 text-justify leading-6">
+                Cập nhật phiên bản giao diện người dùng mới.
               </p>
             </div>
           </div>
