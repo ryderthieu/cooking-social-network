@@ -126,7 +126,7 @@ export default function Contact() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-orange-100/10 to-amber-100/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative z-10 mx-auto px-[100px] py-10">
+      <div className="relative z-10 mx-auto px-[120px] py-10">
         {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-orange-200/50 rounded-full px-4 py-2 mb-6">
