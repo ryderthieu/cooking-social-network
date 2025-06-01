@@ -208,7 +208,7 @@ export default function NotificationDropdown() {
       {open && (
         <div className="absolute right-0 mt-7 w-96 bg-white border border-gray-200 rounded-xl shadow-xl z-50">
           <div className="p-4 border-b border-gray-100 font-semibold text-gray-800 flex justify-between items-center">
-            <span>Thông báo</span>
+            <span className="text-[16px]">Thông báo</span>
             {unreadCount > 0 && (
               <button
                 onClick={handleMarkAllAsRead}
@@ -261,7 +261,7 @@ export default function NotificationDropdown() {
                 navigate("/notification");
                 setOpen(false);
               }}
-              className="text-sm text-orange-500 font-semibold hover:text-orange-600"
+              className="text-sm text-[#FF6363] font-semibold hover:text-[#fa5555]"
             >
               Xem tất cả thông báo
             </button>
