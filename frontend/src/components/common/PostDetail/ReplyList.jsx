@@ -15,7 +15,7 @@ const ReplyList = ({ replies }) => {
 
         <div className="space-y-4">
           {displayReplies.map(reply => (
-            <ReplyItem key={reply.id} reply={reply} />
+            <ReplyItem key={reply._id} reply={reply} />
           ))}
         </div>
 

@@ -2,6 +2,9 @@ import Hero from "../../../components/sections/Support/Hero";
 import avatar1 from "../../../assets/avatar1.jpg";
 import avatar2 from "../../../assets/avatar2.jpg";
 import avatar from "../../../assets/avatar.jpg";
+import { useRef } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const FeedbacksPage = () => {
   const testimonials = [
@@ -27,6 +30,47 @@ const FeedbacksPage = () => {
       img: avatar1,
     },
   ];
+
+  const nameRef = useRef();
+  const emailRef = useRef();
+  const messageRef = useRef();
+
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    const name = nameRef.current.value;
+    const email = emailRef.current.value;
+    const message = messageRef.current.value;
+
+    if (!name || !email || !message) {
+      toast.error("Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
+
+    const formData = {
+      name,
+      email,
+      message,
+      access_key: "ec50783c-36db-4d7d-82b7-f06c8d80ef67",
+    };
+
+    const res = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify(formData),
+    }).then((res) => res.json());
+
+    if (res.success) {
+      toast.success("Gửi phản hồi thành công! Cảm ơn bạn đã góp ý.");
+      nameRef.current.value = "";
+      emailRef.current.value = "";
+      messageRef.current.value = "";
+    } else {
+      toast.error("Gửi phản hồi thất bại. Vui lòng thử lại!");
+    }
+  };
 
   return (
     <div>
@@ -99,22 +143,31 @@ const FeedbacksPage = () => {
             </div>
           </div>
 
-          <form className="bg-white rounded-xl shadow p-6 space-y-4 w-full">
+          <form
+            className="bg-white rounded-xl shadow p-6 space-y-4 w-full"
+            onSubmit={handleFeedbackSubmit}
+          >
             <h3 className="text-xl font-bold text-[#ff6f20]">Oshisha</h3>
             <input
               type="text"
               placeholder="Họ và tên"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:text-[#ff6f20]"
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+              ref={nameRef}
+              name="name"
             />
             <input
               type="email"
               placeholder="Email"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:text-[#ff6f20]"
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+              ref={emailRef}
+              name="email"
             />
             <textarea
               rows={4}
               placeholder="Phản hồi của bạn"
-              className="w-full border border-gray-300 rounded-md px-4 py-2 focus:text-[#ff6f20]"
+              className="w-full border border-gray-300 rounded-md px-4 py-2"
+              ref={messageRef}
+              name="message"
             />
             <button
               type="submit"
@@ -125,6 +178,7 @@ const FeedbacksPage = () => {
           </form>
         </div>
       </section>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 };

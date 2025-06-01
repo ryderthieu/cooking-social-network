@@ -97,7 +97,7 @@ const FunctionsPage = () => {
     <div>
       <Hero />
       <div className="my-[40px] mb-[200px]">
-        <div className="bg-[rgba(255,240,219,0.4)] mx-[110px] text-center pt-[60px] pb-[200px] relative">
+        <div className="bg-[rgba(255,240,219,0.4)] mx-[120px] text-center pt-[60px] pb-[200px] relative">
           <h1 className="font-semibold text-[28px]">
             Các chức năng tiêu biểu của OSHISHA
           </h1>

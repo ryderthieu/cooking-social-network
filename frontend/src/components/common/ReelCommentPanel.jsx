@@ -1,75 +1,71 @@
 import React, { useState, useEffect } from 'react';
-import { FaTimes } from 'react-icons/fa';
+import { FaTimes, FaUser, FaHeart, FaReply } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import { formatTimeAgo } from '@/utils/timeUtils';
 import CommentList from './PostDetail/CommentList';
 import CommentForm from './PostDetail/CommentForm';
 
-const ReelCommentPanel = ({ reel, open, onClose, onAddComment }) => {
-  const [comments, setComments] = useState([]);
-
+const ReelCommentPanel = ({ reel, open, onClose, onAddComment, comments }) => {
+  const [comment, setComment] = useState('');
   useEffect(() => {
-    if (reel && Array.isArray(reel.comments)) {
-      setComments(reel.comments);
-    } else if (reel) {
-      setComments([]);
-    }
-  }, [reel]);
-
-  const handleAddComment = (text) => {
-    const newComment = {
-      id: Date.now(),
-      user: 'Bạn',
-      avatar: 'https://randomuser.me/api/portraits/lego/1.jpg',
-      text,
-      likes: 0,
-      time: 'Vừa xong',
-      replies: []
-    };
-    setComments(prev => [newComment, ...prev]);
-    onAddComment?.(text);
-  };
+    console.log(reel);
+  }, []);
 
   if (!reel) return null;
 
   return (
     <div
-      className={`fixed bottom-0 right-0 h-[calc(100vh-80px)] z-1 w-[400px] bg-white shadow-2xl flex flex-col transition-all duration-500 ease-out ${
-        open ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'
+      className={`fixed inset-y-0 right-0 w-[400px] bg-white shadow-2xl flex flex-col transform transition-transform duration-300 ease-out z-50 ${
+        open ? 'translate-x-0' : 'translate-x-full'
       }`}
     >
       {/* Header */}
-      <div className="p-6 pb-4 border-b border-[#FFB800]/10 bg-gradient-to-r from-[#FFF4D6]/20 to-white">
+      <div className="p-6 pb-4 border-b border-[#FFB800]/10 bg-gradient-to-r from-[#FFF4D6]/30 to-white backdrop-blur-sm">
         <button 
           className="absolute top-4 right-4 p-2 text-gray-400 hover:text-[#FFB800] hover:scale-110 transition-all duration-300" 
           onClick={onClose}
         >
           <FaTimes size={20} />
         </button>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <img 
-              src={reel.user.avatar} 
-              className="w-12 h-12 rounded-full object-cover border-2 border-[#FFB800] shadow-lg hover:scale-105 transition-transform duration-300" 
-            />
-          </div>
-          <div>
-            <div className="font-bold text-gray-800 text-base hover:text-[#FFB800] transition-colors cursor-pointer">
-              {reel.user.name}
+        <div className="flex items-center gap-4">
+          <Link to={`/profile/${reel._id}`} className="relative group">
+            {reel.user.avatar ? (
+              <img 
+                src={reel.user.avatar} 
+                alt={reel.user.name}
+                className="w-14 h-14 rounded-full object-cover border-2 border-[#FFB800] shadow-lg group-hover:scale-105 transition-transform duration-300" 
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center border-2 border-[#FFB800] group-hover:scale-105 transition-transform duration-300">
+                <FaUser className="text-gray-400" size={28} />
+              </div>
+            )}
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#FFB800] rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <FaUser className="text-white" size={12} />
             </div>
+          </Link>
+          <div>
+            <Link 
+              to={`/profile/${reel._id}`}
+              className="font-bold text-gray-800 text-lg hover:text-[#FFB800] transition-colors"
+            >
+              {reel.user.name}
+            </Link>
             <div className="text-sm text-gray-500 flex items-center gap-2">
               <span>{reel.date}</span>
+              <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span className="text-[#FFB800]">Tác giả</span>
             </div>
           </div>
         </div>
-        <div className="mt-4 text-gray-800 font-medium">{reel.title}</div>
+        <div className="mt-4 text-gray-800 font-medium leading-relaxed">{reel.title}</div>
       </div>
 
-      {/* Comment List */}
-      <CommentList comments={comments || []} />
+      {/* Comments List */}
+      <CommentList reel={reel} />
 
       {/* Comment Form */}
-      <div className="p-4 border-t border-[#FFB800]/10 bg-gradient-to-r from-[#FFF4D6]/20 to-white">
-        <CommentForm onSubmit={handleAddComment} />
-      </div>
+      <CommentForm onSubmit={onAddComment} />
     </div>
   );
 };

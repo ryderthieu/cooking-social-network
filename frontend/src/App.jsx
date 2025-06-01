@@ -20,6 +20,7 @@ import SupportsPage from "./pages/SupportPage/Contact/SupportsPage";
 import AboutPage from "./pages/AboutPage";
 import NotificationPage from "./pages/NotificationPage";
 import MessagePage from "./pages/MessagePage";
+import AccountPage from "./pages/AccountPage";
 
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
@@ -72,6 +73,7 @@ function App() {
         <Navigate to="/login" replace />
       ),
     },
+    { path: "/account", element: <AccountPage /> },
     { path: "/profile/:userId", element: <ProfilePage /> },
     { path: "/recipes", element: <RecipeCategories />},
     { path: "/recipes/:categoryType/:item", element: <Recipes />},
@@ -82,7 +84,7 @@ function App() {
     { path: "/explore/*", element: <PostPage /> },
   ];
 
-  const headeronlyRoutes = [{ path: "/messages", element: <MessagePage /> }];
+  const headeronlyRoutes = [{ path: "/messages/", element: <MessagePage /> }, {path: "/messages/:conversationId", element: <MessagePage />}];
 
   return (
     <Routes>

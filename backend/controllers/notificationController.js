@@ -80,28 +80,25 @@ const getUserNotifications = async (req, res) => {
     const userId = req.user._id;
     const { page = 1, limit = 20, isRead, type } = req.query;
 
+    // Tạo filter mặc định
     let searchFilter = { receiver: userId };
 
-    // Lọc theo trạng thái đã đọc
-    if (isRead !== undefined) {
-      searchFilter.isRead = isRead === "true";
+    // Nếu isRead được truyền, lọc theo trạng thái đã đọc
+    if (typeof isRead !== 'undefined' && (isRead === 'true' || isRead === 'false')) {
+      searchFilter.isRead = isRead === 'true';
     }
 
-    // Lọc theo loại thông báo
-    if (
-      type &&
-      ["like", "comment", "reply", "share", "follow", "mention"].includes(type)
-    ) {
+    // Nếu type hợp lệ, lọc theo loại thông báo
+    const validTypes = ["like", "comment", "reply", "share", "follow", "mention"];
+    if (type && validTypes.includes(type)) {
       searchFilter.type = type;
     }
 
     const notifications = await Notification.find(searchFilter)
       .populate("sender", "firstName lastName avatar")
-      .populate("postId", "caption media")
-      .populate("videoId", "caption videoUri")
       .populate("commentId", "text")
       .sort({ createdAt: -1 })
-      .limit(limit * 1)
+      .limit(Number(limit))
       .skip((page - 1) * limit);
 
     const unreadCount = await Notification.countDocuments({
@@ -132,6 +129,7 @@ const getUserNotifications = async (req, res) => {
     });
   }
 };
+
 
 // Lấy thông báo theo ID
 const getNotificationById = async (req, res) => {
@@ -243,7 +241,7 @@ const markAsRead = async (req, res) => {
   try {
     const { notificationId } = req.params;
     const userId = req.user._id;
-
+    console.log('read')
     const notification = await Notification.findById(notificationId);
     if (!notification) {
       return res.status(404).json({

@@ -1,248 +1,388 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import ReelCard from '../../components/common/ReelCard';
-import ReelCommentPanel from '../../components/common/ReelCommentPanel';
-import SharePopup from '../../components/common/SharePopup';
-import { mockReels } from './mockData';
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import ReelCard from "../../components/common/ReelCard";
+import ReelCommentPanel from "../../components/common/ReelCommentPanel";
+import SharePopup from "../../components/common/SharePopup";
+import { useSocket } from "@/context/SocketContext";
+import { useAuth } from "@/context/AuthContext";
+import {
+  getAllVideos,
+  getVideoById,
+  likeVideo,
+  shareVideo,
+} from "@/services/videoService";
+import { createComment, getCommentsByTarget } from "@/services/commentService";
+import { toast } from "react-toastify";
+import Spinner from "../../components/common/Spinner";
 
 const Reels = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const containerRef = useRef(null);
-  const lastScrollTop = useRef(0);
-  
+  const { sendNotification } = useSocket();
+  const { user } = useAuth();
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   const [currentReel, setCurrentReel] = useState(null);
-  const [prevReel, setPrevReel] = useState(null);
-  const [nextReel, setNextReel] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [sharePopup, setSharePopup] = useState({ open: false, postId: null });
+  const [sharePopup, setSharePopup] = useState({ open: false, videoId: null, reel: null });
   const [showReelComment, setShowReelComment] = useState(false);
-  const [selectedReel, setSelectedReel] = useState(null);
+  const [allReels, setAllReels] = useState([]);
+  const [reelCommentRefreshKey, setReelCommentRefreshKey] = useState(0);
 
-  // Hàm giả lập việc lấy video từ API
-  const fetchReelById = async (reelId) => {
-    setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const reel = mockReels.find(r => r.id === parseInt(reelId));
-    setIsLoading(false);
-    return reel;
-  };
-
-  // Hàm giả lập việc lấy video tiếp theo/trước đó
-  const fetchAdjacentReels = async (reelId) => {
-    const currentIndex = mockReels.findIndex(r => r.id === parseInt(reelId));
-    if (currentIndex > 0) {
-      setPrevReel(mockReels[currentIndex - 1]);
-    } else {
-      setPrevReel(null);
-    }
-    
-    if (currentIndex < mockReels.length - 1) {
-      setNextReel(mockReels[currentIndex + 1]);
-    } else {
-      setNextReel(null);
-    }
-  };
-
-  // Load video khi id trong URL thay đổi
+  // Lấy tất cả video khi component mount
   useEffect(() => {
-    const loadReel = async () => {
-      if (id) {
-        const reel = await fetchReelById(id);
-        if (reel) {
-          setCurrentReel(reel);
-          fetchAdjacentReels(id);
+    const fetchAllReels = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getAllVideos();
+        
+        if (response.success && response.data) {
+          const formattedReels = response.data.map(reel => ({
+            ...reel,
+            user: {
+              name: `${reel.author?.firstName || ''} ${reel.author?.lastName || ''}`.trim(),
+              avatar: reel.author?.avatar,
+              _id: reel.author?._id
+            },
+            video: reel.videoUri || reel.video,
+            title: reel.caption || reel.title,
+            date: new Date(reel.createdAt).toLocaleDateString(),
+            likes: Array.isArray(reel.likes) ? reel.likes.length : 0,
+            commentCount: Array.isArray(reel.comments) ? reel.comments.length : 0,
+            shares: reel.shares?.length || 0,
+            liked: Array.isArray(reel.likes) ? reel.likes.includes(user?._id) : false,
+            _id: reel._id
+          }));
+          console.log('Formatted reels:', formattedReels);
+          
+          setAllReels(formattedReels);
+          
+          if (!id && formattedReels.length > 0) {
+            navigate(`/explore/reels/${formattedReels[0]._id}`);
+          } else if (id && formattedReels.length > 0) {
+            const index = formattedReels.findIndex(reel => reel._id === id);
+            if (index === -1) {
+              navigate(`/explore/reels/${formattedReels[0]._id}`);
+            } else {
+              setCurrentIndex(index);
+            }
+          }
         } else {
-          navigate('/explore/reels/1', { replace: true });
+          toast.error("Không thể tải video");
         }
-      } else {
-        navigate('/explore/reels/1', { replace: true });
+      } catch (error) {
+        console.error('Error fetching all reels:', error);
+        toast.error("Đã xảy ra lỗi khi tải video");
+      } finally {
+        setIsLoading(false);
+        setIsInitialized(true);
       }
     };
-    loadReel();
-  }, [id]);
+    fetchAllReels();
+  }, []);
 
-  const handleScroll = (e) => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const currentScrollTop = container.scrollTop;
-    const scrollingDown = currentScrollTop > lastScrollTop.current;
-    lastScrollTop.current = currentScrollTop;
-
-    // Tìm index của video hiện tại trong danh sách
-    const currentIndex = mockReels.findIndex(r => r.id === parseInt(id));
-    
-    // Xác định video tiếp theo dựa vào hướng cuộn
-    let nextId;
-    if (scrollingDown && currentIndex < mockReels.length - 1) {
-      nextId = mockReels[currentIndex + 1].id;
-    } else if (!scrollingDown && currentIndex > 0) {
-      nextId = mockReels[currentIndex - 1].id;
-    }
-
-    // Nếu có video tiếp theo và ID khác với ID hiện tại
-    if (nextId && nextId !== parseInt(id)) {
-      navigate(`/explore/reels/${nextId}`, { replace: true });
-      const nextReel = mockReels.find(r => r.id === nextId);
-      if (nextReel) {
-        setCurrentReel(nextReel);
-        fetchAdjacentReels(nextId);
-      }
-    }
-  };
-
+  // Xử lý cuộn video
   useEffect(() => {
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+
+      const container = containerRef.current;
+      const scrollTop = container.scrollTop;
+      const itemHeight = container.clientHeight;
+      const index = Math.round(scrollTop / itemHeight);
+
+      if (index !== currentIndex && allReels[index]) {
+        setCurrentIndex(index);
+        navigate(`/explore/reels/${allReels[index]._id}`, { replace: true });
+      }
+    };
+
     const container = containerRef.current;
     if (container) {
-      let scrollTimeout;
-      
-      const handleScrollWithDebounce = (e) => {
-        if (scrollTimeout) {
-          clearTimeout(scrollTimeout);
-        }
-        scrollTimeout = setTimeout(() => {
-          handleScroll(e);
-        }, 50); // Debounce 50ms
-      };
-
-      container.addEventListener('scroll', handleScrollWithDebounce);
-      return () => {
-        container.removeEventListener('scroll', handleScrollWithDebounce);
-        if (scrollTimeout) {
-          clearTimeout(scrollTimeout);
-        }
-      };
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
     }
-  }, [id]);
+  }, [currentIndex, allReels]);
 
-  const handleReelLike = (id) => {
-    if (currentReel?.id === id) {
-      setCurrentReel(reel => ({
-        ...reel,
-        liked: !reel.liked,
-        likes: reel.liked ? reel.likes - 1 : reel.likes + 1
-      }));
+  // Cập nhật reel hiện tại khi id thay đổi
+  useEffect(() => {
+    if (!isInitialized || !allReels?.length) return;
+
+    const currentReel = allReels.find(reel => reel._id === id);
+    if (currentReel) {
+      setCurrentReel(currentReel);
+      const index = allReels.findIndex(reel => reel._id === id);
+      if (index !== -1) {
+        setCurrentIndex(index);
+        // Cuộn đến video hiện tại
+        containerRef.current?.scrollTo({
+          top: index * containerRef.current.clientHeight,
+          behavior: 'smooth'
+        });
+      }
+    } else if (allReels.length > 0) {
+      // Nếu không tìm thấy video với id hiện tại, chuyển hướng đến video đầu tiên
+      navigate(`/explore/reels/${allReels[0]._id}`);
+    }
+  }, [id, allReels, isInitialized]);
+
+  const handleLike = async (reelId) => {
+    try {
+      const res = await likeVideo(reelId);
+      const updatedReel = res.data.video;
+      const isLiking = res.data.message === "Đã like video";
+
+      // Cập nhật state cho cả danh sách và video hiện tại
+      setAllReels(prevReels =>
+        prevReels.map(reel => {
+          if (reel._id === reelId) {
+            return {
+              ...reel,
+              likes: updatedReel.likes.length,
+              liked: updatedReel.likes.includes(user?._id)
+            };
+          }
+          return reel;
+        })
+      );
+      setCurrentReel(prevReel => 
+        prevReel._id === reelId ? updatedReel : prevReel
+      );
+
+      // Gửi thông báo khi like
+      if (isLiking && updatedReel.author._id !== user._id) {
+        sendNotification({
+          receiverId: updatedReel.author._id,
+          type: 'like',
+          videoId: reelId,
+        });
+        toast.success("Đã thích video");
+      } else {
+        toast.success("Đã bỏ thích video");
+      }
+    } catch (error) {
+      console.error('Error liking reel:', error);
+      toast.error("Đã xảy ra lỗi khi thích video");
     }
   };
 
-  const handleOpenReelComment = (reel) => {
-    if (selectedReel?.id === reel.id && showReelComment) {
-      setShowReelComment(false);
-      setTimeout(() => setSelectedReel(null), 500);
-    } else {
-      setSelectedReel(reel);
+  const handleShare = () => {
+    try {
+      setSharePopup({ 
+        open: true, 
+        videoId: currentReel._id, 
+        postTitle: currentReel.title 
+      });
+
+      // Gửi thông báo khi share
+      if (currentReel?.author?._id !== user._id) {
+        sendNotification({
+          receiverId: currentReel.author._id,
+          type: 'share',
+          videoId: currentReel._id,
+          message: `${user.firstName} đã chia sẻ video của bạn`,
+        });
+      }
+      toast.success("Đã mở cửa sổ chia sẻ");
+    } catch (error) {
+      console.error('Error sharing video:', error);
+      toast.error("Không thể mở cửa sổ chia sẻ");
+    }
+  };
+
+  const handleOpenReelComment = async (reel) => {
+    try {
       setShowReelComment(true);
+    } catch (error) {
+      console.error('Error opening comment panel:', error);
+      toast.error("Không thể mở bảng bình luận");
     }
   };
 
   const handleCloseReelComment = () => {
-    setShowReelComment(false);
-    setTimeout(() => setSelectedReel(null), 500);
+    try {
+      setShowReelComment(false);
+    } catch (error) {
+      console.error('Error closing comment panel:', error);
+      toast.error("Không thể đóng bảng bình luận");
+    }
   };
 
-  const handleAddReelComment = (text) => {
-    if (!selectedReel) return;
-
-    const newComment = {
-      id: Date.now(),
-      user: 'Bạn',
-      avatar: 'https://randomuser.me/api/portraits/lego/1.jpg',
-      text,
-      likes: 0,
-      time: 'Vừa xong',
-      replies: []
-    };
-
-    if (currentReel?.id === selectedReel.id) {
-      setCurrentReel(reel => ({
-        ...reel,
-        comments: [newComment, ...(Array.isArray(reel.comments) ? reel.comments : [])]
-      }));
+  const handleAddComment = async (text) => {
+    if (!currentReel || !text.trim()) {
+      toast.error("Video hiện tại không tồn tại hoặc vui lòng nhập nội dung bình luận");
+      return;
     }
 
-    setSelectedReel(prev => ({
-      ...prev,
-      comments: [newComment, ...(Array.isArray(prev.comments) ? prev.comments : [])]
-    }));
+    try {
+      toast.info("Đang thêm bình luận...");
+      const response = await createComment({
+        targetId: currentReel._id,
+        targetType: 'video',
+        text: text.trim()
+      });
+
+      if (response.data) {
+        // Fetch updated reel data to get the new comment count
+        try {
+          const updatedReelResponse = await getVideoById(currentReel._id);
+          if (updatedReelResponse.success && updatedReelResponse.data) {
+            const videoData = updatedReelResponse.data;
+            const updatedReelFromServer = {
+              ...videoData,
+              user: { 
+                name: `${videoData.author?.firstName || ''} ${videoData.author?.lastName || ''}`.trim(),
+                avatar: videoData.author?.avatar,
+                _id: videoData.author?._id
+              },
+              video: videoData.videoUri || videoData.video,
+              title: videoData.caption || videoData.title,
+              date: new Date(videoData.createdAt).toLocaleDateString(),
+              likes: Array.isArray(videoData.likes) ? videoData.likes.length : 0,
+              commentCount: Array.isArray(videoData.comments) ? videoData.comments.length : 0,
+              shares: videoData.shares?.length || 0, 
+              liked: Array.isArray(videoData.likes) ? videoData.likes.includes(user?._id) : false,
+              _id: videoData._id
+            };
+
+            setCurrentReel(updatedReelFromServer);
+
+            setAllReels(prevReels =>
+              prevReels.map(reel =>
+                reel._id === currentReel._id
+                  ? updatedReelFromServer
+                  : reel
+              )
+            );
+          } else {
+            // Fallback: if fetching updated reel fails, try to optimistically update count
+            setCurrentReel(prev => ({ 
+              ...prev, 
+              commentCount: (prev.commentCount !== undefined ? prev.commentCount : (Array.isArray(prev.comments) ? prev.comments.length : 0)) + 1 
+            }));
+            setAllReels(prevReels =>
+              prevReels.map(reel =>
+                reel._id === currentReel._id
+                  ? { ...reel, commentCount: (reel.commentCount !== undefined ? reel.commentCount : (Array.isArray(reel.comments) ? reel.comments.length : 0)) + 1 }
+                  : reel
+              )
+            );
+          }
+        } catch (fetchError) {
+          console.error("Error fetching updated reel data after comment:", fetchError);
+          // Fallback: optimistically update count even if fetch fails
+          setCurrentReel(prev => ({ 
+            ...prev, 
+            commentCount: (prev.commentCount !== undefined ? prev.commentCount : (Array.isArray(prev.comments) ? prev.comments.length : 0)) + 1 
+          }));
+          setAllReels(prevReels =>
+            prevReels.map(reel =>
+              reel._id === currentReel._id
+                ? { ...reel, commentCount: (reel.commentCount !== undefined ? reel.commentCount : (Array.isArray(reel.comments) ? reel.comments.length : 0)) + 1 }
+                : reel
+            )
+          );
+        }
+        
+        setReelCommentRefreshKey(prev => prev + 1); // Trigger CommentList refresh
+
+        // Gửi thông báo
+        if (currentReel.author._id !== user._id) {
+          sendNotification({
+            receiverId: currentReel.author._id,
+            type: 'comment',
+            videoId: currentReel._id,
+            message: `${user.firstName} đã bình luận: "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`,
+          });
+        }
+
+        toast.success('Đã thêm bình luận thành công');
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      toast.error('Không thể thêm bình luận. Vui lòng thử lại sau');
+    }
   };
+
+  // Xử lý phím mũi tên
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowUp' && currentIndex > 0) {
+        const newIndex = currentIndex - 1;
+        setCurrentIndex(newIndex);
+        navigate(`/explore/reels/${allReels[newIndex]._id}`, { replace: true });
+        containerRef.current?.scrollTo({
+          top: newIndex * containerRef.current.clientHeight,
+          behavior: 'smooth'
+        });
+      } else if (e.key === 'ArrowDown' && currentIndex < allReels.length - 1) {
+        const newIndex = currentIndex + 1;
+        setCurrentIndex(newIndex);
+        navigate(`/explore/reels/${allReels[newIndex]._id}`, { replace: true });
+        containerRef.current?.scrollTo({
+          top: newIndex * containerRef.current.clientHeight,
+          behavior: 'smooth'
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, allReels]);
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FFB800]"></div>
+      <div className="flex items-center justify-center h-screen">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (!isInitialized || allReels.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <p className="text-lg text-gray-600">Không có video nào</p>
       </div>
     );
   }
 
   return (
     <div className="flex-1 relative">
-      <div 
+      <div
         ref={containerRef}
         className="h-[calc(100vh-120px)] overflow-y-auto snap-y snap-mandatory scrollbar-none"
       >
-        {prevReel && (
-          <div 
-            data-reel-id={prevReel.id} 
-            className="snap-start h-[calc(100vh-120px)] flex items-center justify-center"
-            style={{ scrollSnapAlign: 'start' }}
+        {allReels?.map((reel, index) => (
+          <div
+            key={reel._id}
+            className="snap-start h-[calc(100vh-120px)]"
           >
             <ReelCard
-              reel={prevReel}
-              onLike={() => handleReelLike(prevReel.id)}
-              onComment={() => handleOpenReelComment(prevReel)}
-              onShare={() => setSharePopup({ open: true, postId: prevReel.id })}
-              isVisible={false}
+              reel={reel}
+              onLike={() => handleLike(reel._id)}
+              onComment={() => handleOpenReelComment(reel)}
+              onShare={handleShare}
+              isVisible={index === currentIndex}
             />
           </div>
-        )}
-
-        {currentReel && (
-          <div 
-            data-reel-id={currentReel.id} 
-            className="snap-start h-[calc(100vh-120px)] flex items-center justify-center"
-            style={{ scrollSnapAlign: 'start' }}
-          >
-            <ReelCard
-              reel={currentReel}
-              onLike={() => handleReelLike(currentReel.id)}
-              onComment={() => handleOpenReelComment(currentReel)}
-              onShare={() => setSharePopup({ open: true, postId: currentReel.id })}
-              isVisible={true}
-            />
-          </div>
-        )}
-
-        {nextReel && (
-          <div 
-            data-reel-id={nextReel.id} 
-            className="snap-start h-[calc(100vh-120px)] flex items-center justify-center"
-            style={{ scrollSnapAlign: 'start' }}
-          >
-            <ReelCard
-              reel={nextReel}
-              onLike={() => handleReelLike(nextReel.id)}
-              onComment={() => handleOpenReelComment(nextReel)}
-              onShare={() => setSharePopup({ open: true, postId: nextReel.id })}
-              isVisible={false}
-            />
-          </div>
-        )}
+        ))}
       </div>
 
-      <div className="w-80 flex-shrink-0 hidden lg:block absolute top-0 right-0">
-        <ReelCommentPanel
-          reel={selectedReel}
-          open={showReelComment}
-          onClose={handleCloseReelComment}
-          onAddComment={handleAddReelComment}
-        />
-      </div>
+      <ReelCommentPanel
+        reel={currentReel}
+        open={showReelComment}
+        onClose={handleCloseReelComment}
+        onAddComment={handleAddComment}
+        refreshKey={reelCommentRefreshKey}
+      /> 
 
       <SharePopup
         open={sharePopup.open}
-        postId={sharePopup.postId}
-        onClose={() => setSharePopup({ open: false, postId: null })}
+        videoId={sharePopup.videoId}
+        postTitle={sharePopup.postTitle}
+        onClose={() => setSharePopup({ open: false, videoId: null, postTitle: null })}
       />
 
       <style jsx>{`

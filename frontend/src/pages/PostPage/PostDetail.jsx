@@ -1,47 +1,135 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight, FaTimes, FaHeart, FaComment, FaShare, FaBookmark, FaEllipsisH } from 'react-icons/fa';
 import CommentList from '../../components/common/PostDetail/CommentList';
 import CommentForm from '../../components/common/PostDetail/CommentForm';
-import { mockPosts } from './index';
+import postsService, { getPostById } from '@/services/postService';
+import { formatDate } from '@/components/common/Post';
+import { useAuth } from '@/context/AuthContext';
+import { createComment } from '@/services/commentService';
+import SharePopup from '../../components/common/SharePopup';
+import { useSocket } from '@/context/SocketContext';
 
 const PostDetail = () => {
   const { id } = useParams();
-  const post = mockPosts.find(p => p.id === Number(id));
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isLiked, setIsLiked] = useState(post?.liked || false);
+  const [isLiked, setIsLiked] = useState(false);
   const [showFullImage, setShowFullImage] = useState(false);
+  const [commentRefresh, setCommentRefresh] = useState(0); // Add this to trigger comment refresh
   const navigate = useNavigate();
-  
-  if (!post) return <div className="text-center py-20 text-xl">Không tìm thấy bài viết</div>;
+  const { user } = useAuth();
+  const [sharePopup, setSharePopup] = useState({ open: false, postId: null, postTitle: null });
+  const { sendNotification } = useSocket();
 
-  const images = post.images || [];
-  const hasMultipleImages = images.length > 1;
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await postsService.fetchById(id);
+        setPost(response.data);
+        setIsLiked(response.data.likes?.includes(user._id));
+      } catch (error) {
+        console.error('Error fetching post:', error);
+        setError('Không thể tải bài viết. Vui lòng thử lại sau.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    if (id) {
+      fetchPost();
+    }
+  }, [id, user._id]);
+
+  if (loading) return (
+    <div className="h-[100vh] bg-gradient-to-br from-[#FFF4D6] via-white to-[#FFF4D6] py-6 px-2 lg:px-8 flex justify-center items-center">
+      <div className="text-2xl text-gray-600">Đang tải...</div>
+    </div>
+  );
+
+  if (error) return (
+    <div className="h-[100vh] bg-gradient-to-br from-[#FFF4D6] via-white to-[#FFF4D6] py-6 px-2 lg:px-8 flex justify-center items-center">
+      <div className="text-xl text-red-600">{error}</div>
+    </div>
+  );
+
+  if (!post) return (
+    <div className="h-[100vh] bg-gradient-to-br from-[#FFF4D6] via-white to-[#FFF4D6] py-6 px-2 lg:px-8 flex justify-center items-center">
+      <div className="text-xl text-gray-600">Không tìm thấy bài viết</div>
+    </div>
+  );
+
+  const imageMedia = post.media?.filter(m => m.type === "image") || [];
+  const hasMultipleImages = imageMedia.length > 1;
 
   const handlePrevImage = (e) => {
     e?.stopPropagation();
-    setCurrentImageIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
+    setCurrentImageIndex(prev => (prev === 0 ? imageMedia.length - 1 : prev - 1));
   };
   
   const handleNextImage = (e) => {
     e?.stopPropagation();
-    setCurrentImageIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
+    setCurrentImageIndex(prev => (prev === imageMedia.length - 1 ? 0 : prev + 1));
   };
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
+  const handleLike = async () => {
+    try {
+      await postsService.toggleLike(post._id);
+      const updatedPost = await postsService.fetchById(post._id);
+      setPost(updatedPost.data);
+      const isLiking = !isLiked;
+      setIsLiked(!isLiked);
+      
+      if (isLiking && post.author._id !== user._id) {
+        sendNotification({
+          receiverId: post.author._id,
+          type: 'like',
+          postId: post._id,
+        });
+      }
+    } catch (error) {
+      console.error('Error liking post:', error);
+    }
   };
   
-  const handleShare = () => {};
-  const handleAddComment = () => {};
+  const handleShare = () => {
+    setSharePopup({ open: true, postId: post._id, postTitle: post.content });
+    
+    if (post.author._id !== user._id) {
+      sendNotification({
+        receiverId: post.author._id,
+        type: 'share',
+        postId: post._id,
+      });
+    }
+  };
 
-  const getGridClass = (length) => {
-    switch (length) {
-      case 1: return "grid-cols-1";
-      case 2: return "grid-cols-2";
-      case 3: return "grid-cols-2";
-      case 4: return "grid-cols-2";
-      default: return "grid-cols-2";
+  const handleAddComment = async (content) => {
+    try {
+      await createComment({ targetId: post._id, targetType: 'post', text: content });
+      
+      // Refresh post data to get updated comment count
+      const updatedPost = await postsService.fetchById(id);
+      setPost(updatedPost.data);
+      
+      // Trigger comment list refresh
+      setCommentRefresh(prev => prev + 1);
+
+      if (post.author._id !== user._id) {
+        sendNotification({
+          receiverId: post.author._id,
+          type: 'comment',
+          postId: post._id,
+          message: `${user.firstName} đã bình luận: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
+        });
+      }
+      
+    } catch (error) {
+      console.error('Error adding comment:', error);
     }
   };
 
@@ -64,14 +152,14 @@ const PostDetail = () => {
         
         {/* Left Column - Image/Video (70%) */}
         <div className="w-[70%] relative bg-gradient-to-br from-gray-900 via-gray-800 to-black min-h-[80vh] flex items-center justify-center overflow-hidden">
-          {images.length > 0 ? (
+          {imageMedia.length > 0 ? (
             <div className="relative w-full h-full">
               {/* Gradient Overlay cho ảnh */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20 z-10 pointer-events-none" />
               
               <img
-                src={images[currentImageIndex]}
-                alt="post"
+                src={imageMedia[currentImageIndex].url}
+                alt={`post-${currentImageIndex}`}
                 className="w-full h-full object-contain cursor-zoom-in transition-transform duration-700 ease-out"
                 onClick={() => setShowFullImage(true)}
                 style={{ imageRendering: 'crisp-edges' }}
@@ -97,7 +185,7 @@ const PostDetail = () => {
                   
                   {/* Cải thiện Image Indicators */}
                   <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 bg-black/30 backdrop-blur-md rounded-full px-5 py-3 z-20 border border-white/10">
-                    {images.map((_, index) => (
+                    {imageMedia.map((_, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
@@ -114,7 +202,7 @@ const PostDetail = () => {
 
               {/* Thêm số thứ tự ảnh */}
               <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-black/30 backdrop-blur-md rounded-full px-4 py-2 text-white/90 text-sm font-medium border border-white/10 z-20">
-                {currentImageIndex + 1} / {images.length}
+                {currentImageIndex + 1} / {imageMedia.length}
               </div>
             </div>
           ) : (
@@ -130,31 +218,35 @@ const PostDetail = () => {
         </div>
         
         {/* Right Column - Info and Comments (30%) */}
-        <div className="w-[30%] flex flex-col bg-gradient-to-b from-white via-[#FFF4D6]/10 to-[#FFF4D6]/30 ">
+        <div className="w-[30%] flex flex-col bg-gradient-to-b from-white via-[#FFF4D6]/10 to-[#FFF4D6]/30">
           
           {/* Enhanced Header with User Info */}
           <div className="p-6 border-b border-[#FFB800]/20 bg-gradient-to-r from-white to-[#FFF4D6]/30">
             <div className="flex items-center gap-4 mb-4">
-              <div className="relative">
-                <img
-                  src={post.user.avatar}
-                  alt={post.user.name}
-                  className="w-14 h-14 rounded-full object-cover border-3 border-[#FFB800] shadow-lg hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <div className="flex-1">
-                <div className="font-bold text-gray-800 text-lg hover:text-[#FFB800] transition-colors cursor-pointer">
-                  {post.user.name}
-                </div>
-                <div className="text-sm text-gray-500 flex items-center gap-2">
-                  <span>{post.date}</span>
-                </div>
-              </div>
+              {post.author && (
+                <>
+                  <Link to={`/profile/${post.author._id}`} className="relative">
+                    <img
+                      src={post.author.avatar || "https://via.placeholder.com/150"}
+                      alt={`${post.author.lastName} ${post.author.firstName}`}
+                      className="w-14 h-14 rounded-full object-cover border-3 border-[#FFB800] shadow-lg hover:scale-105 transition-transform duration-300"
+                    />
+                  </Link>
+                  <div className="flex-1">
+                    <Link to={`/profile/${post.author._id}`} className="font-bold text-gray-800 text-lg hover:text-[#FFB800] transition-colors cursor-pointer">
+                      {post.author.lastName} {post.author.firstName}
+                    </Link>
+                    <div className="text-sm text-gray-500 flex items-center gap-2">
+                      <span>{formatDate(post.createdAt)}</span>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
             
             {/* Enhanced Post Content */}
             <div className="text-gray-800 leading-relaxed mb-6 text-base">
-              {post.content}
+              {post.caption}
             </div>
             
             {/* Enhanced Interaction Buttons */}
@@ -174,14 +266,14 @@ const PostDetail = () => {
                 }`}>
                   <FaHeart className={`w-4 h-4 ${isLiked ? 'text-[#FFB800]' : ''}`} />
                 </div>
-                <span className="font-semibold text-sm">{post.likes}</span>
+                <span className="font-semibold text-sm">{post.likes?.length || 0}</span>
               </button>
               
               <button className="flex items-center gap-3 px-4 py-2 rounded-xl text-gray-600 hover:text-[#FFB800] transition-all duration-300 group hover:bg-[#FFF4D6]/50">
                 <div className="p-2 rounded-full bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110 transition-all duration-300">
                   <FaComment className="w-4 h-4" />
                 </div>
-                <span className="font-semibold text-sm">{post.comments.length}</span>
+                <span className="font-semibold text-sm">{post.comments?.length || 0}</span>
               </button>
               
               <button
@@ -191,7 +283,7 @@ const PostDetail = () => {
                 <div className="p-2 rounded-full bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110 transition-all duration-300">
                   <FaShare className="w-4 h-4" />
                 </div>
-                <span className="font-semibold text-sm">{post.shares}</span>
+                <span className="font-semibold text-sm">{post.shares?.length || 0}</span>
               </button>
 
               <button className="p-2 rounded-full bg-gray-100 hover:bg-[#FFF4D6] text-gray-600 hover:text-[#FFB800] transition-all duration-300 hover:scale-110">
@@ -202,12 +294,12 @@ const PostDetail = () => {
           
           {/* Enhanced Comments List */}
           <div className="flex-1 overflow-y-auto">
-            <CommentList postId={post.id} comments={post.comments} />
+            <CommentList post={post} key={commentRefresh} />
           </div>
           
           {/* Enhanced Comment Form */}
           <div className="border-t border-[#FFB800]/20 bg-gradient-to-r from-[#FFF4D6]/20 to-white">
-            <CommentForm onSubmit={text => handleAddComment(post.id, text)} />
+            <CommentForm onSubmit={handleAddComment} />
           </div>
         </div>
       </div>
@@ -226,7 +318,7 @@ const PostDetail = () => {
 
           <div className="relative max-w-[90vw] max-h-[90vh]">
             <img
-              src={images[currentImageIndex]}
+              src={imageMedia[currentImageIndex].url}
               alt="Full size"
               className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl transition-transform duration-700"
               style={{ imageRendering: 'crisp-edges' }}
@@ -252,7 +344,7 @@ const PostDetail = () => {
 
           {hasMultipleImages && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 bg-black/30 backdrop-blur-md rounded-full px-5 py-3 border border-white/10">
-              {images.map((_, index) => (
+              {imageMedia.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
@@ -267,6 +359,14 @@ const PostDetail = () => {
           )}
         </div>
       )}
+
+      {/* Add SharePopup component at the end of the component, before the closing div */}
+      <SharePopup
+        open={sharePopup.open}
+        postId={sharePopup.postId}
+        postTitle={sharePopup.postTitle}
+        onClose={() => setSharePopup({ open: false, postId: null, postTitle: null })}
+      />
     </div>
   );
 };

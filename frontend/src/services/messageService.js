@@ -16,8 +16,8 @@ export const createMessage = ({ conversationId, type, text, image, sticker, shar
     return API.post('/messages',{ conversationId, type, text, image, sticker, sharedType, sharedId } )
 }
 
-export const deleteMessage = ({messsageId}) => {
-    return API.patch(`/messages/${messsageId}/delete`)
+export const deleteMessage = ({messageId}) => {
+    return API.patch(`/messages/${messageId}/delete`)
 }
 
 export const updateMessage = ({messageId}) => {

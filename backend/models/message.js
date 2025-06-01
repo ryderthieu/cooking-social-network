@@ -15,7 +15,12 @@ const messageSchema = new Schema({
   // Thêm trường replyTo
   replyTo: { type: Schema.Types.ObjectId, ref: 'Message', default: null }, // Tham chiếu đến tin nhắn gốc
 
-  isRead: {type: Boolean, default: false},
+  // Thay thế isRead boolean bằng mảng readBy để lưu thông tin người đọc
+  readBy: [{
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    readAt: { type: Date, default: Date.now }
+  }],
+
   reactions: [{
     type: {type: String},
     userId: {type: Schema.Types.ObjectId, ref: 'User'}

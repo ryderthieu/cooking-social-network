@@ -14,14 +14,16 @@ import {
   toggleFollow,
   getUserStats,
   editProfile,
-} from "../../services/userService";
+} from "../../services/UserService";
 import { useAuth } from "../../context/AuthContext";
+import { useSocket } from "../../context/SocketContext";
 import { toast } from "react-toastify";
 import EditProfileModal from "../../components/common/Modal/Profile/EditProfileModal";
 
 export default function ProfilePage() {
   const { userId } = useParams();
   const { user: currentUser } = useAuth();
+  const { sendNotification } = useSocket();
   const navigate = useNavigate();
 
   // State management
@@ -152,6 +154,14 @@ export default function ProfilePage() {
         // Update with backend response if available
         if (response.data && typeof response.data.isFollowing !== "undefined") {
           setIsFollowing(response.data.isFollowing);
+        }
+
+        // Gửi thông báo khi follow
+        if (willFollow) {
+          sendNotification({
+            receiverId: userId,
+            type: 'follow',
+          });
         }
 
         // Refresh stats

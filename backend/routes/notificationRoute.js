@@ -11,8 +11,8 @@ router.get('/', authenticateJWT, getUserNotifications)
 
 router.post('/', authenticateJWT, createNotification)
 
-router.patch('/read/:commentId', authenticateJWT, markAsRead)
+router.patch('/read/:notificationId', authenticateJWT, markAsRead)
 router.patch('/read', authenticateJWT, markAllAsRead)
-router.patch('/unread/:commentId',authenticateJWT, markAsUnread)
+router.patch('/unread/:notificationId',authenticateJWT, markAsUnread)
 
 module.exports = router

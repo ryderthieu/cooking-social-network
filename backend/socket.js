@@ -93,7 +93,11 @@ const socketServer = (server) => {
           sticker: type === 'sticker' ? sticker : undefined,
           sharedType: type === 'share' ? sharedType : undefined,
           sharedId: type === 'share' ? sharedId : undefined,
-          reactions: []
+          reactions: [],
+          readBy: [{ 
+            userId: socket.userId,
+            readAt: new Date()
+          }]
         });
 
         if (replyTo) {
@@ -101,35 +105,71 @@ const socketServer = (server) => {
         }
 
         await newMessage.save();
-        
-        await newMessage.populate(
-            { path: "sender", select: "firstName lastName avatar _id" }
+
+        // Đếm lại số tin nhắn chưa đọc cho mỗi thành viên
+        const unreadCounts = {};
+        for (const memberId of conversation.members) {
+          if (memberId.toString() !== socket.userId) {
+            const count = await Message.countDocuments({
+              conversationId,
+              sender: { $ne: memberId },
+              'readBy.userId': { $ne: memberId }
+            });
+            unreadCounts[memberId.toString()] = count;
+          } else {
+            unreadCounts[memberId.toString()] = 0;
+          }
+        }
+
+        // Cập nhật conversation với số tin nhắn chưa đọc mới nhất và tin nhắn cuối
+        await Conversation.findByIdAndUpdate(
+          conversationId,
+          { 
+            $set: { 
+              unreadCounts,
+              lastMessage: newMessage._id,
+              updatedAt: new Date()
+            }
+          }
         );
+        
+        await newMessage.populate('sender', 'firstName lastName avatar _id');
 
         let populatedMessage = newMessage.toObject();
 
         if (populatedMessage.replyTo) {
-            try {
-                const originalMessage = await Message.findById(populatedMessage.replyTo)
-                                                 .populate('sender', 'firstName _id')
-                                                 .select('text content sender recalled');
-                if (originalMessage) {
-                    populatedMessage.replyTo = {
-                        id: originalMessage._id,
-                        content: originalMessage.recalled ? "Tin nhắn này đã bị xóa" : (originalMessage.text || originalMessage.content),
-                        sender: originalMessage.sender
-                    };
-                } else {
-                    populatedMessage.replyTo = null; 
-                }
-            } catch (populateError) {
-                console.error("Error populating replyTo message:", populateError);
-                populatedMessage.replyTo = null;
+          try {
+            const originalMessage = await Message.findById(populatedMessage.replyTo)
+              .populate('sender', 'firstName _id')
+              .select('text content sender recalled type image');
+            if (originalMessage) {
+              populatedMessage.replyTo = {
+                id: originalMessage._id,
+                content: originalMessage.recalled ? "Tin nhắn này đã bị xóa" : 
+                  (originalMessage.type === 'text' ? originalMessage.text : 
+                   originalMessage.type === 'image' ? 'Đã gửi một hình ảnh' : 
+                   originalMessage.content),
+                sender: originalMessage.sender,
+                type: originalMessage.type,
+                image: originalMessage.image
+              };
+            } else {
+              populatedMessage.replyTo = null;
             }
+          } catch (populateError) {
+            console.error("Error populating replyTo message:", populateError);
+            populatedMessage.replyTo = null;
+          }
         }
 
-        io.to(conversationId.toString()).emit("new_message", { message: populatedMessage, conversationId });
-        console.log(`Message sent in conversation ${conversationId} by ${socket.userId}`);
+        io.to(conversationId.toString()).emit("new_message", { 
+          message: {
+            ...populatedMessage,
+            content: type === 'text' ? text : 
+                    type === 'image' ? image : undefined
+          }, 
+          conversationId 
+        });
 
         // Create notifications for other members
         const otherMembers = conversation.members.filter(id => id.toString() !== socket.userId);
@@ -140,16 +180,16 @@ const socketServer = (server) => {
             type: "message",
             contentObject: newMessage._id,
             contentType: 'Message',
-            message: `${socket.user.firstName} đã gửi cho bạn một tin nhắn.`
+            message: `${socket.user.firstName} đã gửi cho bạn ${type === 'image' ? 'một hình ảnh' : 'một tin nhắn'}.`
           });
           await notification.save();
-          await notification.populate("sender", "firstName lastName avatar");
+          (await notification.populate("sender", "firstName lastName avatar"));
           
           const memberSocketIds = onlineUsers.get(memberIdStr);
           if (memberSocketIds) {
             memberSocketIds.forEach(socketId => {
-                io.to(socketId).emit("new_notification", notification);
-            })
+              io.to(socketId).emit("new_notification", notification);
+            });
           }
         }
       } catch (error) {
@@ -160,24 +200,34 @@ const socketServer = (server) => {
     
     socket.on("delete_message", async ({ messageId }) => {
       try {
-        const message = await Message.findById(messageId);
+        const message = await Message.findById(messageId)
+          .populate('sender', 'firstName lastName avatar _id');
+        
         if (!message) {
           return socket.emit("error", { message: "Tin nhắn không tìm thấy." });
         }
-        if (message.sender.toString() !== socket.userId) {
+        if (message.sender._id.toString() !== socket.userId) {
           return socket.emit("error", { message: "Bạn không có quyền xóa tin nhắn này." });
         }
         
         message.text = "Tin nhắn này đã bị xóa";
         message.recalled = true;
-        // Optionally clear other fields like image, sticker if needed
-        // message.image = undefined; 
         await message.save();
+
+        // Populate message with necessary data
+        const populatedMessage = message.toObject();
         
+        // Emit với đầy đủ thông tin tin nhắn
         io.to(message.conversationId.toString()).emit("message_recalled", {
           messageId: message._id,
-          conversationId: message.conversationId.toString()
+          conversationId: message.conversationId.toString(),
+          message: {
+            ...populatedMessage,
+            id: populatedMessage._id, // Thêm id để frontend có thể sử dụng
+            content: "Tin nhắn đã được thu hồi"
+          }
         });
+        
         console.log(`Message ${messageId} recalled by ${socket.userId}`);
       } catch (error) {
         console.error("Error recalling message:", error);
@@ -260,7 +310,7 @@ const socketServer = (server) => {
     });
 
 
-    socket.on("typing_start", ({ conversationId }) => {
+    socket.on("user_typing", ({ conversationId }) => {
       socket.to(conversationId.toString()).emit("user_typing", {
         userId: socket.userId,
         userName: socket.user.firstName,
@@ -268,22 +318,68 @@ const socketServer = (server) => {
       });
     });
 
-    socket.on("typing_stop", ({ conversationId }) => {
+    socket.on("user_stop_typing", ({ conversationId }) => {
       socket.to(conversationId.toString()).emit("user_stop_typing", {
         userId: socket.userId,
         conversationId
       });
     });
 
-    socket.on("mark_as_read", async ({ conversationId }) => {
-      await Message.updateMany(
-        { conversationId, sender: { $ne: socket.userId } },
-        { isRead: true }
-      );
-      socket.to(conversationId.toString()).emit("messages_read", {
-        conversationId,
-        readBy: socket.userId
-      });
+    socket.on("mark_messages_as_seen", async ({ conversationId }) => {
+      try {
+        // Cập nhật tất cả tin nhắn chưa đọc trong cuộc trò chuyện mà user hiện tại chưa đọc
+        const messagesToUpdate = await Message.find({
+          conversationId,
+          sender: { $ne: socket.userId },
+          'readBy.userId': { $ne: socket.userId } // Chưa được đọc bởi user hiện tại
+        });
+
+        if (messagesToUpdate.length > 0) {
+          const updatePromises = messagesToUpdate.map(message => 
+            Message.findByIdAndUpdate(
+              message._id,
+              {
+                $push: {
+                  readBy: {
+                    userId: socket.userId,
+                    readAt: new Date()
+                  }
+                }
+              },
+              { new: true } // Optional: trả về document đã update
+            )
+          );
+          await Promise.all(updatePromises);
+        }
+
+        // Đếm lại số tin nhắn chưa đọc cho CHÍNH USER VỪA ĐÁNH DẤU XEM
+        const newUnreadCountForCurrentUser = await Message.countDocuments({
+          conversationId,
+          sender: { $ne: socket.userId },       // Tin nhắn không phải của họ
+          'readBy.userId': { $ne: socket.userId } // Và họ vẫn chưa đọc (sau khi đã push ở trên, con số này thường là 0)
+        });
+
+        // Cập nhật trường unreadCounts.{userId} trong conversation model
+        const updateQuery = { $set: {} };
+        updateQuery.$set[`unreadCounts.${socket.userId}`] = newUnreadCountForCurrentUser;
+        
+        await Conversation.findByIdAndUpdate(
+          conversationId,
+          updateQuery
+        );
+
+        // Thông báo cho tất cả client trong cuộc trò chuyện
+        io.to(conversationId.toString()).emit("messages_seen", {
+          conversationId,
+          seenBy: socket.userId,
+          unreadCount: newUnreadCountForCurrentUser // Gửi unread count mới của user vừa xem
+        });
+
+        console.log(`Messages marked as seen in conversation ${conversationId} by ${socket.userId}. Their new unread count: ${newUnreadCountForCurrentUser}`);
+      } catch (error) {
+        console.error("Error marking messages as seen:", error);
+        socket.emit("error", { message: "Lỗi khi đánh dấu tin nhắn đã xem", details: error.message });
+      }
     });
 
     socket.on("send_notification", async (data) => {
@@ -309,6 +405,87 @@ const socketServer = (server) => {
         }
       } catch (err) {
         console.error("Send notification error:", err);
+      }
+    });
+
+    socket.on("mark_notifications_as_read", async () => {
+      try {
+        // Cập nhật tất cả thông báo chưa đọc của user thành đã đọc
+        await Notification.updateMany(
+          { 
+            receiver: socket.userId,
+            isRead: false 
+          },
+          { 
+            $set: { 
+              isRead: true,
+              readAt: new Date()
+            } 
+          }
+        );
+
+        // Emit sự kiện cập nhật cho tất cả các socket của user này
+        const userSocketIds = onlineUsers.get(socket.userId);
+        if (userSocketIds) {
+          userSocketIds.forEach(socketId => {
+            if (socketId !== socket.id) { // Không cần gửi lại cho socket hiện tại
+              io.to(socketId).emit("notifications_marked_as_read");
+            }
+          });
+        }
+
+        console.log(`All notifications marked as read for user ${socket.userId}`);
+      } catch (error) {
+        console.error("Error marking notifications as read:", error);
+        socket.emit("error", { message: "Không thể đánh dấu thông báo là đã đọc" });
+      }
+    });
+
+    socket.on("mark_notification_as_read", async ({ notificationId }) => {
+      try {
+        // Cập nhật một thông báo cụ thể thành đã đọc và populate đầy đủ thông tin
+        const notification = await Notification.findOneAndUpdate(
+          { 
+            _id: notificationId,
+            receiver: socket.userId 
+          },
+          { 
+            $set: { 
+              isRead: true,
+              readAt: new Date()
+            } 
+          },
+          { new: true }
+        ).populate([
+          {
+            path: 'postId',
+            select: '_id content images'
+          },
+          {
+            path: 'sender',
+            select: 'firstName lastName avatar'
+          }
+        ]);
+
+        if (!notification) {
+          return socket.emit("error", { message: "Không tìm thấy thông báo" });
+        }
+
+        // Emit sự kiện cập nhật cho tất cả các socket của user này
+        const userSocketIds = onlineUsers.get(socket.userId);
+        if (userSocketIds) {
+          userSocketIds.forEach(socketId => {
+            io.to(socketId).emit("notification_marked_as_read", { 
+              notificationId,
+              notification // Gửi toàn bộ thông tin notification đã được populate
+            });
+          });
+        }
+
+        console.log(`Notification ${notificationId} marked as read for user ${socket.userId}`);
+      } catch (error) {
+        console.error("Error marking notification as read:", error);
+        socket.emit("error", { message: "Không thể đánh dấu thông báo là đã đọc" });
       }
     });
 

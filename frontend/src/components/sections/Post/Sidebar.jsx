@@ -3,14 +3,9 @@ import { MdLibraryAdd } from "react-icons/md";
 import { Link } from "react-router-dom";
 import React, { useState } from 'react';
 import CreatePostModal from '../../common/Modal/CreatePostModal';
+import { useAuth } from "@/context/AuthContext";
 
 const defaultData = {
-  profile: {
-    name: 'Nguyễn Văn A',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-    posts: 12,
-    followers: 340,
-  },
   menu: [
     { label: 'Bài viết', icon: <FaNewspaper />, href: '/explore/posts' },
     { label: 'Reels', icon: <FaVideo />, href: '/explore/reels/1' },
@@ -22,17 +17,18 @@ const defaultData = {
 
 export const LeftSidebar = ({ activeTab, onTabChange, data = defaultData, onAdd }) => {
 
-
+  const {user} = useAuth()
+  console.log('user',user)
   return (
     <>
       <aside className="hidden lg:block w-72 pr-4 space-y-6 sticky top-24 h-fit">
         <div className="bg-white rounded-2xl shadow p-6 mb-2">
           {/* Profile Section */}
-          {data?.profile && (
+          {user && (
             <div className="flex items-center gap-4 mb-6">
-              <img src={data.profile.avatar} alt={data.profile.name} className="w-12 h-12 rounded-full object-cover border-2 border-[#FFB800]" />
+              <img src={user.avatar} className="w-12 h-12 rounded-full object-cover border-2 border-[#FFB800]" />
               <div>
-                <h3 className="font-bold text-gray-800">{data.profile.name}</h3>
+                <h3 className="font-bold text-gray-800">{user.lastName} {user.firstName}</h3>
               </div>
             </div>
           )}

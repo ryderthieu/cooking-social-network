@@ -261,9 +261,11 @@ const PostPage = () => {
 
         <div className="flex-1">
           <Routes>
-            <Route path='/' element={<Navigate to="posts" replace />} />
             <Route path="/posts" element={<Posts />} />
             <Route path="/reels/:id" element={<Reels />} />
+            <Route path="/reels" element={<Reels />} />
+            <Route path='/' element={<Navigate to="posts" replace />} />
+
           </Routes>
         </div>
 

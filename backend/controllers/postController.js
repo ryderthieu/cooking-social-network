@@ -8,14 +8,17 @@ const addPost = async (req, res) => {
   try {
     const { caption, recipe, videoUri, imgUri } = req.body;
 
-    if (!caption || !recipe) {
-      return res
-        .status(400)
-        .json({ message: "Vui lòng nhập đầy đủ thông tin" });
-    }
+    // if (!caption || !recipe) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Vui lòng nhập đầy đủ thông tin" });
+    // }
 
     const captionSlug = slugify(caption, { lower: true, locale: "vi" });
-    const recipeDoc = await Recipe.findById(recipe);
+    let recipeDoc
+    if(recipe) {
+      recipeDoc = await Recipe.findById(recipe);
+    }
     if (!recipeDoc) {
       return res.status(404).json({ message: "Công thức không tồn tại" });
     }
@@ -44,16 +47,14 @@ const addPost = async (req, res) => {
         }
       });
     }
-
+    console.log(media)
     const newPost = new Post({
       author: req.user._id,
       caption,
       recipe,
       media,
       likes: [],
-      likeCount: 0,
       comments: [],
-      shares: 0,
       captionSlug,
       recipeSlug,
       authorSlug,
@@ -187,11 +188,11 @@ const likePost = async (req, res) => {
       return res.status(400).json({ message: "ID không hợp lệ" });
     }
 
-    const post = await Post.findById(id);
+    const post = await Post.findById(id).populate('author', 'avatar lastName firstName');
     if (!post) {
       return res.status(404).json({ message: "Post không tồn tại" });
     }
-
+    console.log(post)
     if (!post.likes) {
       post.likes = [];
     }
@@ -199,15 +200,12 @@ const likePost = async (req, res) => {
 
     if (isAlreadyLiked) {
       post.likes = post.likes.filter((like) => !like.equals(userId));
-      post.likeCount = Math.max(post.likeCount - 1, 0);
     } else {
       post.likes.push(userId);
-      post.likeCount += 1;
     }
     await post.save();
     res.status(200).json({
       message: isAlreadyLiked ? "Đã bỏ like" : "Đã like bài viết",
-      likeCount: post.likeCount,
       post,
     });
   } catch (error) {
@@ -293,7 +291,7 @@ const getPostById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "ID không hợp lệ" });
     }
-    const post = await Post.findById(id);
+    const post = await Post.findById(id).populate('author', 'avatar lastName firstName');
     if (!post) {
       return res.status(404).json({ message: "Post không được tìm thấy" });
     }
