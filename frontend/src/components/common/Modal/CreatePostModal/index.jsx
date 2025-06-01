@@ -3,7 +3,7 @@ import { X, Image, Video, Plus, Search, User, Settings, ChefHat } from 'lucide-r
 import { useAuth } from '@/context/AuthContext';
 import { useCloudinary } from '@/context/CloudinaryContext';
 import { createPost } from '@/services/postService';
-import { getAllRecipes, getMyRecipes, searchRecipes } from '@/services/recipeService';
+import { getAllRecipes,  searchRecipes } from '@/services/recipeService';
 import { toast } from 'react-toastify';
 import { addVideo } from '@/services/videoService';
 
