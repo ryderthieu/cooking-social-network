@@ -20,7 +20,7 @@ const getVideoById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "ID không hợp lệ" });
     }
-    const video = await Video.findById(id);
+    const video = await Video.findById(id).populate('author', 'avatar lastName firstName');
     if (!video) {
       return res.status(404).json({ message: "Video không tồn tại" });
     }
@@ -213,7 +213,7 @@ const likeVideo = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "ID không hợp lệ" });
     }
-    const video = await Video.findById(id);
+    const video = await Video.findById(id).populate('author', 'avatar firstName lastName');
     if (!video) {
       return res.status(404).json({ message: "Video không tồn tại" });
     }

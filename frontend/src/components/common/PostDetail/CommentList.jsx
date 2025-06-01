@@ -13,6 +13,9 @@ const CommentList = ({ post, reel, key }) => {
   const targetType = post ? 'post' : reel ? 'video' : '';
   const totalComments = post ? post.comments?.length : reel ? reel.comments?.length : 0;
 
+  useEffect(() => {
+    console.log('update comment')
+  }, [])
   const fetchComments = async (currentPage = 1) => {
     if (loading) return;
     

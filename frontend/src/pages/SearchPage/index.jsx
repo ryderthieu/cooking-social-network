@@ -388,7 +388,7 @@ const SearchPage = () => {
                                         <FaNewspaper size={20} />
                                         <span>Bài viết</span>
                                     </button>
-                                    {activeFilter === 'posts' && renderSidebarSubFilter()}
+                                    {/* {activeFilter === 'posts' && renderSidebarSubFilter()} */}
                                     <button
                                         onClick={() => handleActiveFilterChange('videos')}
                                         className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${activeFilter === 'videos'
@@ -399,7 +399,7 @@ const SearchPage = () => {
                                         <FaVideo size={20} />
                                         <span>Video</span>
                                     </button>
-                                    {activeFilter === 'videos' && renderSidebarSubFilter()}
+                                    {/* {activeFilter === 'videos' && renderSidebarSubFilter()} */}
                                     <button
                                         onClick={() => handleActiveFilterChange('recipes')}
                                         className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${activeFilter === 'recipes'
@@ -410,7 +410,7 @@ const SearchPage = () => {
                                         <FaBook size={20} />
                                         <span>Công thức</span>
                                     </button>
-                                    {activeFilter === 'recipes' && renderSidebarSubFilter()}
+                                    {/* {activeFilter === 'recipes' && renderSidebarSubFilter()} */}
                                     <button
                                         onClick={() => handleActiveFilterChange('users')}
                                         className={`w-full text-left px-4 py-3 rounded-lg transition-all duration-300 flex items-center space-x-3 ${activeFilter === 'users'
