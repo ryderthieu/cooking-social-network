@@ -8,14 +8,17 @@ const addPost = async (req, res) => {
   try {
     const { caption, recipe, videoUri, imgUri } = req.body;
 
-    if (!caption || !recipe) {
-      return res
-        .status(400)
-        .json({ message: "Vui lòng nhập đầy đủ thông tin" });
-    }
+    // if (!caption || !recipe) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Vui lòng nhập đầy đủ thông tin" });
+    // }
 
     const captionSlug = slugify(caption, { lower: true, locale: "vi" });
-    const recipeDoc = await Recipe.findById(recipe);
+    let recipeDoc
+    if(recipe) {
+      recipeDoc = await Recipe.findById(recipe);
+    }
     if (!recipeDoc) {
       return res.status(404).json({ message: "Công thức không tồn tại" });
     }
@@ -44,16 +47,14 @@ const addPost = async (req, res) => {
         }
       });
     }
-
+    console.log(media)
     const newPost = new Post({
       author: req.user._id,
       caption,
       recipe,
       media,
       likes: [],
-      likeCount: 0,
       comments: [],
-      shares: 0,
       captionSlug,
       recipeSlug,
       authorSlug,

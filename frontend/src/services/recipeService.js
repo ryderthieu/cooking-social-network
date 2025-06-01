@@ -38,6 +38,16 @@ const recipeService = {
 
   // Get similar recipes based on categories
   getSimilarRecipes: (id, limit = 6) => API.get(`${endpoint}/${id}/similar?limit=${limit}`),
+
+  // Save recipe (add to user's saved recipes)
+  saveRecipe: (id) => API.post(`${endpoint}/${id}/save`),
+
+  // Remove saved recipe
+  unsaveRecipe: (id) => API.delete(`${endpoint}/${id}/save`),
+
+  // Get user's saved recipes
+  getSavedRecipes: () => API.get(`${endpoint}/saved`),
+  
 };
 
 export const {
@@ -52,6 +62,9 @@ export const {
   getRecipesByAuthor,
   filterRecipes,
   getSimilarRecipes,
+  saveRecipe,
+  unsaveRecipe,
+  getSavedRecipes,
 } = recipeService;
 
 export default recipeService;

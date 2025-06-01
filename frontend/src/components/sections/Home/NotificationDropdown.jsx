@@ -104,13 +104,13 @@ export default function NotificationDropdown() {
         console.error("Error marking notification as read:", error);
       }
     }
-    if (
-      notification.type === "like" ||
-      notification.type === "comment" ||
-      notification.type === "share"
-    ) {
-      navigate(`/posts/${notification.postId}`);
-    } else if (notification.type === "follow") {
+    if (notification.type === 'like' || notification.type === 'comment' || notification.type === 'share') {
+      if (notification.postId) {
+        navigate(`/posts/${notification.postId}`);
+      } else if (notification.videoId) {
+        navigate(`/reels/${notification.videoId}`);
+      }
+    } else if (notification.type === 'follow') {
       navigate(`/profile/${notification.sender._id}`);
     }
     setOpen(false);

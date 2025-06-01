@@ -142,6 +142,7 @@ export default function Contact() {
           </p>
         </div>
 
+        
         {/* Main Content */}
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Contact Form */}

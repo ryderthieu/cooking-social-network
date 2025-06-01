@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PostCard } from '../../components/common/Post';
 import SharePopup from '../../components/common/SharePopup';
-import postsService, { getAllPost } from '@/services/postService';
+import postsService, { getAllPosts } from '@/services/postService';
 import { useSocket } from '@/context/SocketContext';
 
 const Posts = () => {
@@ -14,7 +14,7 @@ const Posts = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await getAllPost();
+        const response = await getAllPosts();
         console.log(response);
         setPosts(response.data);
       } catch (error) {

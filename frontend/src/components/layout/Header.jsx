@@ -333,7 +333,7 @@ const Header = () => {
             {isDropdownOpen && (
               <div className="absolute top-[91px] right-[100px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10 border border-gray-100 overflow-hidden">
                 <div className="p-2">
-                  <div className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
+                  <div onClick={() => navigate("/profile")} className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
                     Trang cá nhân
                   </div>
                   <div

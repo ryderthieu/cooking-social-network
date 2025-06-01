@@ -99,7 +99,11 @@ const NotificationPage = () => {
       }
     }
     if (notification.type === 'like' || notification.type === 'comment' || notification.type === 'share') {
-      navigate(`/posts/${notification.postId}`);
+      if (notification.postId) {
+        navigate(`/posts/${notification.postId}`);
+      } else if (notification.videoId) {
+        navigate(`/reels/${notification.videoId}`);
+      }
     } else if (notification.type === 'follow') {
       navigate(`/profile/${notification.sender._id}`);
     }
