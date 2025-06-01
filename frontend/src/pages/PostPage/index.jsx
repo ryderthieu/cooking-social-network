@@ -365,7 +365,7 @@ const PostPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F1E8] py-10 px-2 lg:px-8">
+    <div className="min-h-screen bg-slate-50  py-10 px-2 lg:px-8">
       <div className="max-w-7xl mx-auto flex gap-8 relative">
         <LeftSidebar
           activeTab={currentPath == "/explore/posts" ? "posts" : "reels"}

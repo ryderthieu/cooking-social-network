@@ -9,13 +9,15 @@ import { MdMessage } from "react-icons/md";
 import NotificationDropdown from "../sections/Home/NotificationDropdown";
 import MessageDropdown from "../sections/Home/MessageDropdown";
 import { useAuth } from "../../context/AuthContext";
+import { Bookmark } from "lucide-react";
+import { getRecipeCategories } from "../../services/recipeService";
+import { categoryService } from "../../services/categoryService";
 
 const Header = () => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = useState(0);
-  const [selectedSearchIndex, setSelectedSearchIndex] = useState(0);
   const [selectedSupportIndex, setSelectedSupportIndex] = useState(0);
-  const selectedCategory = categories[selectedCategoryIndex];
-  const selectedSearch = search[selectedSearchIndex];
+  const [dynamicCategories, setDynamicCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const selectedSupport = supports[selectedSupportIndex];
   const [isExploreOpen, setIsExploreOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -29,6 +31,38 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+
+  // Fetch categories from backend
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        // Use new category service
+        const response = await categoryService.getFormattedCategories();
+        if (response.data && response.data.success) {
+          setDynamicCategories(response.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        // Fallback to original service if new one fails
+        try {
+          const fallbackResponse = await getRecipeCategories();
+          if (fallbackResponse.data && fallbackResponse.data.success) {
+            setDynamicCategories(fallbackResponse.data.data);
+          }
+        } catch (fallbackError) {
+          console.error("Fallback also failed:", fallbackError);
+          // Use static categories as last resort
+          setDynamicCategories(categories);
+        }
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       const target = event.target;
@@ -75,9 +109,9 @@ const Header = () => {
   }, [location]);
 
   return (
-    <div className="flex justify-between px-[110px] py-[20px] fixed bg-white z-50 right-0 left-0">
+    <div className="flex justify-between items-center px-[110px] py-[20px] fixed bg-white z-50 right-0 left-0">
       <a href="/">
-        <img src={logo} alt="Oshisha" />
+        <img src={logo} alt="Oshisha" className="h-9 w-auto" />
       </a>
       <div className="flex items-center gap-10" ref={navRef}>
         <Link
@@ -87,11 +121,13 @@ const Header = () => {
             setIsSearchOpen(false);
             setIsSupportOpen(false);
           }}
-          className={`flex cursor-pointer relative items-center ${
+          className={`flex cursor-pointer relative items-center transition-all duration-300 ${
             active == 0 ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[18px]">Trang chủ</p>
+          <p className="font-semibold text-[17px] transform scale-y-[1.05] relative">
+            Trang chủ
+          </p>
         </Link>
         {/* KHÁM PHÁ CÔNG THỨC */}
         <div
@@ -104,51 +140,93 @@ const Header = () => {
             active == 1 ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[18px]">Công thức</p>
+          <p className="font-semibold text-[17px] transform scale-y-[1.05]">
+            Công thức
+          </p>
           <FaAngleDown className="my-auto ml-2" />
           {isExploreOpen && (
             <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4 ml-[110px]">
-                <ul className="space-y-2 text-sm text-gray-700 font-medium">
-                  {categories.map((category, index) => (
-                    <li key={category.name}>
-                      <div
-                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
-                          index === selectedCategoryIndex
-                            ? "text-[#FF6363]"
-                            : "hover:text-[#FF6363]"
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCategoryIndex(index);
-                        }}
-                      >
-                        {category.name}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                {
+                  <ul className="scale-y-105 text-gray-700 font-medium">
+                    {dynamicCategories.map((category, index) => (
+                      <li key={category.name}>
+                        <div
+                          className={`cursor-pointer text-[17px] pb-4 transition-all duration-200 font-medium ${
+                            index === selectedCategoryIndex
+                              ? "text-[#FF6363]"
+                              : "hover:text-[#FF6363]"
+                          }`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCategoryIndex(index);
+                          }}
+                        >
+                          {category.name}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                }
+                <a 
+                  href="/recipes"
+                  onClick={() => setIsExploreOpen(false)}
+                  className="mt-4 inline-block"
+                >
+                  <div className="cursor-pointer text-[17px] font-medium text-sky-600 hover:text-sky-700 transition-all duration-200 relative group">
+                    Xem tất cả
+                    <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-sky-600 transition-all duration-300 group-hover:w-full"></span>
+                  </div>
+                </a>
               </div>
 
               <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-gradient-to-br from-[#fef2f2] to-[#fff7ed]">
-                {selectedCategory.items.map((item) => (
-                  <Link to={item.path} key={item.name} className="text-center">
-                    <div className="h-[280px] rounded-2xl mb-4 overflow-hidden bg-pink-100 flex items-center justify-center">
-                      {item.src ? (
-                        <img
-                          src={item.src}
-                          alt={item.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-gray-400">No image</span>
-                      )}
-                    </div>
-                    <p className="text-[18px] font-medium text-gray-700 hover:text-[#FF6363] transition-all duration-200">
-                      {item.name}
-                    </p>
-                  </Link>
-                ))}
+                {!isLoadingCategories &&
+                  dynamicCategories[selectedCategoryIndex] &&
+                  dynamicCategories[selectedCategoryIndex].items.map((item) => (
+                    <Link
+                      to={item.path}
+                      key={item.name}
+                      className="text-center group"
+                    >
+                      <div
+                        className="h-[280px] rounded-2xl mb-4 overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
+                        style={{
+                          background:
+                            dynamicCategories[selectedCategoryIndex]
+                              .background || "bg-pink-100",
+                        }}
+                      >
+                        {item.image ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="text-gray-500 text-center p-4">
+                            <div className="text-6xl mb-4">🍴</div>
+                            <span className="text-[17px] font-medium">
+                              {item.name}
+                            </span>
+                            {item.count && (
+                              <div className="text-sm text-gray-400 mt-2">
+                                {item.count} công thức
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[17px] font-medium text-gray-700 hover:text-[#FF6363] transition-all duration-200">
+                        {item.name}
+                        {item.count && (
+                          <span className="text-sm text-gray-400 ml-2">
+                            ({item.count})
+                          </span>
+                        )}
+                      </p>
+                    </Link>
+                  ))}
               </div>
             </div>
           )}
@@ -165,7 +243,9 @@ const Header = () => {
             active == 2 ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[18px]">Khám phá</p>
+          <p className="font-semibold text-[17px] transform scale-y-[1.05]">
+            Khám phá
+          </p>
         </Link>
 
         {/* VỀ OSHISHA */}
@@ -180,7 +260,9 @@ const Header = () => {
             active == 3 ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[18px]">Về OSHISHA</p>
+          <p className="font-semibold text-[17px] transform scale-y-[1.05]">
+            Về OSHISHA
+          </p>
         </Link>
 
         {/* HỖ TRỢ */}
@@ -194,16 +276,18 @@ const Header = () => {
             active == 4 ? "text-[#FF6363]" : "text-[#211E2E]"
           }`}
         >
-          <p className="font-semibold text-[18px]">Hỗ trợ</p>
+          <p className="font-semibold text-[17px] transform scale-y-[1.05]">
+            Hỗ trợ
+          </p>
           <FaAngleDown className="my-auto ml-2" />
           {isSupportOpen && (
             <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4 ml-[110px]">
-                <ul className="space-y-2 text-sm text-gray-700 font-medium">
+                <ul className=" text-gray-700 font-medium">
                   {supports.map((item, index) => (
                     <li key={item.name}>
                       <div
-                        className={`cursor-pointer text-[18px] pb-4 transition-all duration-200 font-medium ${
+                        className={`cursor-pointer scale-y-105 pb-4 transition-all duration-200 font-medium ${
                           index === selectedSupportIndex
                             ? "text-[#FF6363]"
                             : "hover:text-[#FF6363]"
@@ -234,7 +318,7 @@ const Header = () => {
                         <span className="text-gray-400">No image</span>
                       )}
                     </div>
-                    <p className="text-[18px] font-medium text-gray-700 hover:text-[#FF6363] transition-all duration-200">
+                    <p className="text-[17px] font-medium text-gray-700 hover:text-[#FF6363] transition-all duration-200">
                       {item.name}
                     </p>
                   </Link>
@@ -269,7 +353,8 @@ const Header = () => {
                     className="flex-1 bg-transparent outline-none text-sm placeholder-gray-400"
                     autoFocus
                     onKeyDown={(event) => {
-                      if (event.key === "Enter") navigate(`/search?q=${searchQuery}`);
+                      if (event.key === "Enter")
+                        navigate(`/search?q=${searchQuery}`);
                     }}
                   />
                   {searchQuery && (
@@ -292,7 +377,7 @@ const Header = () => {
                   className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
                   onClick={() => setIsSearchOpen(true)}
                 >
-                  <IoSearchOutline className="w-6 h-6 text-[#04043F]" />
+                  <IoSearchOutline className="w-6 h-6 text-slate-700" />
                 </div>
               )}
             </div>
@@ -307,6 +392,12 @@ const Header = () => {
               <MessageDropdown />
             </div>
 
+            <a href="/recipes/saved">
+              <div className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer border border-gray-600 hover:border-gray-700">
+                <Bookmark className="w-6 h-6 text-gray-600" strokeWidth={1.5} />
+              </div>
+            </a>
+
             {/* User Avatar */}
             <div
               className="relative cursor-pointer"
@@ -318,7 +409,7 @@ const Header = () => {
                     user.avatar ||
                     "https://randomuser.me/api/portraits/men/32.jpg"
                   }
-                  className="w-12 h-12 rounded-full object-cover border-2 border-[#FFB800]"
+                  className="w-10 h-10 rounded-full object-cover border-2 border-[#FFB800]"
                 />
               </div>
               <div className="absolute -bottom-0.5 -right-0.5 w-[20px] h-[20px] bg-[#E2E5E9] rounded-full flex items-center justify-center text-[12px]">
@@ -333,7 +424,10 @@ const Header = () => {
             {isDropdownOpen && (
               <div className="absolute top-[91px] right-[100px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10 border border-gray-100 overflow-hidden">
                 <div className="p-2">
-                  <div onClick={() => navigate("/profile")} className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
+                  <div
+                    onClick={() => navigate("/profile")}
+                    className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200"
+                  >
                     Trang cá nhân
                   </div>
                   <div
@@ -362,7 +456,7 @@ const Header = () => {
           <div>
             <button
               onClick={() => navigate("/login")}
-              className="font-medium text-[18px] text-white bg-[#04043F] hover:bg-[#03032d] py-2 px-6 rounded-[30px] ml-[80px] transition-colors duration-200"
+              className="font-medium text-[17px] text-white bg-[#04043F] hover:bg-[#03032d] py-2 px-6 rounded-[30px] ml-[80px] transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105 focus:ring-4 focus:ring-[#04043F]/50"
             >
               Đăng nhập
             </button>

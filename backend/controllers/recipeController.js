@@ -8,7 +8,8 @@ const getAllRecipes = async (req, res) => {
   try {
     const recipes = await Recipe.find()
       .populate("author", "firstName lastName  avatar")
-      .populate("ingredients.ingredient", "name unit");
+      .populate("ingredients.ingredient", "name unit")
+      .populate("categories", "name type slug image");
     res
       .status(200)
       .json({ success: true, count: recipes.length, data: recipes });
@@ -32,7 +33,8 @@ const getRecipeById = async (req, res) => {
   try {
     const recipe = await Recipe.findById(id)
       .populate("author", "firstName lastName avatar")
-      .populate("ingredients.ingredient", "name unit");
+      .populate("ingredients.ingredient", "name unit")
+      .populate("categories", "name type slug image");
     if (!recipe) {
       return res.status(404).json({
         success: false,
@@ -62,6 +64,9 @@ const searchRecipe = async (req, res) => {
       occasions,
       timeBased,
       difficultyLevel,
+      dietaryPreferences,
+      mainIngredients,
+      cookingMethod,
       ingredient,
       utensils,
       page = 1,
@@ -80,26 +85,80 @@ const searchRecipe = async (req, res) => {
       filter.slug = { $regex: slug, $options: "i" };
     }
 
-    // Tìm kiếm theo categories (mealType, cuisine, occasions,...)
+    // Import Category model for category searches
+    const Category = require("../models/category");
+
+    // Helper function to find category IDs by name and type
+    const findCategoryIds = async (categoryName, categoryType) => {
+      const categories = await Category.find({
+        name: categoryName,
+        type: categoryType
+      }).select('_id');
+      return categories.map(cat => cat._id);
+    };
+
+    // Tìm kiếm theo categories - now using ObjectId references
+    const categoryFilters = [];
 
     if (mealType) {
-      filter["categories.mealType"] = mealType;
+      const categoryIds = await findCategoryIds(mealType, "mealType");
+      if (categoryIds.length > 0) {
+        categoryFilters.push({ categories: { $in: categoryIds } });
+      }
     }
 
     if (cuisine) {
-      filter["categories.cuisine"] = cuisine;
+      const categoryIds = await findCategoryIds(cuisine, "cuisine");
+      if (categoryIds.length > 0) {
+        categoryFilters.push({ categories: { $in: categoryIds } });
+      }
     }
 
     if (occasions) {
-      filter["categories.occasions"] = occasions;
+      const categoryIds = await findCategoryIds(occasions, "occasions");
+      if (categoryIds.length > 0) {
+        categoryFilters.push({ categories: { $in: categoryIds } });
+      }
     }
 
     if (timeBased) {
-      filter["categories.timeBased"] = timeBased;
+      const categoryIds = await findCategoryIds(timeBased, "timeBased");
+      if (categoryIds.length > 0) {
+        categoryFilters.push({ categories: { $in: categoryIds } });
+      }
     }
 
     if (difficultyLevel) {
-      filter["categories.difficultyLevel"] = difficultyLevel;
+      const categoryIds = await findCategoryIds(difficultyLevel, "difficultyLevel");
+      if (categoryIds.length > 0) {
+        categoryFilters.push({ categories: { $in: categoryIds } });
+      }
+    }
+
+    if (dietaryPreferences) {
+      const categoryIds = await findCategoryIds(dietaryPreferences, "dietaryPreferences");
+      if (categoryIds.length > 0) {
+        categoryFilters.push({ categories: { $in: categoryIds } });
+      }
+    }
+
+    if (mainIngredients) {
+      const categoryIds = await findCategoryIds(mainIngredients, "mainIngredients");
+      if (categoryIds.length > 0) {
+        categoryFilters.push({ categories: { $in: categoryIds } });
+      }
+    }
+
+    if (cookingMethod) {
+      const categoryIds = await findCategoryIds(cookingMethod, "cookingMethod");
+      if (categoryIds.length > 0) {
+        categoryFilters.push({ categories: { $in: categoryIds } });
+      }
+    }
+
+    // Apply category filters using AND logic
+    if (categoryFilters.length > 0) {
+      filter.$and = categoryFilters;
     }
 
     // Tìm kiếm theo dụng cụ nấu
@@ -131,6 +190,7 @@ const searchRecipe = async (req, res) => {
     const recipes = await Recipe.find(filter)
       .populate("author", "firstName lastName avatar")
       .populate("ingredients.ingredient", "name unit")
+      .populate("categories", "name type slug image")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
@@ -397,7 +457,7 @@ const getSimilarRecipes = async (req, res) => {
     }
 
     // Lấy recipe hiện tại để biết categories
-    const currentRecipe = await Recipe.findById(id);
+    const currentRecipe = await Recipe.findById(id).populate('categories', 'type');
 
     if (!currentRecipe) {
       return res.status(404).json({
@@ -411,72 +471,18 @@ const getSimilarRecipes = async (req, res) => {
       _id: { $ne: id }, // Loại bỏ recipe hiện tại
     };
 
-    // Tạo điều kiện OR để tìm recipes có ít nhất 1 category giống
-    const orConditions = [];
-
-    if (currentRecipe.categories.mealType?.length > 0) {
-      orConditions.push({
-        "categories.mealType": { $in: currentRecipe.categories.mealType },
-      });
-    }
-
-    if (currentRecipe.categories.cuisine?.length > 0) {
-      orConditions.push({
-        "categories.cuisine": { $in: currentRecipe.categories.cuisine },
-      });
-    }
-
-    if (currentRecipe.categories.occasions?.length > 0) {
-      orConditions.push({
-        "categories.occasions": { $in: currentRecipe.categories.occasions },
-      });
-    }
-
-    if (currentRecipe.categories.dietaryPreferences?.length > 0) {
-      orConditions.push({
-        "categories.dietaryPreferences": {
-          $in: currentRecipe.categories.dietaryPreferences,
-        },
-      });
-    }
-
-    if (currentRecipe.categories.mainIngredients?.length > 0) {
-      orConditions.push({
-        "categories.mainIngredients": {
-          $in: currentRecipe.categories.mainIngredients,
-        },
-      });
-    }
-
-    if (currentRecipe.categories.cookingMethod?.length > 0) {
-      orConditions.push({
-        "categories.cookingMethod": {
-          $in: currentRecipe.categories.cookingMethod,
-        },
-      });
-    }
-
-    if (currentRecipe.categories.timeBased?.length > 0) {
-      orConditions.push({
-        "categories.timeBased": { $in: currentRecipe.categories.timeBased },
-      });
-    }
-
-    if (currentRecipe.categories.difficultyLevel) {
-      orConditions.push({
-        "categories.difficultyLevel": currentRecipe.categories.difficultyLevel,
-      });
-    }
-
-    // Nếu có điều kiện tương tự, thêm vào query
-    if (orConditions.length > 0) {
-      similarityQuery.$or = orConditions;
+    // If current recipe has categories, find similar ones
+    if (currentRecipe.categories && currentRecipe.categories.length > 0) {
+      similarityQuery.categories = {
+        $in: currentRecipe.categories.map(cat => cat._id)
+      };
     }
 
     // Tìm recipes tương tự
     const similarRecipes = await Recipe.find(similarityQuery)
       .populate("author", "firstName lastName avatar")
       .populate("ingredients.ingredient", "name unit")
+      .populate("categories", "name type slug image")
       .sort({ averageRating: -1, createdAt: -1 }) // Ưu tiên rating cao và mới
       .limit(parseInt(limit));
 
@@ -491,6 +497,7 @@ const getSimilarRecipes = async (req, res) => {
       })
         .populate("author", "firstName lastName avatar")
         .populate("ingredients.ingredient", "name unit")
+        .populate("categories", "name type slug image")
         .sort({ createdAt: -1 })
         .limit(remainingLimit);
 

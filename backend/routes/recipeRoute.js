@@ -8,7 +8,7 @@ const {
     editRecipe, 
     deleteRecipe, 
     getTopRecipes,
-    getSimilarRecipes 
+    getSimilarRecipes
 } = require('../controllers/recipeController');
 
 const router = express.Router();

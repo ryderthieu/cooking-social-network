@@ -32,6 +32,7 @@ const recipeService = {
 
   // Get recipes by author
   getRecipesByAuthor: (authorId) => API.get(`${endpoint}/author/${authorId}`),
+  
   // Filter recipes
   filterRecipes: (filters) =>
     API.get(`${endpoint}/filter`, { params: { ...filters } }),
@@ -48,6 +49,8 @@ const recipeService = {
   // Get user's saved recipes
   getSavedRecipes: () => API.get(`${endpoint}/saved`),
   
+  // Get recipe categories (using new category service)
+  getRecipeCategories: () => API.get(`/categories/formatted`),
 };
 
 export const {
@@ -65,6 +68,7 @@ export const {
   saveRecipe,
   unsaveRecipe,
   getSavedRecipes,
+  getRecipeCategories,
 } = recipeService;
 
 export default recipeService;

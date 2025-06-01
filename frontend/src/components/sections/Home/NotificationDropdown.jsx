@@ -195,9 +195,9 @@ export default function NotificationDropdown() {
     <div ref={dropdownRef} className="relative inline-block text-left">
       <button
         onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-full hover:bg-gray-100 "
+        className="relative p-2 rounded-full hover:bg-gray-100 border border-gray-600 hover:border-gray-700 transition-colors duration-200"
       >
-        <Bell className="w-6 h-6 text-gray-700" />
+        <Bell className="w-6 h-6 text-gray-600" strokeWidth={1.5} />
         {unreadCount > 0 && (
           <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">
             {unreadCount}
