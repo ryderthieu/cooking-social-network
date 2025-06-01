@@ -27,7 +27,7 @@ const ReelCommentPanel = ({ reel, open, onClose, onAddComment, refreshKey }) => 
         </button>
         <div className="flex items-center gap-4">
           <Link to={`/profile/${reel.user._id}`} className="relative group">
-            {reel.user.avatar ? (
+            {reel.user?.avatar ? (
               <img 
                 src={reel.user.avatar} 
                 alt={reel.user.name}

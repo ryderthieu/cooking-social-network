@@ -11,6 +11,7 @@ export default function Contact() {
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [subscribeEmail, setSubscribeEmail] = useState("");
   const [formErrors, setFormErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState(null);
 
   // Form validation
   const validateForm = (type) => {
@@ -53,9 +54,10 @@ export default function Contact() {
           Accept: "application/json",
         },
         body: JSON.stringify(formData),
-      }).then((res) => res.json());
-      console.log(res);
-      if (res.success) {
+      });
+      const data = await res.json();
+      console.log("Kết quả trả về:", data);
+      if (data.success) {
         toast.success(
           "Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể."
         );
@@ -64,7 +66,7 @@ export default function Contact() {
         setMessage("");
         setFormErrors({});
       } else {
-        toast.error(res.message || "Gửi thất bại. Vui lòng thử lại!");
+        toast.error("Gửi thất bại. Vui lòng thử lại!");
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
@@ -96,16 +98,17 @@ export default function Contact() {
           Accept: "application/json",
         },
         body: JSON.stringify(formData),
-      }).then((res) => res.json());
-
-      if (res.success) {
+      });
+      const data = await res.json();
+      console.log("Kết quả trả về:", data);
+      if (data.success) {
         toast.success(
           "Cảm ơn bạn đã đăng ký! Chúng tôi sẽ gửi những công thức ngon nhất."
         );
         setSubscribeEmail("");
         setFormErrors({});
       } else {
-        toast.error(res.message || "Đăng ký thất bại. Vui lòng thử lại!");
+        toast.error("Đăng ký thất bại. Vui lòng thử lại!");
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
@@ -123,7 +126,7 @@ export default function Contact() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-orange-100/10 to-amber-100/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative z-10 mx-auto px-[100px] py-10">
+      <div className="relative z-10 mx-auto px-[120px] py-10">
         {/* Header */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-orange-200/50 rounded-full px-4 py-2 mb-6">
@@ -141,8 +144,27 @@ export default function Contact() {
             tuyệt vời
           </p>
         </div>
-
-        
+        {/* Success Message
+        {successMessage && (
+          <div className="fixed bottom-6 right-6 z-50 max-w-sm ">
+            <div className="bg-white rounded-lg shadow-lg border border-green-200 p-4 flex items-center gap-3">
+              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                <Check className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-800">
+                  {successMessage.message}
+                </p>
+              </div>
+              <button
+                onClick={() => setSuccessMessage(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        )} */}
         {/* Main Content */}
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Contact Form */}

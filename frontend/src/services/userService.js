@@ -1,3 +1,4 @@
+import { useSocket } from "@/context/SocketContext";
 import API from "./api";
 
 export const login = ({email, password}) => {

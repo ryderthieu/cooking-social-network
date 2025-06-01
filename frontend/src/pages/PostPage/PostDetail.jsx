@@ -39,7 +39,7 @@ const PostDetail = () => {
         setLoading(false);
       }
     };
-    
+
     if (id) {
       fetchPost();
     }
@@ -70,7 +70,7 @@ const PostDetail = () => {
     e?.stopPropagation();
     setCurrentImageIndex(prev => (prev === 0 ? imageMedia.length - 1 : prev - 1));
   };
-  
+
   const handleNextImage = (e) => {
     e?.stopPropagation();
     setCurrentImageIndex(prev => (prev === imageMedia.length - 1 ? 0 : prev + 1));
@@ -83,7 +83,7 @@ const PostDetail = () => {
       setPost(updatedPost.data);
       const isLiking = !isLiked;
       setIsLiked(!isLiked);
-      
+
       if (isLiking && post.author._id !== user._id) {
         sendNotification({
           receiverId: post.author._id,
@@ -95,10 +95,10 @@ const PostDetail = () => {
       console.error('Error liking post:', error);
     }
   };
-  
+
   const handleShare = () => {
     setSharePopup({ open: true, postId: post._id, postTitle: post.content });
-    
+
     if (post.author._id !== user._id) {
       sendNotification({
         receiverId: post.author._id,
@@ -111,11 +111,11 @@ const PostDetail = () => {
   const handleAddComment = async (content) => {
     try {
       await createComment({ targetId: post._id, targetType: 'post', text: content });
-      
+
       // Refresh post data to get updated comment count
       const updatedPost = await postsService.fetchById(id);
       setPost(updatedPost.data);
-      
+
       // Trigger comment list refresh
       setCommentRefresh(prev => prev + 1);
 
@@ -127,7 +127,7 @@ const PostDetail = () => {
           message: `${user.firstName} đã bình luận: "${content.substring(0, 50)}${content.length > 50 ? '...' : ''}"`,
         });
       }
-      
+
     } catch (error) {
       console.error('Error adding comment:', error);
     }
@@ -136,10 +136,10 @@ const PostDetail = () => {
   return (
     <div className="h-[100vh] bg-gradient-to-br from-[#FFF4D6] via-white to-[#FFF4D6] py-6 px-2 lg:px-8 flex justify-center">
       <div className="bg-white rounded-3xl shadow-2xl w-11/12 max-w-7xl flex overflow-hidden border border-[#FFB800]/20 relative backdrop-blur-sm">
-        
+
         {/* Enhanced Close Button */}
-        <button 
-          onClick={() => navigate(-1)} 
+        <button
+          onClick={() => navigate(-1)}
           className='absolute top-4 left-4 z-20 p-3 bg-black/30 backdrop-blur-md hover:bg-black/50 text-white rounded-full transition-all duration-300 hover:scale-110 hover:rotate-90'
         >
           <FaTimes size={18} />
@@ -149,14 +149,14 @@ const PostDetail = () => {
         <button className='absolute top-4 right-4 z-20 p-3 bg-black/30 backdrop-blur-md hover:bg-black/50 text-white rounded-full transition-all duration-300 hover:scale-110'>
           <FaEllipsisH size={18} />
         </button>
-        
+
         {/* Left Column - Image/Video (70%) */}
         <div className="w-[70%] relative bg-gradient-to-br from-gray-900 via-gray-800 to-black min-h-[80vh] flex items-center justify-center overflow-hidden">
           {imageMedia.length > 0 ? (
             <div className="relative w-full h-full">
               {/* Gradient Overlay cho ảnh */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20 z-10 pointer-events-none" />
-              
+
               <img
                 src={imageMedia[currentImageIndex].url}
                 alt={`post-${currentImageIndex}`}
@@ -164,10 +164,10 @@ const PostDetail = () => {
                 onClick={() => setShowFullImage(true)}
                 style={{ imageRendering: 'crisp-edges' }}
               />
-              
+
               {/* Thêm hiệu ứng vignette */}
               <div className="absolute inset-0 bg-radial-gradient pointer-events-none opacity-40" />
-              
+
               {hasMultipleImages && (
                 <>
                   <button
@@ -182,18 +182,17 @@ const PostDetail = () => {
                   >
                     <FaChevronRight className="group-hover:translate-x-0.5 transition-transform" />
                   </button>
-                  
+
                   {/* Cải thiện Image Indicators */}
                   <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 bg-black/30 backdrop-blur-md rounded-full px-5 py-3 z-20 border border-white/10">
                     {imageMedia.map((_, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
-                        className={`w-2.5 h-2.5 rounded-full transition-all duration-300 transform ${
-                          index === currentImageIndex 
-                            ? 'bg-white scale-125' 
+                        className={`w-2.5 h-2.5 rounded-full transition-all duration-300 transform ${index === currentImageIndex
+                            ? 'bg-white scale-125'
                             : 'bg-white/40 hover:bg-white/60'
-                        }`}
+                          }`}
                       />
                     ))}
                   </div>
@@ -216,10 +215,10 @@ const PostDetail = () => {
             </div>
           )}
         </div>
-        
+
         {/* Right Column - Info and Comments (30%) */}
         <div className="w-[30%] flex flex-col bg-gradient-to-b from-white via-[#FFF4D6]/10 to-[#FFF4D6]/30">
-          
+
           {/* Enhanced Header with User Info */}
           <div className="p-6 border-b border-[#FFB800]/20 bg-gradient-to-r from-white to-[#FFF4D6]/30">
             <div className="flex items-center gap-4 mb-4">
@@ -243,39 +242,44 @@ const PostDetail = () => {
                 </>
               )}
             </div>
-            
+
             {/* Enhanced Post Content */}
-            <div className="text-gray-800 leading-relaxed mb-6 text-base">
+            {post.recipe &&
+              <div className="mb-1 text-base font-bold text-[#FFB800]">
+                <Link to={`/recipes/${post.recipe._id}`}>
+                  @{post.recipe.name}
+                </Link>
+              </div>
+            }
+            <div className="text-gray-800 leading-relaxed mb-6 text-base text-pretty max-h-[130px] overflow-scroll scrollbar-none">
               {post.caption}
             </div>
-            
+
             {/* Enhanced Interaction Buttons */}
             <div className="flex items-center justify-around bg-gradient-to-r from-gray-50 to-[#FFF4D6]/40 rounded-2xl p-3 border border-[#FFB800]/10">
               <button
                 onClick={handleLike}
-                className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-300 group ${
-                  isLiked 
-                    ? 'bg-[#FFB800]/20 text-[#FFB800] shadow-md' 
+                className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-300 group ${isLiked
+                    ? 'bg-[#FFB800]/20 text-[#FFB800] shadow-md'
                     : 'text-gray-600 hover:text-[#FFB800] hover:bg-[#FFF4D6]/50'
-                }`}
+                  }`}
               >
-                <div className={`p-2 rounded-full transition-all duration-300 ${
-                  isLiked 
-                    ? 'bg-[#FFB800]/30 scale-110' 
+                <div className={`p-2 rounded-full transition-all duration-300 ${isLiked
+                    ? 'bg-[#FFB800]/30 scale-110'
                     : 'bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110'
-                }`}>
+                  }`}>
                   <FaHeart className={`w-4 h-4 ${isLiked ? 'text-[#FFB800]' : ''}`} />
                 </div>
                 <span className="font-semibold text-sm">{post.likes?.length || 0}</span>
               </button>
-              
+
               <button className="flex items-center gap-3 px-4 py-2 rounded-xl text-gray-600 hover:text-[#FFB800] transition-all duration-300 group hover:bg-[#FFF4D6]/50">
                 <div className="p-2 rounded-full bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110 transition-all duration-300">
                   <FaComment className="w-4 h-4" />
                 </div>
                 <span className="font-semibold text-sm">{post.comments?.length || 0}</span>
               </button>
-              
+
               <button
                 onClick={handleShare}
                 className="flex items-center gap-3 px-4 py-2 rounded-xl text-gray-600 hover:text-[#FFB800] transition-all duration-300 group hover:bg-[#FFF4D6]/50"
@@ -291,12 +295,12 @@ const PostDetail = () => {
               </button>
             </div>
           </div>
-          
+
           {/* Enhanced Comments List */}
           <div className="flex-1 overflow-y-auto">
             <CommentList post={post} key={commentRefresh} />
           </div>
-          
+
           {/* Enhanced Comment Form */}
           <div className="border-t border-[#FFB800]/20 bg-gradient-to-r from-[#FFF4D6]/20 to-white">
             <CommentForm onSubmit={handleAddComment} />
@@ -308,7 +312,7 @@ const PostDetail = () => {
       {showFullImage && (
         <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-lg flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/50 pointer-events-none" />
-          
+
           <button
             onClick={() => setShowFullImage(false)}
             className="absolute top-6 right-6 p-3 bg-black/40 backdrop-blur-md hover:bg-black/60 text-white/90 rounded-full transition-all duration-300 hover:scale-110 border border-white/10 z-20 group"
@@ -323,7 +327,7 @@ const PostDetail = () => {
               className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl transition-transform duration-700"
               style={{ imageRendering: 'crisp-edges' }}
             />
-            
+
             {hasMultipleImages && (
               <>
                 <button
@@ -348,11 +352,10 @@ const PostDetail = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
-                    index === currentImageIndex 
-                      ? 'bg-white scale-125' 
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentImageIndex
+                      ? 'bg-white scale-125'
                       : 'bg-white/40 hover:bg-white/60'
-                  }`}
+                    }`}
                 />
               ))}
             </div>

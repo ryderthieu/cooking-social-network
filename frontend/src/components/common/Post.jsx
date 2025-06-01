@@ -9,8 +9,6 @@ import {
 } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { formatDistanceToNow } from 'date-fns';
-import { vi } from 'date-fns/locale';
 import { useAuth } from "@/context/AuthContext";
 
 export const formatDate = (dateString) => {
@@ -29,14 +27,14 @@ export const formatDate = (dateString) => {
             const diffMins = Math.floor(diffMs / (1000 * 60));
             const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 
-            if (diffMins < 1) return 'Vừa xong';
+            if (diffMins < 1) return "Vừa xong";
             if (diffHours < 1) return `${diffMins} phút trước`;
             return `${diffHours} giờ trước`;
         }
 
         // Nếu là ngày hôm qua
         if (date >= yesterday) {
-            return 'Hôm qua';
+            return "Hôm qua";
         }
 
         // Tính số ngày chênh lệch
@@ -49,27 +47,43 @@ export const formatDate = (dateString) => {
         }
 
         // Còn lại hiển thị ngày tháng năm
-        return new Intl.DateTimeFormat('vi-VN', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+        return new Intl.DateTimeFormat("vi-VN", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
         }).format(date);
     } catch (error) {
         return dateString;
     }
 };
 
-export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete }) => {
-    const { user } = useAuth()
+export const PostCard = ({
+    post,
+    onLike,
+    onComment,
+    onShare,
+    onEdit,
+    onDelete,
+    onBookmark,
+}) => {
+    const { user } = useAuth();
     const [showMenu, setShowMenu] = useState(false);
     const [isLiked, setIsLiked] = useState(() =>
-        post?.likes?.some(id => id.toString() === user?._id)
+        post?.likes?.some((id) => id.toString() === user?._id)
     );
 
+    const [isBookmarked, setIsBookmarked] = useState(() =>
+        post?.bookmarks?.some((id) => id.toString() === user?._id)
+    );
 
     const handleLike = () => {
         setIsLiked(!isLiked);
         onLike?.();
+    };
+
+    const handleBookmark = () => {
+        setIsBookmarked(!isBookmarked);
+        onBookmark?.();
     };
 
     const getGridClass = (length) => {
@@ -89,10 +103,10 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
 
     if (!post || !post.author) return null;
 
-    const imageMedia = post.media?.filter(m => m.type === "image") || [];
+    const imageMedia = post.media?.filter((m) => m.type === "image") || [];
 
     return (
-        <div className="bg-white rounded-3xl shadow-xl border border-[#FFB800]/10 p-6 mb-8 transition-all duration-500 hover:shadow-2xl hover:border-[#FFB800]/30 group backdrop-blur-sm">
+        <div className="bg-white rounded-3xl shadow-xl p-6 mb-8 transition-all duration-500 hover:shadow-2xl hover:border-[#FFB800]/30 group backdrop-blur-sm">
             {/* Header với Avatar và Menu */}
             <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-4">
@@ -105,9 +119,15 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
                     </Link>
 
                     <div>
-                        <Link to={`/profile/${post.author._id}`} className="font-bold text-gray-800 text-base hover:text-[#FFB800] transition-colors cursor-pointer">
-                            {post.author.lastName} {post.author.firstName}
-                        </Link>
+                        <div className="flex flex-row">
+                            <Link
+                                to={`/profile/${post.author._id}`}
+                                className="font-bold text-gray-800 text-base hover:text-[#FFB800] transition-colors cursor-pointer"
+                            >
+                                {post.author.lastName} {post.author.firstName}
+                            </Link>
+                        </div>
+
                         <div className="text-sm text-gray-500 flex items-center gap-2">
                             <span>{formatDate(post.createdAt)}</span>
                         </div>
@@ -159,7 +179,14 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
             </div>
 
             {/* Nội dung bài viết */}
-            <div className="text-gray-800 mb-6 text-base leading-relaxed">
+            {post.recipe &&
+                <div className="mb-1 text-base font-bold text-[#FFB800]">
+                    <Link to={`/recipes/${post.recipe._id}`}>
+                        @{post.recipe.name}
+                    </Link>
+                </div>
+            }
+            <div className="text-gray-800 mb-6 text-base leading-relaxed text-pretty">
                 {post.caption}
             </div>
 
@@ -167,16 +194,22 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
             {imageMedia.length > 0 && (
                 <div className="mb-6">
                     <div
-                        className={`grid ${getGridClass(imageMedia.length)} gap-2 rounded-2xl overflow-hidden max-h-[600px]`}
-                        style={{ gridAutoRows: imageMedia.length === 1 ? '1fr' : '200px' }}
+                        className={`grid ${getGridClass(
+                            imageMedia.length
+                        )} gap-2 rounded-2xl overflow-hidden max-h-[600px]`}
+                        style={{ gridAutoRows: imageMedia.length === 1 ? "1fr" : "200px" }}
                     >
                         {imageMedia.slice(0, 4).map((media, index) => (
                             <Link
                                 to={`/posts/${post._id}`}
                                 key={media._id}
                                 className={`relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black cursor-pointer group
-                                ${index === 0 && imageMedia.length === 3 ? 'row-span-2' : ''}
-                                ${imageMedia.length === 1 ? 'max-h-[500px]' : ''}`}
+                                ${index === 0 && imageMedia.length === 3
+                                        ? "row-span-2"
+                                        : ""
+                                    }
+                                ${imageMedia.length === 1 ? "max-h-[500px]" : ""
+                                    }`}
                             >
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/20 z-10 pointer-events-none" />
                                 <img
@@ -186,7 +219,9 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
                                 />
                                 {imageMedia.length > 4 && index === 3 && (
                                     <div className="absolute inset-0 flex items-center justify-center bg-black/60 z-20">
-                                        <span className="text-white text-2xl font-bold">+{imageMedia.length - 4}</span>
+                                        <span className="text-white text-2xl font-bold">
+                                            +{imageMedia.length - 4}
+                                        </span>
                                     </div>
                                 )}
                             </Link>
@@ -200,17 +235,21 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
                 <button
                     onClick={handleLike}
                     className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-300 group ${isLiked
-                        ? 'bg-[#FFB800]/20 text-[#FFB800] shadow-md'
-                        : 'text-gray-600 hover:text-[#FFB800] hover:bg-[#FFF4D6]/50'
+                        ? "bg-[#FFB800]/20 text-[#FFB800] shadow-md"
+                        : "text-gray-600 hover:text-[#FFB800] hover:bg-[#FFF4D6]/50"
                         }`}
                 >
-                    <div className={`p-2 rounded-full transition-all duration-300 ${isLiked
-                        ? 'bg-[#FFB800]/30 scale-110'
-                        : 'bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110'
-                        }`}>
-                        <FaHeart className={`w-4 h-4 ${isLiked ? 'text-[#FFB800]' : ''}`} />
+                    <div
+                        className={`p-2 rounded-full transition-all duration-300 ${isLiked
+                            ? "bg-[#FFB800]/30 scale-110"
+                            : "bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110"
+                            }`}
+                    >
+                        <FaHeart className={`w-4 h-4 ${isLiked ? "text-[#FFB800]" : ""}`} />
                     </div>
-                    <span className="font-semibold text-sm">{post.likes?.length || 0}</span>
+                    <span className="font-semibold text-sm">
+                        {post.likes?.length || 0}
+                    </span>
                 </button>
 
                 <button
@@ -220,7 +259,9 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
                     <div className="p-2 rounded-full bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110 transition-all duration-300">
                         <FaComment className="w-4 h-4" />
                     </div>
-                    <span className="font-semibold text-sm">{post.comments?.length || 0}</span>
+                    <span className="font-semibold text-sm">
+                        {post.comments?.length || 0}
+                    </span>
                 </button>
 
                 <button
@@ -230,7 +271,9 @@ export const PostCard = ({ post, onLike, onComment, onShare, onEdit, onDelete })
                     <div className="p-2 rounded-full bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110 transition-all duration-300">
                         <FaShare className="w-4 h-4" />
                     </div>
-                    <span className="font-semibold text-sm">{post.shares?.length || 0}</span>
+                    <span className="font-semibold text-sm">
+                        {post.shares?.length || 0}
+                    </span>
                 </button>
 
                 <button className="p-2 rounded-full bg-gray-100 hover:bg-[#FFF4D6] text-gray-600 hover:text-[#FFB800] transition-all duration-300 hover:scale-110">

@@ -52,6 +52,7 @@ import {
 import { useCloudinary } from "../../context/CloudinaryContext";
 import postsService from "@/services/postService";
 import { getVideoById } from "@/services/videoService";
+import EmojiPicker from "emoji-picker-react";
 
 export const formatRelativeTime = (dateString) => {
   if (!dateString) return "";
@@ -130,7 +131,7 @@ export default function MessagePage() {
   const [selectedTab, setSelectedTab] = useState("media"); // 'media', 'files', 'links'
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-
+  const [isShowIconPicker, setIsShowIconPicker] = useState(false)
   // Thêm state cho modal tìm kiếm
   const [showSearchModal, setShowSearchModal] = useState(false);
 
@@ -151,7 +152,10 @@ export default function MessagePage() {
     }
     return originalMessage.text || originalMessage.content || "";
   };
-
+  const handleEmojiClick = (emojiData, event) => {
+    setNewMessage(prev => prev + emojiData.emoji)
+    console.log(emojiData)
+  }
   const fetchPostDetails = async (postId) => {
     try {
       const response = await postsService.fetchById(postId);
@@ -376,16 +380,16 @@ export default function MessagePage() {
                       text: message.recalled
                         ? "Tin nhắn đã được thu hồi"
                         : message.type === "text"
-                        ? message.text
-                        : message.type === "image"
-                        ? "Đã gửi một hình ảnh"
-                        : message.type === "share"
-                        ? message.sharedType === "post"
-                          ? "Đã chia sẻ một bài viết"
-                          : message.sharedType === "video"
-                          ? "Đã chia sẻ một video"
-                          : message.text || "Đã chia sẻ một liên kết"
-                        : message.text, // fallback
+                          ? message.text
+                          : message.type === "image"
+                            ? "Đã gửi một hình ảnh"
+                            : message.type === "share"
+                              ? message.sharedType === "post"
+                                ? "Đã chia sẻ một bài viết"
+                                : message.sharedType === "video"
+                                  ? "Đã chia sẻ một video"
+                                  : message.text || "Đã chia sẻ một liên kết"
+                              : message.text, // fallback
                     },
                     unreadCount: newUnreadCount,
                   };
@@ -472,10 +476,10 @@ export default function MessagePage() {
               prevMessages.map((msg) =>
                 msg.id === messageId || msg._id === messageId
                   ? {
-                      ...msg,
-                      content: "Tin nhắn đã được thu hồi",
-                      recalled: true,
-                    }
+                    ...msg,
+                    content: "Tin nhắn đã được thu hồi",
+                    recalled: true,
+                  }
                   : msg
               )
             );
@@ -589,9 +593,9 @@ export default function MessagePage() {
             })),
             otherUser: conv.otherUser
               ? {
-                  ...conv.otherUser,
-                  isOnline: activeOnlineUserIds.includes(conv.otherUser._id),
-                }
+                ...conv.otherUser,
+                isOnline: activeOnlineUserIds.includes(conv.otherUser._id),
+              }
               : null,
           }))
         );
@@ -629,9 +633,9 @@ export default function MessagePage() {
           })),
           otherUser: conv.otherUser
             ? {
-                ...conv.otherUser,
-                isOnline: onlineUsers.includes(conv.otherUser._id),
-              }
+              ...conv.otherUser,
+              isOnline: onlineUsers.includes(conv.otherUser._id),
+            }
             : conv.otherUser,
         }))
       );
@@ -658,9 +662,9 @@ export default function MessagePage() {
             })),
             otherUser: conv.otherUser
               ? {
-                  ...conv.otherUser,
-                  isOnline: onlineUsers.includes(conv.otherUser._id),
-                }
+                ...conv.otherUser,
+                isOnline: onlineUsers.includes(conv.otherUser._id),
+              }
               : null,
           })
         );
@@ -806,7 +810,7 @@ export default function MessagePage() {
   }, [selectedConversationId, user]); // Thêm user vào dependencies
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView();
   };
 
   useLayoutEffect(() => {
@@ -968,7 +972,7 @@ export default function MessagePage() {
       } else {
         setError(
           "Không thể xóa tin nhắn. " +
-            (response.data.message || "Vui lòng thử lại.")
+          (response.data.message || "Vui lòng thử lại.")
         );
       }
 
@@ -1459,20 +1463,18 @@ export default function MessagePage() {
           <a href={`/explore/reels/${sharedVideo?._id}`} className="rounded-lg overflow-hidden">
             <div
               className={`flex items-center gap-2 mb-1 p-2 rounded-t-lg border-b 
-              ${
-                message.isOwn
+              ${message.isOwn
                   ? "bg-blue-400 border-blue-300"
                   : "bg-gray-50 border-gray-200"
-              }`}
+                }`}
             >
               <Video
                 size={16}
                 className={message.isOwn ? "text-white" : "text-purple-500"}
               />
               <span
-                className={`text-sm font-medium ${
-                  message.isOwn ? "text-white" : "text-purple-500"
-                }`}
+                className={`text-sm font-medium ${message.isOwn ? "text-white" : "text-purple-500"
+                  }`}
               >
                 Video được chia sẻ
               </span>
@@ -1494,11 +1496,10 @@ export default function MessagePage() {
             </div>
             {message.text && message.text !== message.sharedId && (
               <div
-                className={`p-2 text-xs rounded-b-lg ${
-                  message.isOwn
-                    ? "bg-blue-400 text-blue-50"
-                    : "bg-gray-50 text-gray-600"
-                }`}
+                className={`p-2 text-xs rounded-b-lg ${message.isOwn
+                  ? "bg-blue-400 text-blue-50"
+                  : "bg-gray-50 text-gray-600"
+                  }`}
               >
                 {message.text}
               </div>
@@ -1614,11 +1615,10 @@ export default function MessagePage() {
               <div
                 key={conversation._id}
                 onClick={() => navigate(`/messages/${conversation._id}`)}
-                className={`flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 transition-colors duration-150 ${
-                  selectedConversationId === conversation._id
-                    ? "bg-blue-50 hover:bg-blue-100"
-                    : ""
-                }`}
+                className={`flex items-center p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 transition-colors duration-150 ${selectedConversationId === conversation._id
+                  ? "bg-blue-50 hover:bg-blue-100"
+                  : ""
+                  }`}
               >
                 <div className="relative flex-shrink-0">
                   <img
@@ -1636,21 +1636,19 @@ export default function MessagePage() {
                 <div className="ml-3 flex-1 min-w-0 relative">
                   <div className="flex items-center justify-between">
                     <p
-                      className={`text-sm font-semibold truncate ${
-                        selectedConversationId === conversation._id
-                          ? "text-blue-700"
-                          : "text-gray-800"
-                      }`}
+                      className={`text-sm font-semibold truncate ${selectedConversationId === conversation._id
+                        ? "text-blue-700"
+                        : "text-gray-800"
+                        }`}
                     >
                       {otherUser?.name || "Người dùng"}
                     </p>
                     {lastMessage && (
                       <span
-                        className={`text-xs  ml-2 flex-shrink-0 ${
-                          conversation.unreadCount > 0
-                            ? "font-bold text-black"
-                            : "text-gray-400"
-                        }`}
+                        className={`text-xs  ml-2 flex-shrink-0 ${conversation.unreadCount > 0
+                          ? "font-bold text-black"
+                          : "text-gray-400"
+                          }`}
                       >
                         {/* Hiển thị thời gian tương đối cho lastMessage trong danh sách conversation */}
                         {formatRelativeTime(lastMessage.createdAt)}
@@ -1658,27 +1656,26 @@ export default function MessagePage() {
                     )}
                   </div>
                   <p
-                    className={`text-xs truncate mt-0.5 ${
-                      conversation.unreadCount > 0
-                        ? "font-bold text-black"
-                        : "text-gray-500 "
-                    }`}
+                    className={`text-xs truncate mt-0.5 ${conversation.unreadCount > 0
+                      ? "font-bold text-black"
+                      : "text-gray-500 "
+                      }`}
                   >
                     {lastMessage
                       ? (lastMessage.sender._id === user?._id ? "Bạn: " : "") +
-                        (lastMessage.recalled ||
+                      (lastMessage.recalled ||
                         lastMessage.text === "Tin nhắn này đã bị xóa" ||
                         lastMessage.content === "Tin nhắn này đã bị xóa"
-                          ? "Tin nhắn đã thu hồi"
-                          : lastMessage.type === "image"
+                        ? "Tin nhắn đã thu hồi"
+                        : lastMessage.type === "image"
                           ? "Đã gửi một hình ảnh"
                           : lastMessage.type === "share"
-                          ? lastMessage.sharedType === "post"
-                            ? "Đã chia sẻ một bài viết"
-                            : lastMessage.sharedType === "video"
-                            ? "Đã chia sẻ một video"
-                            : lastMessage.text || "Đã chia sẻ một liên kết"
-                          : lastMessage.text || "")
+                            ? lastMessage.sharedType === "post"
+                              ? "Đã chia sẻ một bài viết"
+                              : lastMessage.sharedType === "video"
+                                ? "Đã chia sẻ một video"
+                                : lastMessage.text || "Đã chia sẻ một liên kết"
+                            : lastMessage.text || "")
                       : "Bắt đầu cuộc trò chuyện"}
                   </p>
                   {conversation.unreadCount > 0 && (
@@ -1696,12 +1693,11 @@ export default function MessagePage() {
       <div className="flex-1 flex h-full">
         {/* Main Chat */}
         <div
-          className={`flex flex-col bg-white transition-all duration-300 ${
-            showInfoSidebar ? "w-[65%]" : "w-full"
-          }`}
+          className={`flex flex-col bg-white transition-all duration-300 ${showInfoSidebar ? "w-[65%]" : "w-full"
+            }`}
         >
           {selectedConversationId &&
-          conversations.find((c) => c._id === selectedConversationId) ? (
+            conversations.find((c) => c._id === selectedConversationId) ? (
             <>
               {/* Chat Header */}
               <div className="px-6 py-3 border-b border-gray-200 bg-white shadow-sm">
@@ -1733,9 +1729,8 @@ export default function MessagePage() {
                             {otherUser?.name || "Người dùng"}
                           </h2>
                           <p
-                            className={`text-xs ${
-                              isOnline ? "text-green-600" : "text-gray-500"
-                            }`}
+                            className={`text-xs ${isOnline ? "text-green-600" : "text-gray-500"
+                              }`}
                           >
                             {isOnline ? "Đang hoạt động" : "Không hoạt động"}
                           </p>
@@ -1890,8 +1885,8 @@ export default function MessagePage() {
                         message.createdAt &&
                         prevMessage.createdAt &&
                         new Date(message.createdAt).getTime() -
-                          new Date(prevMessage.createdAt).getTime() >
-                          5 * 60 * 1000));
+                        new Date(prevMessage.createdAt).getTime() >
+                        5 * 60 * 1000));
 
                   const isFirstInGroupChain =
                     index === 0 ||
@@ -1930,13 +1925,11 @@ export default function MessagePage() {
                       )}
                       <div
                         id={`message-item-${message.id}`}
-                        className={`flex ${
-                          message.isOwn ? "justify-end" : "justify-start"
-                        } ${
-                          showSenderInfo && !showTimeSeparator
+                        className={`flex ${message.isOwn ? "justify-end" : "justify-start"
+                          } ${showSenderInfo && !showTimeSeparator
                             ? "mt-2"
                             : "mt-px"
-                        } group relative message-item`}
+                          } group relative message-item`}
                       >
                         {!message.isOwn && (
                           <div className="flex-shrink-0 w-8 h-8 self-end mr-2">
@@ -1952,9 +1945,8 @@ export default function MessagePage() {
                           </div>
                         )}
                         <div
-                          className={`flex flex-col ${
-                            message.isOwn ? "items-end" : "items-start"
-                          } max-w-xs sm:max-w-sm md:max-w-md relative group`}
+                          className={`flex flex-col ${message.isOwn ? "items-end" : "items-start"
+                            } max-w-xs sm:max-w-sm md:max-w-md relative group`}
                         >
                           <div className={`flex items-center gap-1`}>
                             {/* Message bubble */}
@@ -1980,21 +1972,18 @@ export default function MessagePage() {
                                 }));
                               }}
                               className={`relative px-3 py-2 rounded-lg
-                                ${
-                                  message.isOwn
-                                    ? "bg-blue-500 text-white dark:bg-blue-600 dark:text-slate-50"
-                                    : "bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-100"
+                                ${message.isOwn
+                                  ? "bg-blue-500 text-white dark:bg-blue-600 dark:text-slate-50"
+                                  : "bg-gray-100 dark:bg-slate-700 text-gray-800 dark:text-slate-100"
                                 } 
-                                ${
-                                  message.recalled ? "italic text-gray-500" : ""
+                                ${message.recalled ? "italic text-gray-500" : ""
                                 } 
-                                ${
-                                  message.type === "image" ||
+                                ${message.type === "image" ||
                                   (message.type === "share" &&
                                     (message.sharedType === "video" ||
                                       message.sharedType === "post"))
-                                    ? "p-1"
-                                    : "px-3 py-2"
+                                  ? "p-1"
+                                  : "px-3 py-2"
                                 }
                                 hover:shadow-md transition-shadow duration-150`}
                             >
@@ -2008,18 +1997,16 @@ export default function MessagePage() {
                                     );
                                   }}
                                   className={`mb-1.5 p-2 rounded-md cursor-pointer transition-colors border-l-2
-                                    ${
-                                      message.isOwn
-                                        ? "bg-blue-400 hover:bg-blue-300 dark:bg-blue-500 dark:hover:bg-blue-400 border-blue-200"
-                                        : "bg-gray-200 hover:bg-gray-300 dark:bg-slate-600 dark:hover:bg-slate-500 border-gray-400"
+                                    ${message.isOwn
+                                      ? "bg-blue-400 hover:bg-blue-300 dark:bg-blue-500 dark:hover:bg-blue-400 border-blue-200"
+                                      : "bg-gray-200 hover:bg-gray-300 dark:bg-slate-600 dark:hover:bg-slate-500 border-gray-400"
                                     } opacity-90 hover:opacity-100`}
                                 >
                                   <div
-                                    className={`text-xs font-semibold flex items-center ${
-                                      message.isOwn
-                                        ? "text-blue-50"
-                                        : "text-gray-700 dark:text-slate-200"
-                                    }`}
+                                    className={`text-xs font-semibold flex items-center ${message.isOwn
+                                      ? "text-blue-50"
+                                      : "text-gray-700 dark:text-slate-200"
+                                      }`}
                                   >
                                     <Reply
                                       size={12}
@@ -2029,15 +2016,14 @@ export default function MessagePage() {
                                     {message.replyTo.sender?._id === user?._id
                                       ? "chính bạn"
                                       : message.replyTo.sender?.firstName ||
-                                        message.replyTo.sender?.name ||
-                                        "..."}
+                                      message.replyTo.sender?.name ||
+                                      "..."}
                                   </div>
                                   <p
-                                    className={`text-xs truncate mt-0.5 ${
-                                      message.isOwn
-                                        ? "text-blue-100"
-                                        : "text-gray-600 dark:text-slate-300"
-                                    }`}
+                                    className={`text-xs truncate mt-0.5 ${message.isOwn
+                                      ? "text-blue-100"
+                                      : "text-gray-600 dark:text-slate-300"
+                                      }`}
                                   >
                                     {getReplyPreviewContent(message.replyTo)}
                                   </p>
@@ -2050,11 +2036,10 @@ export default function MessagePage() {
                             {/* Message actions */}
                             {!message.recalled && (
                               <div
-                                className={`absolute ${
-                                  message.isOwn
-                                    ? "left-0 -translate-x-full -ml-1"
-                                    : "right-0 translate-x-full ml-1"
-                                } top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150`}
+                                className={`absolute ${message.isOwn
+                                  ? "left-0 -translate-x-full -ml-1"
+                                  : "right-0 translate-x-full ml-1"
+                                  } top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150`}
                               >
                                 {!message.isOwn ? (
                                   <>
@@ -2114,11 +2099,10 @@ export default function MessagePage() {
                             message.reactions.length > 0 &&
                             !message.recalled && (
                               <div
-                                className={`flex flex-wrap gap-x-0.5 gap-y-1 mt-1 items-center ${
-                                  message.isOwn
-                                    ? "justify-end"
-                                    : "justify-start"
-                                }`}
+                                className={`flex flex-wrap gap-x-0.5 gap-y-1 mt-1 items-center ${message.isOwn
+                                  ? "justify-end"
+                                  : "justify-start"
+                                  }`}
                               >
                                 {message.reactions
                                   .slice(0, 4)
@@ -2146,15 +2130,13 @@ export default function MessagePage() {
                                         }}
                                         disabled={message.isOwn}
                                         className={`px-1 py-px rounded-full text-xs flex items-center gap-0.5 transition-colors shadow-sm 
-                                      ${
-                                        userHasReacted
-                                          ? "bg-blue-100 dark:bg-blue-600 border border-blue-400 dark:border-blue-500 text-blue-700 dark:text-blue-100"
-                                          : "bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-200"
-                                      } ${
-                                          message.isOwn
+                                      ${userHasReacted
+                                            ? "bg-blue-100 dark:bg-blue-600 border border-blue-400 dark:border-blue-500 text-blue-700 dark:text-blue-100"
+                                            : "bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 border border-gray-200 dark:border-slate-600 text-gray-700 dark:text-slate-200"
+                                          } ${message.isOwn
                                             ? "cursor-not-allowed opacity-70"
                                             : "cursor-pointer"
-                                        }`}
+                                          }`}
                                         title={
                                           reaction.users
                                             .map(
@@ -2183,9 +2165,8 @@ export default function MessagePage() {
                                   !message.recalled && (
                                     <div
                                       className="px-1 py-px rounded-full text-[10px] flex items-center justify-center bg-gray-200 dark:bg-slate-700 border border-gray-300 dark:border-slate-600 text-gray-600 dark:text-slate-300 cursor-pointer shadow-sm min-w-[20px] h-[18px] ml-0.5"
-                                      title={`Xem thêm ${
-                                        message.reactions.length - 4
-                                      } cảm xúc khác`}
+                                      title={`Xem thêm ${message.reactions.length - 4
+                                        } cảm xúc khác`}
                                     >
                                       +{message.reactions.length - 4}
                                     </div>
@@ -2280,16 +2261,7 @@ export default function MessagePage() {
 
               {/* Message Input */}
               <div className="p-3 flex items-center gap-2 bg-white border-t border-gray-200">
-                <button className="text-gray-500 hover:text-blue-500 p-2 rounded-full transition-colors hover:bg-gray-100">
-                  <Paperclip size={20} />
-                </button>
-                <button className="text-gray-500 hover:text-blue-500 p-2 rounded-full transition-colors hover:bg-gray-100">
-                  <Image
-                    size={20}
-                    onClick={() => fileInputRef.current?.click()}
-                  />
-                </button>
-                <div className="flex-1 relative">
+                <div className="flex-1 relative mb-2">
                   <input
                     value={newMessage}
                     onChange={handleTyping}
@@ -2298,9 +2270,20 @@ export default function MessagePage() {
                     placeholder="Nhập tin nhắn..."
                     className="w-full px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10"
                   />
-                  <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500 p-1.5 rounded-full hover:bg-gray-200 transition-colors">
-                    <Smile size={20} />
-                  </button>
+                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
+                    <button className=" text-gray-400 hover:text-blue-500 p-1.5 rounded-full hover:bg-gray-200 transition-colors" onClick={() => {setIsShowIconPicker(prev => !prev)}}>
+                      <Smile size={20} />
+                    </button>
+                    {isShowIconPicker && (
+                      <div className="absolute z-50 top-[-450px] left-[-270px] h-[350px] w-auto">
+                        <EmojiPicker onEmojiClick={handleEmojiClick} />
+                      </div>
+                    )}
+                    <button className="text-gray-400 hover:text-blue-500 p-2 rounded-full transition-colors hover:bg-gray-100" onClick={() => fileInputRef.current?.click()}>
+                      <Image size={20} />
+                    </button>
+                  </div>
+
                 </div>
                 <button
                   onClick={handleSendMessage}
@@ -2326,9 +2309,8 @@ export default function MessagePage() {
 
         {/* Info Sidebar */}
         <div
-          className={`bg-white border-l border-gray-200 transition-all duration-300 relative ${
-            showInfoSidebar ? "w-[35%]" : "w-0 opacity-0 overflow-hidden"
-          }`}
+          className={`bg-white border-l border-gray-200 transition-all duration-300 relative ${showInfoSidebar ? "w-[35%]" : "w-0 opacity-0 overflow-hidden"
+            }`}
         >
           {selectedConversationId &&
             conversations.find((c) => c._id === selectedConversationId) && (
@@ -2403,11 +2385,10 @@ export default function MessagePage() {
                     <div className="space-y-2">
                       <button
                         onClick={() => setSelectedTab("media")}
-                        className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
-                          selectedTab === "media"
-                            ? "bg-blue-50 text-blue-600"
-                            : "hover:bg-gray-100 text-gray-700"
-                        }`}
+                        className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${selectedTab === "media"
+                          ? "bg-blue-50 text-blue-600"
+                          : "hover:bg-gray-100 text-gray-700"
+                          }`}
                       >
                         <Image
                           size={20}
@@ -2422,11 +2403,10 @@ export default function MessagePage() {
 
                       <button
                         onClick={() => setSelectedTab("links")}
-                        className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
-                          selectedTab === "links"
-                            ? "bg-blue-50 text-blue-600"
-                            : "hover:bg-gray-100 text-gray-700"
-                        }`}
+                        className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${selectedTab === "links"
+                          ? "bg-blue-50 text-blue-600"
+                          : "hover:bg-gray-100 text-gray-700"
+                          }`}
                       >
                         <FileText
                           size={20}

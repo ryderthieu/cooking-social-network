@@ -6,6 +6,7 @@ import { createPost } from '@/services/postService';
 import { getAllRecipes,  searchRecipes } from '@/services/recipeService';
 import { toast } from 'react-toastify';
 import { addVideo } from '@/services/videoService';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const CreatePostModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();
