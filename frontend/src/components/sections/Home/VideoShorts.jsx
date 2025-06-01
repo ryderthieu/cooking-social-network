@@ -131,7 +131,7 @@ const VideoShorts = () => {
               ref={videoRef}
               src={GaNuongVid}
               poster={GaNuong}
-              className="w-full object-contain h-[600px] rounded-lg shadow-lg"
+              className="w-full object-contain h-[600px] rounded-lg shadow-lg bg-black"
               onClick={togglePlayPause}
               loop
             />
@@ -237,8 +237,8 @@ const VideoShorts = () => {
               <button
                 onClick={handleDislike}
                 className={`w-9 h-9 flex items-center justify-center ${
-                  disliked ? "bg-gray-600" : "bg-black/30"
-                } rounded-full mt-3 transition-colors hover:bg-gray-600/70`}
+                  disliked ? "bg-pink-500" : "bg-black/30"
+                } rounded-full mt-3 transition-colors hover:bg-pink-500/70`}
               >
                 <svg
                   className="w-5 h-5 text-white transform rotate-180"
@@ -252,7 +252,7 @@ const VideoShorts = () => {
 
               <button
                 onClick={() => handleInteraction(() => {})}
-                className="w-9 h-9 flex items-center justify-center bg-black/30 hover:bg-gray-600/70 transition-colors rounded-full mt-3"
+                className="w-9 h-9 flex items-center justify-center bg-black/30 hover:bg-pink-500/70 transition-colors rounded-full mt-3"
               >
                 <svg
                   className="w-5 h-5 text-white"
@@ -272,7 +272,7 @@ const VideoShorts = () => {
 
               <button
                 onClick={() => handleInteraction(() => {})}
-                className="w-9 h-9 flex items-center justify-center bg-black/30 hover:bg-gray-600/70 transition-colors rounded-full mt-3"
+                className="w-9 h-9 flex items-center justify-center bg-black/30 hover:bg-pink-500/70 transition-colors rounded-full mt-3"
               >
                 <svg
                   className="w-5 h-5 text-white"
@@ -292,7 +292,7 @@ const VideoShorts = () => {
 
               <button
                 onClick={() => handleInteraction(() => {})}
-                className="w-9 h-9 flex items-center justify-center bg-black/30 hover:bg-gray-600/70 transition-colors rounded-full mt-3"
+                className="w-9 h-9 flex items-center justify-center bg-black/30 hover:bg-pink-500/70 transition-colors rounded-full mt-3"
               >
                 <svg
                   className="w-5 h-5 text-white"
