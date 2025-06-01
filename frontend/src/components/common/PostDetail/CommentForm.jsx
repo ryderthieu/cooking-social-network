@@ -1,4 +1,5 @@
 import { useAuth } from '@/context/AuthContext';
+import EmojiPicker from 'emoji-picker-react';
 import React, { useState } from 'react';
 import { FaSmile, FaImage, FaGift } from 'react-icons/fa';
 
@@ -6,6 +7,7 @@ const CommentForm = ({ onSubmit, isReply }) => {
   const [text, setText] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const { user } = useAuth()
+  const [showEmoji, setShowEmoji] = useState(false)
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!text.trim()) return;
@@ -38,9 +40,15 @@ const CommentForm = ({ onSubmit, isReply }) => {
             <button
               type="button"
               className="p-2 text-gray-400 hover:text-[#FFB800] transition-colors rounded-full hover:bg-[#FFF4D6]"
+              onClick={() => setShowEmoji(prev => !prev)}
             >
               <FaSmile className="w-5 h-5" />
             </button>
+            {showEmoji &&
+              <div className='absolute bottom-[50px] right-[-80px] z-[999999] opacity-100'>
+                <EmojiPicker onEmojiClick={(emojiData, e) => setText(prev => prev + emojiData.emoji)} />
+              </div>
+            }
           </div>
         </div>
 

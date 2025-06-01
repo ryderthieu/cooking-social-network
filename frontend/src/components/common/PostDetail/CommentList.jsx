@@ -86,7 +86,7 @@ const CommentList = ({ post, reel, key }) => {
   return (
     <div className="flex-1 overflow-y-auto">
       {/* Header with sort options */}
-      <div className="px-6 py-4 border-b border-[#FFB800]/10 sticky top-0 bg-white/80 backdrop-blur-sm z-10">
+      <div className="px-6 py-4 border-b border-[#FFB800]/10 sticky top-0 bg-white/80 backdrop-blur-sm z-5">
         <div className="flex items-center justify-between">
           <div className="text-gray-800 font-semibold">
             {totalComments} bình luận
