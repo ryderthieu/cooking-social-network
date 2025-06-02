@@ -5,6 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { getUserConversations } from "@/services/conversationService";
 import { MessageCircleMore } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const MessageDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,6 +13,7 @@ const MessageDropdown = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const { socket } = useSocket();
+  const { user } = useAuth()
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
 
@@ -141,9 +143,9 @@ const MessageDropdown = () => {
             })),
             otherUser: conv.otherUser
               ? {
-                  ...conv.otherUser,
-                  isOnline: activeOnlineUserIds.includes(conv.otherUser._id),
-                }
+                ...conv.otherUser,
+                isOnline: activeOnlineUserIds.includes(conv.otherUser._id),
+              }
               : null,
           }))
         );
@@ -237,9 +239,8 @@ const MessageDropdown = () => {
                 <div
                   key={conversation?._id}
                   onClick={() => handleConversationClick(conversation?._id)}
-                  className={`p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 transition-colors ${
-                    conversation?.unreadCount > 0 ? "bg-blue-50" : ""
-                  }`}
+                  className={`p-3 hover:bg-gray-50 cursor-pointer border-b border-gray-50 transition-colors ${conversation?.unreadCount > 0 ? "bg-blue-50" : ""
+                    }`}
                 >
                   <div className="flex items-start space-x-3">
                     {/* Avatar with online status */}
@@ -260,9 +261,8 @@ const MessageDropdown = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p
-                          className={`text-sm font-medium text-gray-900 ${
-                            conversation?.unreadCount > 0 ? "font-semibold" : ""
-                          }`}
+                          className={`text-sm font-medium text-gray-900 ${conversation?.unreadCount > 0 ? "font-semibold" : ""
+                            }`}
                         >
                           {conversation?.otherUser?.name || "Người dùng"}
                         </p>
@@ -271,13 +271,15 @@ const MessageDropdown = () => {
                         </span>
                       </div>
                       <p
-                        className={`text-sm text-gray-600 truncate mt-1 ${
-                          conversation?.unreadCount > 0
-                            ? "font-medium text-gray-800"
-                            : ""
-                        }`}
+                        className={`text-sm text-gray-600 truncate mt-1 ${conversation?.unreadCount > 0
+                          ? "font-medium text-gray-800"
+                          : ""
+                          }`}
                       >
-                        {conversation?.lastMessage?.text || "Không có tin nhắn"}
+                        {(conversation?.lastMessage?.sender._id == user._id ? 'Bạn: ' : '') + (conversation?.lastMessage?.type === 'text'
+                          ? conversation.lastMessage.text : conversation?.lastMessage?.type === 'share'
+                            ? "Đã chia sẻ một liên kết" : conversation?.lastMessage?.type === 'image'
+                              ? "Đã gửi một hình ảnh" : "Không có tin nhắn")}
                       </p>
                     </div>
 

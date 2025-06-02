@@ -15,15 +15,15 @@ const addPost = async (req, res) => {
     // }
 
     const captionSlug = slugify(caption, { lower: true, locale: "vi" });
-    let recipeDoc
-    if(recipe) {
+    let recipeDoc, recipeSlug;
+    if (recipe) {
       recipeDoc = await Recipe.findById(recipe);
-    }
-    if (!recipeDoc) {
-      return res.status(404).json({ message: "Công thức không tồn tại" });
+      if (!recipeDoc) {
+        return res.status(404).json({ message: "Công thức không tồn tại" });
+      }
+      recipeSlug = slugify(recipeDoc.name, { lower: true, locale: "vi" });
     }
 
-    const recipeSlug = slugify(recipeDoc.name, { lower: true, locale: "vi" });
     const user = await User.findById(req.user._id);
     const authorName = `${user.firstName} ${user.lastName}`;
     const authorSlug = slugify(authorName, {
@@ -47,7 +47,7 @@ const addPost = async (req, res) => {
         }
       });
     }
-    console.log(media)
+    console.log(media);
     const newPost = new Post({
       author: req.user._id,
       caption,
@@ -188,11 +188,14 @@ const likePost = async (req, res) => {
       return res.status(400).json({ message: "ID không hợp lệ" });
     }
 
-    const post = await Post.findById(id).populate('author', 'avatar lastName firstName');
+    const post = await Post.findById(id).populate(
+      "author",
+      "avatar lastName firstName"
+    );
     if (!post) {
       return res.status(404).json({ message: "Post không tồn tại" });
     }
-    console.log(post)
+    console.log(post);
     if (!post.likes) {
       post.likes = [];
     }
@@ -235,7 +238,6 @@ const commentPost = async (req, res) => {
       return res.status(404).json({ message: "Post không tồn tại" });
     }
 
-
     post.comments.push({ userId, comment, createdAt: new Date() });
     await post.save();
 
@@ -277,7 +279,10 @@ const sharePost = async (req, res) => {
 
 const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate('author', 'avatar firstName lastName').sort({'createdAt': -1});
+    const posts = await Post.find()
+      .populate("author", "avatar firstName lastName")
+      .populate("recipe", "name")
+      .sort({ createdAt: -1 });
     res.status(200).json(posts);
   } catch (error) {
     console.error("Lỗi khi lấy tất cả post:", error);
@@ -291,7 +296,9 @@ const getPostById = async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "ID không hợp lệ" });
     }
-    const post = await Post.findById(id).populate('author', 'avatar lastName firstName');
+    const post = await Post.findById(id)
+      .populate("author", "avatar lastName firstName")
+      .populate("recipe", "name");
     if (!post) {
       return res.status(404).json({ message: "Post không được tìm thấy" });
     }
@@ -339,5 +346,5 @@ module.exports = {
   searchPosts,
   getAllPosts,
   getPostById,
-  getPostsByUserId
+  getPostsByUserId,
 };

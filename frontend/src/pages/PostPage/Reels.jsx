@@ -38,34 +38,21 @@ const Reels = () => {
       try {
         setIsLoading(true);
         const response = await getAllVideos();
-        
+
         if (response.success && response.data) {
-          const formattedReels = response.data.map(reel => ({
-            ...reel,
-            user: {
-              name: `${reel.author?.lastName || ''} ${reel.author?.firstName || ''}`.trim(),
-              avatar: reel.author?.avatar,
-              _id: reel.author?._id
-            },
-            video: reel.videoUri || reel.video,
-            title: reel.caption || reel.title,
-            date: formatRelativeTime(reel.createdAt),
-            likes: Array.isArray(reel.likes) ? reel.likes.length : 0,
-            commentCount: Array.isArray(reel.comments) ? reel.comments.length : 0,
-            shares: reel.shares?.length || 0,
-            liked: Array.isArray(reel.likes) ? reel.likes.includes(user?._id) : false,
-            _id: reel._id
+          const allReels = response.data.map((v) => ({
+            ...v,
+            liked: v.likes.includes(user._id),
           }));
-          console.log('Formatted reels:', formattedReels);
-          
-          setAllReels(formattedReels);
-          
-          if (!id && formattedReels.length > 0) {
-            navigate(`/explore/reels/${formattedReels[0]._id}`);
-          } else if (id && formattedReels.length > 0) {
-            const index = formattedReels.findIndex(reel => reel._id === id);
+
+          setAllReels(allReels);
+
+          if (!id && response.data.length > 0) {
+            navigate(`/explore/reels/${response.data[0]._id}`);
+          } else if (id && response.data.length > 0) {
+            const index = response.data.findIndex(reel => reel._id === id);
             if (index === -1) {
-              navigate(`/explore/reels/${formattedReels[0]._id}`);
+              navigate(`/explore/reels/${response.data[0]._id}`);
             } else {
               setCurrentIndex(index);
             }
@@ -128,27 +115,30 @@ const Reels = () => {
       navigate(`/explore/reels/${allReels[0]._id}`);
     }
   }, [id, allReels, isInitialized]);
-
+  useEffect(() => {
+    console.log('allreel change')
+  }, [allReels])
+  useEffect(() => {
+    console.log('current change')
+  }, [])
   const handleLike = async (reelId) => {
     try {
       const res = await likeVideo(reelId);
       const updatedReel = res.data.video;
+      console.log(updatedReel)
       const isLiking = res.data.message === "Đã like video";
 
       // Cập nhật state cho cả danh sách và video hiện tại
       setAllReels(prevReels =>
         prevReels.map(reel => {
           if (reel._id === reelId) {
-            return {
-              ...reel,
-              likes: updatedReel.likes.length,
-              liked: updatedReel.likes.includes(user?._id)
-            };
+            return updatedReel
+            
           }
           return reel;
         })
       );
-      setCurrentReel(prevReel => 
+      setCurrentReel(prevReel =>
         prevReel._id === reelId ? updatedReel : prevReel
       );
 
@@ -171,10 +161,10 @@ const Reels = () => {
 
   const handleShare = () => {
     try {
-      setSharePopup({ 
-        open: true, 
-        videoId: currentReel._id, 
-        postTitle: currentReel.title 
+      setSharePopup({
+        open: true,
+        videoId: currentReel._id,
+        postTitle: currentReel.title
       });
 
       // Gửi thông báo khi share
@@ -201,7 +191,9 @@ const Reels = () => {
       toast.error("Không thể mở bảng bình luận");
     }
   };
-
+  useEffect(() => {
+    console.log('current change')
+  }, [currentReel])
   const handleCloseReelComment = () => {
     try {
       setShowReelComment(false);
@@ -229,64 +221,22 @@ const Reels = () => {
         // Fetch updated reel data to get the new comment count
         try {
           const updatedReelResponse = await getVideoById(currentReel._id);
-          if (updatedReelResponse.success && updatedReelResponse.data) {
-            const videoData = updatedReelResponse.data;
-            const updatedReelFromServer = {
-              ...videoData,
-              user: { 
-                name: `${videoData.author?.firstName || ''} ${videoData.author?.lastName || ''}`.trim(),
-                avatar: videoData.author?.avatar,
-                _id: videoData.author?._id
-              },
-              video: videoData.videoUri || videoData.video,
-              title: videoData.caption || videoData.title,
-              date: new Date(videoData.createdAt).toLocaleDateString(),
-              likes: Array.isArray(videoData.likes) ? videoData.likes.length : 0,
-              commentCount: Array.isArray(videoData.comments) ? videoData.comments.length : 0,
-              shares: videoData.shares?.length || 0, 
-              liked: Array.isArray(videoData.likes) ? videoData.likes.includes(user?._id) : false,
-              _id: videoData._id
-            };
+          const videoData = updatedReelResponse.data;
 
-            setCurrentReel(updatedReelFromServer);
+          setCurrentReel(videoData);
 
-            setAllReels(prevReels =>
-              prevReels.map(reel =>
-                reel._id === currentReel._id
-                  ? updatedReelFromServer
-                  : reel
-              )
-            );
-          } else {
-            // Fallback: if fetching updated reel fails, try to optimistically update count
-            setCurrentReel(prev => ({ 
-              ...prev, 
-              commentCount: (prev.commentCount !== undefined ? prev.commentCount : (Array.isArray(prev.comments) ? prev.comments.length : 0)) + 1 
-            }));
-            setAllReels(prevReels =>
-              prevReels.map(reel =>
-                reel._id === currentReel._id
-                  ? { ...reel, commentCount: (reel.commentCount !== undefined ? reel.commentCount : (Array.isArray(reel.comments) ? reel.comments.length : 0)) + 1 }
-                  : reel
-              )
-            );
-          }
-        } catch (fetchError) {
-          console.error("Error fetching updated reel data after comment:", fetchError);
-          // Fallback: optimistically update count even if fetch fails
-          setCurrentReel(prev => ({ 
-            ...prev, 
-            commentCount: (prev.commentCount !== undefined ? prev.commentCount : (Array.isArray(prev.comments) ? prev.comments.length : 0)) + 1 
-          }));
           setAllReels(prevReels =>
             prevReels.map(reel =>
               reel._id === currentReel._id
-                ? { ...reel, commentCount: (reel.commentCount !== undefined ? reel.commentCount : (Array.isArray(reel.comments) ? reel.comments.length : 0)) + 1 }
+                ? videoData
                 : reel
             )
           );
+
+        } catch (fetchError) {
+          console.error("Error fetching updated reel data after comment:", fetchError);
         }
-        
+
         setReelCommentRefreshKey(prev => prev + 1); // Trigger CommentList refresh
 
         // Gửi thông báo
@@ -365,7 +315,6 @@ const Reels = () => {
               onLike={() => handleLike(reel._id)}
               onComment={() => handleOpenReelComment(reel)}
               onShare={handleShare}
-              isVisible={index === currentIndex}
             />
           </div>
         ))}
@@ -377,7 +326,7 @@ const Reels = () => {
         onClose={handleCloseReelComment}
         onAddComment={handleAddComment}
         refreshKey={reelCommentRefreshKey}
-      /> 
+      />
 
       <SharePopup
         open={sharePopup.open}

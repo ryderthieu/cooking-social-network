@@ -16,9 +16,7 @@ const CommentItem = ({ comment }) => {
   const [isShowReplies, setIsShowReplies] = useState(false)
   const { user } = useAuth()
   const { id } = useParams()
-  useEffect(() => {
-    console.log('commet', comment)
-  }, [])
+  
   const handleLike = () => {
     setLiked(l => !l);
     setLikes(l => liked ? l - 1 : l + 1);

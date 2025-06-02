@@ -144,7 +144,6 @@ export default function Contact() {
             tuyệt vời
           </p>
         </div>
-        
         {/* Success Message
         {successMessage && (
           <div className="fixed bottom-6 right-6 z-50 max-w-sm ">
