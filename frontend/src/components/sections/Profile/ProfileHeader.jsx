@@ -12,6 +12,7 @@ export default function ProfileHeader({
   stats,
   currentUserId,
   onToggleFollowInModal,
+  onMessage,
 }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const profileUser = user;
@@ -36,19 +37,29 @@ export default function ProfileHeader({
 
       <div className="p-6 pt-16 relative">
         {/* Avatar */}
-        <div className="absolute -top-12 left-6 shadow-sm rounded-full">
+        <div className="absolute -top-12 left-6">
           <img
             src={profileUser.avatar}
             alt={profileUser.lastName}
-            className="w-24 h-24 rounded-full border-4 border-white object-cover"
+            className="w-24 h-24 rounded-full border-4 border-white object-cover bg-white"
           />
         </div>
 
         <div className="flex flex-col md:flex-row md:justify-between md:items-start">
           <div className="md:max-w-3xl">
-            <h1 className="text-2xl font-bold">
-              {profileUser.firstName} {profileUser.lastName}
-            </h1>
+            <div className="flex items-center justify-between gap-4">
+              <h1 className="text-2xl font-bold">
+                {profileUser.firstName} {profileUser.lastName}
+              </h1>
+              {!isOwnProfile && onMessage && (
+                <button
+                  onClick={onMessage}
+                  className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-700 transition my-auto"
+                >
+                  Nhắn tin
+                </button>
+              )}
+            </div>
             <p className="text-gray-600 max-w-[700px] mt-4">
               {profileUser.bio ||
                 "Đầu bếp đam mê chia sẻ những công thức nấu ăn ngon và dễ làm. Yêu thích khám phá ẩm thực từ khắp nơi trên thế giới 🍳✨"}
@@ -75,7 +86,7 @@ export default function ProfileHeader({
                 </span>
               )}
             </div>
-            
+
             <div className="flex gap-6 mt-4">
               <ProfileStats
                 stats={stats}

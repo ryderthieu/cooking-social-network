@@ -345,6 +345,7 @@ export default function ProfilePage() {
                 onEditProfile={handleEditProfile}
                 currentUserId={currentUser?._id}
                 onToggleFollowInModal={handleToggleFollowInModal}
+                onMessage={() => navigate(`/messages/${userData?._id}`)}
               />
             </div>
 
