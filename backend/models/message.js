@@ -9,7 +9,7 @@ const messageSchema = new Schema({
   sticker: { type: String }, // nếu type === 'sticker'
 
   // Nếu là share
-  sharedType: { type: String, enum: ['post', 'video'] },
+  sharedType: { type: String, enum: ['post', 'video', 'recipe'] },
   sharedId: { type: Schema.Types.ObjectId },
 
   // Thêm trường replyTo

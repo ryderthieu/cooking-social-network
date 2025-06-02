@@ -1,7 +1,7 @@
 import { Bookmark, Share2 } from "lucide-react";
 import StarRating from "./StarRating";
 
-export default function RecipeHeader({ recipe }) {
+export default function RecipeHeader({ recipe, onShare }) {
   const formatCookingTime = (time) => {
     if (time >= 60) {
       const hours = Math.floor(time / 60);
@@ -94,7 +94,9 @@ export default function RecipeHeader({ recipe }) {
           <button className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
             <Bookmark className="w-5 h-5 text-gray-600" />
           </button>
-          <button className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+          <button 
+            onClick={onShare}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
             <Share2 className="w-5 h-5 text-gray-600" />
           </button>
         </div>

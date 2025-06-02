@@ -13,6 +13,7 @@ import {
 } from "@/components/sections/Recipe/RecipeDetail/index.js";
 import { getRecipeById } from "@/services/recipeService";
 import { calculateNutrition } from "@/utils/recipeUtils";
+import SharePopup from "@/components/common/SharePopup";
 
 export default function RecipeDetail({ className }) {
   const { id } = useParams();
@@ -20,6 +21,8 @@ export default function RecipeDetail({ className }) {
   const [error, setError] = useState(null);
   const [servings, setServings] = useState(1);
   const [calculatedNutrition, setCalculatedNutrition] = useState(null);
+  const [sharePopup, setSharePopup] = useState({ open: false, recipeId: null, recipeTitle: null });
+
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
@@ -102,7 +105,14 @@ export default function RecipeDetail({ className }) {
       </div>
 
       {/* Recipe Header */}
-      <RecipeHeader recipe={recipe} />
+      <RecipeHeader 
+        recipe={recipe} 
+        onShare={() => setSharePopup({ 
+          open: true, 
+          recipeId: recipe._id, 
+          recipeTitle: recipe.title 
+        })} 
+      />
 
       <div className="flex flex-col lg:flex-row gap-8 mb-8">
         {/* Recipe Image */}
@@ -141,6 +151,15 @@ export default function RecipeDetail({ className }) {
 
       {/* More Recipes Section */}
       <MoreRecipes />
+
+      {/* Share Popup */}
+      <SharePopup
+        open={sharePopup.open}
+        recipeId={sharePopup.recipeId}
+        recipeTitle={sharePopup.recipeTitle}
+        type="recipe"
+        onClose={() => setSharePopup({ open: false, recipeId: null, recipeTitle: null })}
+      />
     </div>
   );
 }
