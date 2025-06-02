@@ -14,7 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import { sharePost } from "@/services/postService";
 import { shareVideo } from "@/services/videoService";
 
-const SharePopup = ({ open, onClose, postId, postTitle, videoId }) => {
+const SharePopup = ({ open, onClose, postId, postTitle, videoId, recipeId, recipeTitle, type = "post" }) => {
   const [activeTab, setActiveTab] = useState("social");
   const [searchQuery, setSearchQuery] = useState("");
   const [conversations, setConversations] = useState([]);
@@ -23,16 +23,15 @@ const SharePopup = ({ open, onClose, postId, postTitle, videoId }) => {
   const { user: currentUser } = useAuth();
 
   useEffect(() => {
-    console.log("videoId", videoId);
     if (open && activeTab === "chat") {
       fetchConversations();
     }
   }, [open, activeTab]);
+
   const fetchConversations = async () => {
     try {
       setLoading(true);
       const response = await getUserConversations({ page: 1, limit: 20 });
-      console.log(response);
       setConversations(response.data.data.conversations || []);
     } catch (error) {
       console.error("Error fetching conversations:", error);
@@ -44,11 +43,62 @@ const SharePopup = ({ open, onClose, postId, postTitle, videoId }) => {
 
   if (!open) return null;
 
-  const shareUrl = `https://mycookingapp.com/post/${postId}`;
+  const getShareUrl = () => {
+    switch (type) {
+      case "post":
+        return `${window.location.origin}/posts/${postId}`;
+      case "video":
+        return `${window.location.origin}/videos/${videoId}`;
+      case "recipe":
+        return `${window.location.origin}/recipes/${recipeId}`;
+      default:
+        return window.location.href;
+    }
+  };
+
+  const getShareTitle = () => {
+    switch (type) {
+      case "post":
+        return postTitle;
+      case "video":
+        return "video";
+      case "recipe":
+        return recipeTitle;
+      default:
+        return "";
+    }
+  };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(shareUrl);
+    navigator.clipboard.writeText(getShareUrl());
     toast.success("Đã copy link!");
+  };
+
+  const handleShareToChat = async (conversationId) => {
+    try {
+      setSharing(true);
+      if (postId) {
+        await sharePost(postId);
+      } else if (videoId) {
+        await shareVideo(videoId);
+      }
+      // Recipe sharing doesn't need to track share count
+      
+      await createMessage({
+        conversationId,
+        type: "share",
+        sharedType: type,
+        sharedId: postId || videoId || recipeId,
+        text: `Đã chia sẻ ${type === "post" ? "bài viết" : type === "video" ? "video" : "công thức"} "${getShareTitle()}"`,
+      });
+      toast.success(`Đã chia sẻ ${type === "post" ? "bài viết" : type === "video" ? "video" : "công thức"}!`);
+      onClose();
+    } catch (error) {
+      console.error("Error sharing to chat:", error);
+      toast.error(`Không thể chia sẻ ${type === "post" ? "bài viết" : type === "video" ? "video" : "công thức"}`);
+    } finally {
+      setSharing(false);
+    }
   };
 
   const filteredConversations = conversations.filter(
@@ -60,32 +110,6 @@ const SharePopup = ({ open, onClose, postId, postTitle, videoId }) => {
           .includes(searchQuery.toLowerCase())
       )
   );
-
-  const handleShareToChat = async (conversationId) => {
-    try {
-      setSharing(true);
-      if (postId) {
-        await sharePost(postId)
-      }
-      else if (videoId) {
-        await shareVideo(videoId)
-      }
-      await createMessage({
-        conversationId,
-        type: "share",
-        sharedType: postId ? "post" : "video",
-        sharedId: postId || videoId,
-        text: `Đã chia sẻ bài viết "${postTitle}"`,
-      });
-      toast.success("Đã chia sẻ bài viết!");
-      onClose();
-    } catch (error) {
-      console.error("Error sharing to chat:", error);
-      toast.error("Không thể chia sẻ bài viết");
-    } finally {
-      setSharing(false);
-    }
-  };
 
   const getConversationName = (conv) => {
     if (conv.name) return conv.name;
@@ -182,7 +206,7 @@ const SharePopup = ({ open, onClose, postId, postTitle, videoId }) => {
 
             <a
               href={`https://facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-                shareUrl
+                getShareUrl()
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -196,7 +220,7 @@ const SharePopup = ({ open, onClose, postId, postTitle, videoId }) => {
 
             <a
               href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
-                shareUrl
+                getShareUrl()
               )}`}
               target="_blank"
               rel="noopener noreferrer"

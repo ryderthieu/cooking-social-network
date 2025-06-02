@@ -1,7 +1,12 @@
-import { Bookmark, Share2 } from "lucide-react";
+import { useState } from "react";
+import { Bookmark, Share2, Heart, MoreVertical } from "lucide-react";
 import StarRating from "./StarRating";
+import CollectionDropdown from "../../../common/Modal/Recipe/CollectionDropdown";
+import { FaBookmark } from "react-icons/fa";
 
-export default function RecipeHeader({ recipe }) {
+export default function RecipeHeader({ recipe, onShare, onLike, isLiked }) {
+  const [showCollectionDropdown, setShowCollectionDropdown] = useState(false);
+
   const formatCookingTime = (time) => {
     if (time >= 60) {
       const hours = Math.floor(time / 60);
@@ -90,15 +95,40 @@ export default function RecipeHeader({ recipe }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
-          <button className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
-            <Bookmark className="w-5 h-5 text-gray-600" />
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onLike}
+            className={`flex items-center justify-center w-10 h-10 rounded-full ${
+              isLiked
+                ? "bg-red-500 text-white"
+                : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+            } transition-colors`}
+          >
+            <Heart className="w-5 h-5" />
           </button>
-          <button className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+
+          <button
+            onClick={onShare}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+          >
             <Share2 className="w-5 h-5 text-gray-600" />
+          </button>
+
+          <button
+            onClick={() => setShowCollectionDropdown(true)}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+          >
+            <FaBookmark className="w-5 h-5 text-gray-600" />
           </button>
         </div>
       </div>
+
+      {/* Collection Dropdown */}
+      <CollectionDropdown
+        isOpen={showCollectionDropdown}
+        onClose={() => setShowCollectionDropdown(false)}
+        recipeId={recipe?._id}
+      />
     </>
   );
 }

@@ -32,7 +32,7 @@ export const LeftSidebar = ({
       { label: "Reels", icon: <FaVideo />, href: "/explore/reels" },
       { label: "Trang cá nhân", icon: <FaUser />, href: `/profile/${user._id}` },
       { label: "Bài viết đã lưu", icon: <FaBookmark />, href: "/saved" },
-      { label: "Công thức của tôi", icon: <FaUtensils />, href: "/my-recipes" },
+      { label: "Công thức của tôi", icon: <FaUtensils />, href: "/recipes/saved" },
     ],
   };
   return (

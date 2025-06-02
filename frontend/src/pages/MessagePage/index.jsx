@@ -39,6 +39,7 @@ import {
   ChevronDown,
   ChevronRight,
   Share2,
+  UtensilsCrossed,
 } from "lucide-react";
 import {
   getConversation,
@@ -52,6 +53,7 @@ import {
 import { useCloudinary } from "../../context/CloudinaryContext";
 import postsService from "@/services/postService";
 import { getVideoById } from "@/services/videoService";
+import { getRecipeById } from "@/services/recipeService";
 import EmojiPicker from "emoji-picker-react";
 import Tooltip from "../../components/Tooltip";
 
@@ -99,6 +101,7 @@ export default function MessagePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sharedPosts, setSharedPosts] = useState({});
   const [sharedVideos, setSharedVideos] = useState({});
+  const [sharedRecipes, setSharedRecipes] = useState({});
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null); // Ref cho typing timeout
   const [tooltipConfig, setTooltipConfig] = useState({
@@ -179,6 +182,18 @@ export default function MessagePage() {
       }));
     } catch (error) {
       console.error("Error fetching video details:", error);
+    }
+  };
+  const fetchRecipeDetails = async (recipeId) => {
+    try {
+      const response = await getRecipeById(recipeId);
+      console.log(response);
+      setSharedRecipes((prev) => ({
+        ...prev,
+        [recipeId]: response.data.data,
+      }));
+    } catch (error) {
+      console.error("Error fetching recipe details:", error);
     }
   };
   // Effect để ưu tiên selectedConversationId từ URL params
@@ -1388,9 +1403,13 @@ export default function MessagePage() {
       if (message.sharedType === "post" && !sharedPosts[message.sharedId]) {
         fetchPostDetails(message.sharedId);
       }
+      // Fetch recipe details if not already fetched for 'recipe' type
+      else if (message.sharedType === "recipe" && !sharedRecipes[message.sharedId]) {
+        fetchRecipeDetails(message.sharedId);
+      }
 
       const sharedPost = sharedPosts[message.sharedId];
-
+      const sharedRecipe = sharedRecipes[message.sharedId];
       if (message.sharedType === "post") {
         return (
           <div
@@ -1400,7 +1419,7 @@ export default function MessagePage() {
             }
             className="bg-gray-50 hover:bg-gray-100 rounded-lg cursor-pointer transition-all border border-gray-200 overflow-hidden max-w-[300px]"
           >
-            {/* Preview Image */}
+            {/* Post Preview */}
             {sharedPost?.media?.[0]?.url ? (
               <div className="w-full aspect-video relative overflow-hidden">
                 <img
@@ -1454,7 +1473,59 @@ export default function MessagePage() {
             </div>
           </div>
         );
-      } else if (message.sharedType === "video" && message.sharedId) {
+      } else if (message.sharedType === "recipe") {
+        return (
+          <div
+            onClick={() =>
+              message.sharedId &&
+              window.open(`/recipes/${message.sharedId}`, "_blank")
+            }
+            className="bg-gray-50 hover:bg-gray-100 rounded-lg cursor-pointer transition-all border border-gray-200 overflow-hidden max-w-[300px]"
+          >
+            {/* Recipe Preview */}
+            {sharedRecipe?.image?.[0] ? (
+              <div className="w-full aspect-video relative overflow-hidden">
+                <img
+                  src={sharedRecipe.image[0]}
+                  alt="Recipe preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="w-full aspect-video bg-gray-200 flex items-center justify-center">
+                <UtensilsCrossed className="text-gray-400" size={32} />
+              </div>
+            )}
+
+            {/* Recipe Info */}
+            <div className="p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <UtensilsCrossed size={16} className="text-orange-500" />
+                <span className="text-sm text-orange-500 font-medium">
+                  Công thức được chia sẻ
+                </span>
+              </div>
+
+              {sharedRecipe ? (
+                <>
+                  <h4 className="font-medium text-gray-800 line-clamp-2 mb-1">
+                    {sharedRecipe.name || "Công thức không có tên."}
+                  </h4>
+                </>
+              ) : (
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="w-5 h-5 bg-gray-200 rounded-full"></div>
+                    <div className="h-3 bg-gray-200 rounded w-1/3"></div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      } else if (message.sharedType === "video") {
         if (!sharedVideos[message.sharedId]) {
           fetchVideoDetails(message.sharedId);
         }
@@ -1982,7 +2053,8 @@ export default function MessagePage() {
                                 ${message.type === "image" ||
                                   (message.type === "share" &&
                                     (message.sharedType === "video" ||
-                                      message.sharedType === "post"))
+                                      message.sharedType === "post" ||
+                                      message.sharedType === "recipe"))
                                   ? "p-1"
                                   : "px-3 py-2"
                                 }
