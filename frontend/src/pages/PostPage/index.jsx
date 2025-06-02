@@ -54,7 +54,7 @@ const PostPage = () => {
 
         <div className="w-80 flex-shrink-0 hidden lg:block">
           <div className="sticky top-24">
-            <RightSidebar data={rightSidebarData} />
+            <RightSidebar />
           </div>
         </div>
       </div>
