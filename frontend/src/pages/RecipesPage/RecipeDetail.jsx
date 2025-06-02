@@ -14,14 +14,23 @@ import {
 import { getRecipeById } from "@/services/recipeService";
 import { calculateNutrition } from "@/utils/recipeUtils";
 import SharePopup from "@/components/common/SharePopup";
+import { checkRecipeInFavorites, toggleRecipeInFavorites } from "../../services/collectionService";
+import { toast } from "react-toastify";
+import { useAuth } from "../../context/AuthContext";
 
 export default function RecipeDetail({ className }) {
   const { id } = useParams();
+  const { user } = useAuth();
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState(null);
   const [servings, setServings] = useState(1);
   const [calculatedNutrition, setCalculatedNutrition] = useState(null);
-  const [sharePopup, setSharePopup] = useState({ open: false, recipeId: null, recipeTitle: null });
+  const [isLiked, setIsLiked] = useState(false);
+  const [sharePopup, setSharePopup] = useState({
+    open: false,
+    recipeId: null,
+    recipeTitle: "",
+  });
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -77,6 +86,42 @@ export default function RecipeDetail({ className }) {
     }
   }, [recipe, servings]);
 
+  // Check if recipe is in favorites
+  useEffect(() => {
+    const checkFavorites = async () => {
+      if (user && recipe?._id) {
+        try {
+          const response = await checkRecipeInFavorites(recipe._id);
+          if (response.success) {
+            setIsLiked(response.isInFavorites);
+          }
+        } catch (error) {
+          console.error("Error checking favorites:", error);
+        }
+      }
+    };
+
+    checkFavorites();
+  }, [recipe?._id, user]);
+
+  const handleLike = async () => {
+    if (!user) {
+      toast.info("Vui lòng đăng nhập để lưu công thức");
+      return;
+    }
+
+    try {
+      const response = await toggleRecipeInFavorites(recipe._id);
+      if (response.success) {
+        setIsLiked(response.isInFavorites);
+        toast.success(response.message);
+      }
+    } catch (error) {
+      console.error("Error toggling favorites:", error);
+      toast.error("Không thể cập nhật yêu thích");
+    }
+  };
+
   if (error || !recipe) {
     return (
       <div className="max-w-7xl mx-auto bg-white px-4 sm:px-6 lg:px-8 py-16">
@@ -101,17 +146,25 @@ export default function RecipeDetail({ className }) {
     >
       {/* Breadcrumb */}
       <div className="text-xs text-gray-500 py-4">
-        <BreadCrumb category="Chi tiết công thức" />
+        <BreadCrumb
+          items={[
+            { label: "Trang chủ", link: "/" },
+            { label: "Công thức", link: "/recipes" },
+            { label: recipe?.name || "Chi tiết công thức" },
+          ]}
+        />
       </div>
 
       {/* Recipe Header */}
-      <RecipeHeader 
-        recipe={recipe} 
-        onShare={() => setSharePopup({ 
-          open: true, 
-          recipeId: recipe._id, 
-          recipeTitle: recipe.title 
-        })} 
+      <RecipeHeader
+        recipe={recipe}
+        onShare={() => setSharePopup({
+          open: true,
+          recipeId: recipe._id,
+          recipeTitle: recipe.name,
+        })}
+        onLike={handleLike}
+        isLiked={isLiked}
       />
 
       <div className="flex flex-col lg:flex-row gap-8 mb-8">
@@ -154,11 +207,11 @@ export default function RecipeDetail({ className }) {
 
       {/* Share Popup */}
       <SharePopup
-        open={sharePopup.open}
+        isOpen={sharePopup.open}
+        onClose={() => setSharePopup({ open: false, recipeId: null, recipeTitle: "" })}
         recipeId={sharePopup.recipeId}
         recipeTitle={sharePopup.recipeTitle}
         type="recipe"
-        onClose={() => setSharePopup({ open: false, recipeId: null, recipeTitle: null })}
       />
     </div>
   );
