@@ -47,12 +47,16 @@ const Posts = forwardRef((props, ref) => {
         prevPosts.map(post => (post._id === id ? updatedPost : post))
       );
 
-      if (isLiking && updatedPost.author._id !== user._id) {
-        sendNotification({
-          receiverId: updatedPost.author._id,
-          type: 'like',
-          postId: id,
-        });
+      // Gửi thông báo khi like bài viết
+      if (isLiking) {
+        const post = posts.find(p => p._id === id);
+        if (post && post.author._id !== user._id) {
+          sendNotification({
+            receiverId: post.author._id,
+            type: 'like',
+            postId: id,
+          });
+        }
       }
     }
     catch (error) {

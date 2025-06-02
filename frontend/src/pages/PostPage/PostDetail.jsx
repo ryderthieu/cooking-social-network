@@ -106,12 +106,13 @@ const PostDetail = () => {
   }
   const handleLike = async () => {
     try {
-      await postsService.toggleLike(post._id);
+      const res = await postsService.toggleLike(post._id);
       const updatedPost = await postsService.fetchById(post._id);
       setPost(updatedPost.data);
       const isLiking = !isLiked;
       setIsLiked(!isLiked);
 
+      // Gửi thông báo khi like bài viết
       if (isLiking && post.author._id !== user._id) {
         sendNotification({
           receiverId: post.author._id,
@@ -147,6 +148,7 @@ const PostDetail = () => {
       // Trigger comment list refresh
       setCommentRefresh(prev => prev + 1);
 
+      // Gửi thông báo khi comment bài viết
       if (post.author._id !== user._id) {
         sendNotification({
           receiverId: post.author._id,
