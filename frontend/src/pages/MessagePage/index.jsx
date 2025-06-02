@@ -1615,6 +1615,60 @@ export default function MessagePage() {
     );
   };
 
+  const handleFileSelect = async (e) => {
+    const files = Array.from(e.target.files);
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+
+    if (imageFiles.length > 0) {
+      setIsUploading(true);
+      try {
+        for (const file of imageFiles) {
+          const result = await uploadImage(file, "messages");
+          if (result.secure_url) {
+            // Gửi tin nhắn hình ảnh qua socket
+            socket.emit("send_message", {
+              conversationId: selectedConversationId,
+              type: "image",
+              image: result.secure_url,
+            });
+
+            // Optimistic update UI
+            const tempMessageId = `temp-${Date.now()}`;
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: tempMessageId,
+                sender: {
+                  _id: user._id,
+                  firstName: user.firstName,
+                  lastName: user.lastName,
+                  avatar: user.avatar,
+                },
+                type: "image",
+                image: result.secure_url,
+                createdAt: new Date().toISOString(),
+                isOwn: true,
+                avatar: user.avatar,
+                reactions: [],
+                recalled: false,
+              },
+            ]);
+
+            scrollToBottom();
+          }
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        setError("Không thể tải ảnh lên. Vui lòng thử lại.");
+      } finally {
+        setIsUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      }
+    }
+  };
+
   if (loading) {
     // Only show initial full page loader
     return (
@@ -2033,7 +2087,7 @@ export default function MessagePage() {
                                       message.createdAt
                                     ),
                                     top: rect.top,
-                                    left: rect.left, 
+                                    left: rect.left,
                                   });
                                 }
                               }}
@@ -2344,7 +2398,7 @@ export default function MessagePage() {
                     className="w-full px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10"
                   />
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                    <button className=" text-gray-400 hover:text-blue-500 p-1.5 rounded-full hover:bg-gray-200 transition-colors" onClick={() => {setIsShowIconPicker(prev => !prev)}}>
+                    <button className=" text-gray-400 hover:text-blue-500 p-1.5 rounded-full hover:bg-gray-200 transition-colors" onClick={() => { setIsShowIconPicker(prev => !prev) }}>
                       <Smile size={20} />
                     </button>
                     {isShowIconPicker && (
@@ -2654,29 +2708,84 @@ export default function MessagePage() {
                         {messages
                           .filter((m) => {
                             return (
-                              m.text?.includes("http") &&
-                              !isMessageDeleted(m) &&
-                              typeof m.text === "string" && // Đảm bảo text là string
-                              m.text.trim() !== ""
-                            ); // Đảm bảo text không rỗng
+                              (m.type === "share" && !isMessageDeleted(m)) ||
+                              (m.text?.includes("http") && !isMessageDeleted(m))
+                            );
                           })
-                          .slice(0, 5)
-                          .map((message, index) => (
-                            <div
-                              key={message.id}
-                              className="p-2 hover:bg-gray-100 rounded-lg cursor-pointer"
-                            >
-                              <p className="text-sm text-blue-600 truncate">
-                                {message.text}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {format(
-                                  new Date(message.createdAt),
-                                  "dd/MM/yyyy"
-                                )}
-                              </p>
-                            </div>
-                          ))}
+                          .slice(0, 10)
+                          .map((message, index) => {
+                            if (message.type === "share") {
+                              const sharedContent = (() => {
+                                if (message.sharedType === "post" && sharedPosts[message.sharedId]) {
+                                  const post = sharedPosts[message.sharedId];
+                                  return {
+                                    title: post.content || "Bài viết được chia sẻ",
+                                    icon: <Share2 size={16} className="text-blue-500" />,
+                                    link: `/posts/${message.sharedId}`,
+                                    type: "Bài viết"
+                                  };
+                                } else if (message.sharedType === "video" && sharedVideos[message.sharedId]) {
+                                  const video = sharedVideos[message.sharedId];
+                                  return {
+                                    title: video.description || "Video được chia sẻ",
+                                    icon: <Video size={16} className="text-purple-500" />,
+                                    link: `/explore/reels/${message.sharedId}`,
+                                    type: "Video"
+                                  };
+                                } else if (message.sharedType === "recipe" && sharedRecipes[message.sharedId]) {
+                                  const recipe = sharedRecipes[message.sharedId];
+                                  return {
+                                    title: recipe.name || "Công thức được chia sẻ",
+                                    icon: <UtensilsCrossed size={16} className="text-orange-500" />,
+                                    link: `/recipes/${message.sharedId}`,
+                                    type: "Công thức"
+                                  };
+                                }
+                                return null;
+                              })();
+
+                              if (!sharedContent) return null;
+
+                              return (
+                                <a
+                                  key={message.id}
+                                  href={sharedContent.link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block p-3 hover:bg-gray-50 rounded-lg transition-all border border-gray-100 hover:border-gray-200"
+                                >
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {sharedContent.icon}
+                                    <span className="text-sm font-medium">{sharedContent.type}</span>
+                                  </div>
+                                  <p className="text-sm text-gray-800 line-clamp-2 mb-1">
+                                    {sharedContent.title}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    {format(new Date(message.createdAt), "HH:mm dd/MM/yyyy", { locale: vi })}
+                                  </p>
+                                </a>
+                              );
+                            }
+
+                            // Hiển thị link thông thường
+                            return (
+                              <div
+                                key={message.id}
+                                className="p-3 hover:bg-gray-50 rounded-lg cursor-pointer border border-gray-100 hover:border-gray-200"
+                                onClick={() => window.open(message.text, '_blank')}
+                              >
+                                <div className="flex items-center gap-2 mb-1">
+                                  <FileText size={16} className="text-gray-500" />
+                                  <span className="text-sm font-medium">Liên kết</span>
+                                </div>
+                                <p className="text-sm text-blue-600 truncate mb-1">{message.text}</p>
+                                <p className="text-xs text-gray-500">
+                                  {format(new Date(message.createdAt), "HH:mm dd/MM/yyyy", { locale: vi })}
+                                </p>
+                              </div>
+                            );
+                          })}
                       </div>
                     )}
                   </div>
@@ -2686,7 +2795,7 @@ export default function MessagePage() {
         </div>
       </div>
       {renderReactionPicker()} {/* Gọi hàm renderReactionPicker ở đây */}
-      
+
       {/* Add Tooltip component */}
       <Tooltip
         content={tooltipConfig.content}
@@ -2694,6 +2803,22 @@ export default function MessagePage() {
         left={tooltipConfig.left}
         visible={tooltipConfig.visible}
       />
+
+      {/* Add file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
+      {/* <button 
+        className="text-gray-400 hover:text-blue-500 p-2 rounded-full transition-colors hover:bg-gray-100" 
+        onClick={() => fileInputRef.current?.click()}
+      >
+        <Image size={20} />
+      </button> */}
     </div>
   );
 }

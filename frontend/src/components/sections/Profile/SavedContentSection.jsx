@@ -5,7 +5,7 @@ function SavedContentSection({ savedTab, setSavedTab }) {
   const savedTabs = [
     { key: "recipes", label: "Công thức" },
     { key: "posts", label: "Bài viết" },
-    { key: "reels", label: "Video" },
+    { key: "reels", label: "Reels" },
   ];
 
   return (

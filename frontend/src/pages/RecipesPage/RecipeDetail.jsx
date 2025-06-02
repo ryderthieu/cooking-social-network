@@ -149,13 +149,13 @@ export default function RecipeDetail({ className }) {
 
         {/* <BreadCrumb category="Chi tiết công thức" /> */}
 
-//         <BreadCrumb
-//           items={[
-//             { label: "Trang chủ", link: "/" },
-//             { label: "Công thức", link: "/recipes" },
-//             { label: recipe?.name || "Chi tiết công thức" },
-//           ]}
-//         />
+       <BreadCrumb
+          items={[
+             { label: "Trang chủ", link: "/" },
+            { label: "Công thức", link: "/recipes" },
+           { label: recipe?.name || "Chi tiết công thức" },
+         ]}
+      />
 
       </div>
 
