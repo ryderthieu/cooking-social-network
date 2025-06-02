@@ -101,7 +101,7 @@ const ExploreSection = ({ categoryType, currentItem }) => {
       style={{
         backgroundColor: currentCategoryData?.background 
           ? currentCategoryData.background.includes('[') 
-            ? currentCategoryData.background.match(/\[(.*?)\]/)?.[1] + '70'
+            ? currentCategoryData.background.match(/\[(.*?)\]/)?.[1] + '80'
             : '#f3f4f630' 
           : '#f3f4f630'
       }}

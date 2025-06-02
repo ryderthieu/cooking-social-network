@@ -11,7 +11,6 @@ import { getAllRecipes, filterRecipes } from "../../services/recipeService.js";
 import { getAllPosts } from "../../services/postService.js";
 import categoryService from "../../services/categoryService.js";
 
-
 const Recipes = () => {
   const { categoryType, item } = useParams();
   const location = useLocation();
@@ -26,65 +25,73 @@ const Recipes = () => {
 
   // Parse query parameters
   const queryParams = new URLSearchParams(location.search);
-  const dietaryPreferences = queryParams.get('dietaryPreferences');
-  const cookingMethod = queryParams.get('cookingMethod');
+  const dietaryPreferences = queryParams.get("dietaryPreferences");
+  const cookingMethod = queryParams.get("cookingMethod");
   const isQueryFiltering = dietaryPreferences || cookingMethod;
 
   // Filter recipes based on current category
-  const filterRecipesByCategory = React.useCallback((recipes) => {
-    if (!categoryType || !item || !currentCategory) {
-      return recipes;
-    }
-    
-    return recipes.filter(recipe => {
-      if (!recipe.categories || !Array.isArray(recipe.categories)) return false;
-      
-      // Check if any of the recipe's categories match the current filter
-      return recipe.categories.some(category => {
-        // Handle populated category objects
-        if (typeof category === 'object' && category !== null) {
-          const categoryTypeField = category.type;
-          const categorySlug = category.slug;
-          const categoryName = category.name;
-          
-          // Check if the category type matches
-          if (categoryTypeField === categoryType) {
-            // Try to match by slug first (most accurate)
-            if (categorySlug === item) {
-              return true;
-            }
-            
-            // If slug doesn't match, try matching by name from database
-            if (categoryName === currentCategory.name) {
-              return true;
+  const filterRecipesByCategory = React.useCallback(
+    (recipes) => {
+      if (!categoryType || !item || !currentCategory) {
+        return recipes;
+      }
+
+      return recipes.filter((recipe) => {
+        if (!recipe.categories || !Array.isArray(recipe.categories))
+          return false;
+
+        // Check if any of the recipe's categories match the current filter
+        return recipe.categories.some((category) => {
+          // Handle populated category objects
+          if (typeof category === "object" && category !== null) {
+            const categoryTypeField = category.type;
+            const categorySlug = category.slug;
+            const categoryName = category.name;
+
+            // Check if the category type matches
+            if (categoryTypeField === categoryType) {
+              // Try to match by slug first (most accurate)
+              if (categorySlug === item) {
+                return true;
+              }
+
+              // If slug doesn't match, try matching by name from database
+              if (categoryName === currentCategory.name) {
+                return true;
+              }
             }
           }
-        }
-        
-        return false;
+
+          return false;
+        });
       });
-    });
-  }, [categoryType, item, currentCategory]);
+    },
+    [categoryType, item, currentCategory]
+  );
   // Fetch initial data (recipes, blogs, category info)
   useEffect(() => {
     const fetchData = async () => {
       try {
         setError(null);
-        
+
         // Handle different filtering scenarios
         let recipes = [];
-        
+
         if (isQueryFiltering) {
           // Use query parameter filtering - call backend API with filters
           const filters = {};
-          if (dietaryPreferences) filters.dietaryPreferences = dietaryPreferences;
+          if (dietaryPreferences)
+            filters.dietaryPreferences = dietaryPreferences;
           if (cookingMethod) filters.cookingMethod = cookingMethod;
-          
+
           try {
             const recipeResponse = await filterRecipes(filters);
             recipes = recipeResponse.data.data || [];
           } catch (filterError) {
-            console.warn('Failed to filter recipes, falling back to all recipes:', filterError);
+            console.warn(
+              "Failed to filter recipes, falling back to all recipes:",
+              filterError
+            );
             // Fallback to getting all recipes
             const recipeResponse = await getAllRecipes();
             recipes = recipeResponse.data.data || [];
@@ -94,42 +101,49 @@ const Recipes = () => {
           const recipeResponse = await getAllRecipes();
           recipes = recipeResponse.data.data || [];
         }
-        
+
         setAllRecipes(recipes);
-        
+
         // First, fetch category information if we have categoryType and item
         if (categoryType && item) {
           try {
-            const categoryResponse = await categoryService.getCategoryBySlugAndType(categoryType, item);
+            const categoryResponse =
+              await categoryService.getCategoryBySlugAndType(
+                categoryType,
+                item
+              );
             setCurrentCategory(categoryResponse.data.data);
           } catch (categoryError) {
-            console.warn('Failed to load category info:', categoryError);
+            console.warn("Failed to load category info:", categoryError);
             setCurrentCategory(null);
           }
         }
-        
+
         // Fetch blogs/posts
         try {
           const blogsResponse = await getAllPosts();
-          const postsData = Array.isArray(blogsResponse.data) ? blogsResponse.data : [];
+          const postsData = Array.isArray(blogsResponse.data)
+            ? blogsResponse.data
+            : [];
           // Transform posts to blog format if needed
-          const formattedBlogs = postsData.slice(0, 4).map(post => ({
+          const formattedBlogs = postsData.slice(0, 4).map((post) => ({
             id: post._id,
-            title: post.caption || 'Bài viết mới',
+            title: post.caption || "Bài viết mới",
             image: post.media?.[0]?.url || Korea1,
-            author: post.author ? `${post.author.firstName} ${post.author.lastName}` : 'Oshisha',
+            author: post.author
+              ? `${post.author.firstName} ${post.author.lastName}`
+              : "Oshisha",
             date: post.createdAt,
-            path: `/posts/${post._id}`
+            path: `/posts/${post._id}`,
           }));
           setBlogs(formattedBlogs);
         } catch (blogError) {
-          console.warn('Failed to load blogs:', blogError);
+          console.warn("Failed to load blogs:", blogError);
           setBlogs([]);
         }
-        
       } catch (err) {
-        console.error('Error fetching data:', err);
-        setError('Có lỗi xảy ra khi tải dữ liệu');
+        console.error("Error fetching data:", err);
+        setError("Có lỗi xảy ra khi tải dữ liệu");
         // Fallback to empty arrays
         setFilteredPopularRecipes([]);
         setFilteredAllRecipes([]);
@@ -143,17 +157,24 @@ const Recipes = () => {
   useEffect(() => {
     if (allRecipes.length > 0) {
       let filtered = allRecipes;
-      
+
       // Apply path parameter filtering (category-based) if not using query filters
-      if (!isQueryFiltering && (categoryType && item && currentCategory)) {
+      if (!isQueryFiltering && categoryType && item && currentCategory) {
         filtered = filterRecipesByCategory(allRecipes);
       }
       // If using query filters, recipes are already filtered from backend
-      
+
       setFilteredPopularRecipes(filtered.slice(0, 4));
       setFilteredAllRecipes(filtered);
     }
-  }, [allRecipes, filterRecipesByCategory, isQueryFiltering, categoryType, item, currentCategory]);
+  }, [
+    allRecipes,
+    filterRecipesByCategory,
+    isQueryFiltering,
+    categoryType,
+    item,
+    currentCategory,
+  ]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -174,24 +195,27 @@ const Recipes = () => {
         return `Phương pháp nấu: ${cookingMethod}`;
       }
     }
-    
+
     // Handle path parameter display names
     const categoryTypeMap = {
-      'mealType': 'Loại bữa ăn',
-      'cuisine': 'Vùng ẩm thực',
-      'occasions': 'Dịp đặc biệt',
-      'dietaryPreferences': 'Chế độ ăn',
-      'mainIngredients': 'Nguyên liệu chính',
-      'cookingMethod': 'Phương pháp nấu',
-      'timeBased': 'Thời gian',
-      'difficultyLevel': 'Mức độ khó'
+      mealType: "Loại bữa ăn",
+      cuisine: "Vùng ẩm thực",
+      occasions: "Dịp đặc biệt",
+      dietaryPreferences: "Chế độ ăn",
+      mainIngredients: "Nguyên liệu chính",
+      cookingMethod: "Phương pháp nấu",
+      timeBased: "Thời gian",
+      difficultyLevel: "Mức độ khó",
     };
     return categoryTypeMap[categoryType] || categoryType;
   };
 
   // Get display names from database or fallback
-  const displayItemName = currentCategory?.name || item || '';
-  const displayCategoryName = getCategoryDisplayName();  const categoryDescription = currentCategory?.description || `Khám phá các công thức ${displayItemName.toLowerCase()} tuyệt vời! 
+  const displayItemName = currentCategory?.name || item || "";
+  const displayCategoryName = getCategoryDisplayName();
+  const categoryDescription =
+    currentCategory?.description ||
+    `Khám phá các công thức ${displayItemName.toLowerCase()} tuyệt vời! 
 Từ những món ăn truyền thống đến hiện đại, 
 chúng tôi mang đến cho bạn những trải nghiệm ẩm thực đa dạng và phong phú.`;
 
@@ -205,8 +229,8 @@ chúng tôi mang đến cho bạn những trải nghiệm ẩm thực đa dạng
       <div className="flex justify-center items-center min-h-screen">
         <div className="text-center">
           <p className="text-red-500 text-lg mb-4">{error}</p>
-          <button 
-            onClick={() => window.location.reload()} 
+          <button
+            onClick={() => window.location.reload()}
             className="bg-pink-500 text-white px-4 py-2 rounded hover:bg-pink-600"
           >
             Thử lại
@@ -214,8 +238,10 @@ chúng tôi mang đến cho bạn những trải nghiệm ẩm thực đa dạng
         </div>
       </div>
     );
-  }  return (
-    <>      <RecipeHeader
+  }
+  return (
+    <>
+      <RecipeHeader
         scrollY={scrollY}
         displayCategoryName={displayCategoryName}
         displayItemName={displayItemName}
@@ -223,7 +249,6 @@ chúng tôi mang đến cho bạn những trải nghiệm ẩm thực đa dạng
         categoryType={categoryType}
         currentCategory={currentCategory}
       />
-
       <div className="mx-auto space-y-10 my-10">
         {/* Blog Section */}
         <BlogSection blogs={blogs} />

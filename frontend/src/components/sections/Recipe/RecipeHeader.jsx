@@ -179,7 +179,7 @@ const RecipeHeader = ({
   const getBannerStyles = () => {
     const maxScroll = 200;
     const scrollProgress = Math.min(scrollY / maxScroll, 1);
-    const width = 100 - scrollProgress * 10;
+    const width = 100 - scrollProgress * 15;
     const borderRadius = scrollProgress * 48;
 
     return {

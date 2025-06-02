@@ -3,7 +3,7 @@ import SavedCard from "./SavedCard";
 
 const RecipeGrid = ({ title, recipes, showLoadMore, onLoadMore }) => {
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-[80px]">
       <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-black mb-6 md:mb-8">
         {title}
       </h3>

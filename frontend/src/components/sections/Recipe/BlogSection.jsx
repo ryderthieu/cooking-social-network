@@ -10,8 +10,8 @@ const BlogSection = ({ blogs }) => {
   const sideBogs = blogs.slice(1, 4);
 
   return (
-    <div className="container mx-auto px-4">
-      <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-black mb-6">
+    <div className="container mx-auto  px-[80px]">
+      <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-black mb-6">
         Tin tức - kiến thức
       </h3>
 
