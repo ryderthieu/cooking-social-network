@@ -71,16 +71,6 @@ export const sharePost = (id) => {
   return API.patch(`/posts/share-post/${id}`);
 };
 
-export const commentPost = (id, data) => {
-  return API.post(`/posts/${id}/comments`, data);
-};
 
-export const getSavedPosts = () => {
-  return API.get('/posts/saved');
-};
-
-export const savePost = (id) => {
-  return API.patch(`/posts/save-post/${id}`);
-};
 
 export default postsService

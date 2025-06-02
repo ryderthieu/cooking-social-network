@@ -9,6 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import { createComment } from '@/services/commentService';
 import SharePopup from '../../components/common/SharePopup';
 import { useSocket } from '@/context/SocketContext';
+import { deleteSavedPost, savePost } from '@/services/userService';
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -19,6 +20,7 @@ const PostDetail = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [showFullImage, setShowFullImage] = useState(false);
   const [commentRefresh, setCommentRefresh] = useState(0); // Add this to trigger comment refresh
+  const [isBookmarked, setIsBookmarked] = useState(false)
   const navigate = useNavigate();
   const { user } = useAuth();
   const [sharePopup, setSharePopup] = useState({ open: false, postId: null, postTitle: null });
@@ -32,6 +34,9 @@ const PostDetail = () => {
         const response = await postsService.fetchById(id);
         setPost(response.data);
         setIsLiked(response.data.likes?.includes(user._id));
+        setIsBookmarked(
+          user.savedPost.some((id) => id && id.toString() === response.data._id)
+        );
       } catch (error) {
         console.error('Error fetching post:', error);
         setError('Không thể tải bài viết. Vui lòng thử lại sau.');
@@ -75,7 +80,22 @@ const PostDetail = () => {
     e?.stopPropagation();
     setCurrentImageIndex(prev => (prev === imageMedia.length - 1 ? 0 : prev + 1));
   };
+  const handleBookmark = async () => {
+    try {
+      console.log(post._id)
+      if (isBookmarked) {
+        await deleteSavedPost({postId: post._id})
+      }
+      else {
+        await savePost({postId: post._id})
+      }
+      setIsBookmarked(prev => !prev)
 
+    }
+    catch (error) {
+      console.log(error)
+    }
+  }
   const handleLike = async () => {
     try {
       await postsService.toggleLike(post._id);
@@ -190,8 +210,8 @@ const PostDetail = () => {
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
                         className={`w-2.5 h-2.5 rounded-full transition-all duration-300 transform ${index === currentImageIndex
-                            ? 'bg-white scale-125'
-                            : 'bg-white/40 hover:bg-white/60'
+                          ? 'bg-white scale-125'
+                          : 'bg-white/40 hover:bg-white/60'
                           }`}
                       />
                     ))}
@@ -260,13 +280,13 @@ const PostDetail = () => {
               <button
                 onClick={handleLike}
                 className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-300 group ${isLiked
-                    ? 'bg-[#FFB800]/20 text-[#FFB800] shadow-md'
-                    : 'text-gray-600 hover:text-[#FFB800] hover:bg-[#FFF4D6]/50'
+                  ? 'bg-[#FFB800]/20 text-[#FFB800] shadow-md'
+                  : 'text-gray-600 hover:text-[#FFB800] hover:bg-[#FFF4D6]/50'
                   }`}
               >
                 <div className={`p-2 rounded-full transition-all duration-300 ${isLiked
-                    ? 'bg-[#FFB800]/30 scale-110'
-                    : 'bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110'
+                  ? 'bg-[#FFB800]/30 scale-110'
+                  : 'bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110'
                   }`}>
                   <FaHeart className={`w-4 h-4 ${isLiked ? 'text-[#FFB800]' : ''}`} />
                 </div>
@@ -290,8 +310,17 @@ const PostDetail = () => {
                 <span className="font-semibold text-sm">{post.shares?.length || 0}</span>
               </button>
 
-              <button className="p-2 rounded-full bg-gray-100 hover:bg-[#FFF4D6] text-gray-600 hover:text-[#FFB800] transition-all duration-300 hover:scale-110">
-                <FaBookmark className="w-4 h-4" />
+              <button onClick={handleBookmark} className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-300 group ${isBookmarked
+                ? 'bg-[#FFB800]/20 text-[#FFB800] shadow-md'
+                : 'text-gray-600 hover:text-[#FFB800] hover:bg-[#FFF4D6]/50'
+                }`}>
+                <div className={`p-2 rounded-full transition-all duration-300 ${isBookmarked
+                  ? 'bg-[#FFB800]/30 scale-110'
+                  : 'bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110'
+                  }`}>
+                  <FaBookmark className="w-4 h-4" />
+
+                </div>
               </button>
             </div>
           </div>
@@ -353,8 +382,8 @@ const PostDetail = () => {
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
                   className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${index === currentImageIndex
-                      ? 'bg-white scale-125'
-                      : 'bg-white/40 hover:bg-white/60'
+                    ? 'bg-white scale-125'
+                    : 'bg-white/40 hover:bg-white/60'
                     }`}
                 />
               ))}

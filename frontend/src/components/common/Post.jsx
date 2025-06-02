@@ -72,9 +72,7 @@ export const PostCard = ({
         post?.likes?.some((id) => id.toString() === user?._id)
     );
 
-    const [isBookmarked, setIsBookmarked] = useState(() =>
-        post?.bookmarks?.some((id) => id.toString() === user?._id)
-    );
+    const [isBookmarked, setIsBookmarked] = useState(false);
 
     const handleLike = () => {
         setIsLiked(!isLiked);
@@ -83,11 +81,18 @@ export const PostCard = ({
 
     const handleBookmark = () => {
         setIsBookmarked(!isBookmarked);
-        onBookmark?.();
+        onBookmark?.(post._id);
     };
     useEffect(() => {
-        console.log(post)
-    }, [])
+        console.log('post', post);
+        console.log('user', user);
+        if (user && post && Array.isArray(user.savedPost)) {
+        setIsBookmarked(
+            user.savedPost.some((id) => id && id.toString() === post._id)
+        );
+    }
+    }, []);
+
     const getGridClass = (length) => {
         switch (length) {
             case 1:
