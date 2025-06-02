@@ -152,7 +152,7 @@ const Header = () => {
                     {dynamicCategories.map((category, index) => (
                       <li key={category.name}>
                         <div
-                          className={`cursor-pointer text-[17px] scale-y-105 pb-4 transition-all duration-200 font-medium ${
+                          className={`cursor-pointer text-[17px] scale-[1.05] pb-4 transition-all duration-200 font-medium ${
                             index === selectedCategoryIndex
                               ? "text-[#FF6363]"
                               : "hover:text-[#FF6363]"
@@ -173,7 +173,7 @@ const Header = () => {
                   onClick={() => setIsExploreOpen(false)}
                   className="mt-4 inline-block"
                 >
-                  <div className="cursor-pointer text-[17px] font-medium text-sky-600 hover:text-sky-700 transition-all duration-200 relative group">
+                  <div className="cursor-pointer text-[17px] scale-[1.05] font-medium text-sky-600 hover:text-sky-700 transition-all duration-200 relative group">
                     Xem tất cả
                     <span className="absolute left-0 bottom-0 w-0 h-[2px] bg-sky-600 transition-all duration-300 group-hover:w-full"></span>
                   </div>
@@ -190,7 +190,7 @@ const Header = () => {
                       className="text-center group"
                     >
                       <div
-                        className="h-[280px] rounded-2xl mb-4 overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
+                        className="h-[280px] rounded-2xl mb-4 overflow-hidden flex items-center justify-center transition-transform duration-300 group-hover:[1.05]"
                         style={{
                           background:
                             dynamicCategories[selectedCategoryIndex]
@@ -282,7 +282,7 @@ const Header = () => {
                   {supports.map((item, index) => (
                     <li key={item.name}>
                       <div
-                        className={`cursor-pointer scale-y-105 pb-4 transition-all duration-200 font-medium ${
+                        className={`cursor-pointer scale-[1.05] pb-4 transition-all duration-200 font-medium ${
                           index === selectedSupportIndex
                             ? "text-[#FF6363]"
                             : "hover:text-[#FF6363]"
@@ -417,14 +417,14 @@ const Header = () => {
             </div>
 
             {isDropdownOpen && (
-              <div className="absolute top-[91px] right-[100px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10 border border-gray-100 overflow-hidden">
+              <div className="absolute top-[85px] right-[100px] bg-white  rounded-b-lg w-[200px] text-[18px] pt-2 shadow-2xl z-10 overflow-hidden">
                 <div className="p-2">
-                  <a href={`/profile/${user._id}`} className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
+                  <a href={`/profile/${user._id}`} className="text-[#04043F] font-medium text-[17px] scale-[1.05]  mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
                     Trang cá nhân
                   </a>
                   <div
                     onClick={() => navigate("/account")}
-                    className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200"
+                    className="text-[#04043F] scale-[1.05]  font-medium text-[17px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200"
                   >
                     Tài khoản
                   </div>
@@ -448,7 +448,7 @@ const Header = () => {
           <div>
             <button
               onClick={() => navigate("/login")}
-              className="font-medium text-[17px] text-white bg-[#04043F] hover:bg-[#03032d] py-2 px-6 rounded-[30px] ml-[80px] transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-105 focus:ring-4 focus:ring-[#04043F]/50"
+              className="font-medium text-[17px] text-white bg-[#04043F] hover:bg-[#03032d] py-2 px-6 rounded-[30px] ml-[80px] transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.05]  focus:ring-4 focus:ring-[#04043F]/50"
             >
               Đăng nhập
             </button>

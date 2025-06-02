@@ -98,7 +98,7 @@ export default function RecipeDetail({ className }) {
     >
       {/* Breadcrumb */}
       <div className="text-xs text-gray-500 py-4">
-        <BreadCrumb category="Chi tiết công thức" />
+        {/* <BreadCrumb category="Chi tiết công thức" /> */}
       </div>
 
       {/* Recipe Header */}
