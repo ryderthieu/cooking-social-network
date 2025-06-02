@@ -53,7 +53,7 @@ export default function ProfileHeader({
               </h1>
               {!isOwnProfile && onMessage && (
                 <button
-                  onClick={onMessage}
+                  onClick={() => onMessage(profileUser._id)}
                   className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-700 transition my-auto"
                 >
                   Nhắn tin

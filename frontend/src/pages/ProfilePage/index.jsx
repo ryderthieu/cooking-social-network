@@ -19,6 +19,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useSocket } from "../../context/SocketContext";
 import { toast } from "react-toastify";
 import EditProfileModal from "../../components/common/Modal/Profile/EditProfileModal";
+import { createConversation, getPrivateConversation } from "@/services/conversationService";
 
 export default function ProfilePage() {
   const { userId } = useParams();
@@ -241,6 +242,16 @@ export default function ProfilePage() {
     }
   };
 
+  const handleMessage = async (id) => {
+    try {
+      const res = await createConversation({members: [currentUser._id, id], name: ''})
+      console.log(res)
+      navigate(`/messages/${res.data.data._id}`)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Handle edit profile
   const handleEditProfile = async (formData) => {
     try {
@@ -345,7 +356,7 @@ export default function ProfilePage() {
                 onEditProfile={handleEditProfile}
                 currentUserId={currentUser?._id}
                 onToggleFollowInModal={handleToggleFollowInModal}
-                onMessage={() => navigate(`/messages/${userData?._id}`)}
+                onMessage={handleMessage}
               />
             </div>
 

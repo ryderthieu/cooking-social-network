@@ -245,7 +245,7 @@ const searchUser = async (req, res) => {
 const editProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { firstName, lastName, gender, birthDay, avatar } = req.body;
+    const { firstName, lastName, gender, birthDay, avatar, username } = req.body;
 
     const user = await User.findById(userId).select(
       "-password -otp -otpExpire"
@@ -257,9 +257,9 @@ const editProfile = async (req, res) => {
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
     if (gender) user.gender = gender;
-    if (birthDay) user.birthDay = birthDay;
+    if (birthDay) user.birthday = birthDay;
     if (avatar) user.avatar = avatar;
-
+    if (username) user.username = username
     await user.save();
 
     res.status(200).json(user);

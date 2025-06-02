@@ -8,6 +8,10 @@ export const getConversation = ({conversationId}) => {
     return API.get(`/conversations/${conversationId}`)
 }
 
+export const getPrivateConversation = ({userId1, userId2}) => {
+    return API.get(`/conversations/find-private?userId1=${userId1}&userId2=${userId2}`)
+}
+
 export const getUserConversations = ({page = 1, limit = 10}) => {
     return API.get(`/conversations?page=${page}&limit=${limit}`)
 }
