@@ -49,7 +49,7 @@ export default function ProfileHeader({
           <div className="md:max-w-3xl">
             <div className="flex items-center justify-between gap-4">
               <h1 className="text-2xl font-bold">
-                {profileUser.firstName} {profileUser.lastName}
+                {profileUser.lastName} {profileUser.firstName}
               </h1>
               {!isOwnProfile && onMessage && (
                 <button

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { PostCard } from '../../common/Post';
-import postsService from '../../../services/postService';
+import postsService, { deletePost } from '../../../services/postService';
 import { useAuth } from '../../../context/AuthContext';
+import { toast } from 'react-toastify';
 
 export default function PostsTab({userId}) {
   const [posts, setPosts] = useState([]);
@@ -37,7 +38,7 @@ export default function PostsTab({userId}) {
     try {
       await postsService.toggleLike(postId);
       setPosts(posts.map(post => {
-        if (post.id === postId) {
+        if (post._id === postId) {
           return {
             ...post,
             liked: !post.liked,
@@ -64,17 +65,20 @@ export default function PostsTab({userId}) {
     }
   };
 
-  const handleEdit = (postId) => {
-    console.log(`Edit post ${postId}`);
+  const handleEdit = (postId, editedData) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post => post._id === postId ? editedData : post)
+    );
   };
 
   const handleDelete = async (postId) => {
     try {
-      await postsService.remove(postId);
       // Remove the post from the state
-      setPosts(posts.filter(post => post.id !== postId));
+      setPosts(prevPosts => prevPosts.filter(post => post._id !== postId));
+      toast.success('Đã xóa bài viết thành công!');
     } catch (err) {
       console.error('Error deleting post:', err);
+      toast.error('Có lỗi xảy ra khi xóa bài viết');
     }
   };
 
@@ -107,8 +111,8 @@ export default function PostsTab({userId}) {
             onLike={() => handleLike(post._id)}
             onComment={() => handleComment(post._id)}
             onShare={() => handleShare(post._id)}
-            onEdit={() => handleEdit(post._id)}
-            onDelete={() => handleDelete(post._id)}
+            onPostUpdated={(editedData) => handleEdit(post._id, editedData)}
+            onDelete={handleDelete}
           />
         );
       })}

@@ -10,6 +10,11 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import EditPostModal from './PostModals/EditPostModal';
+import DeleteConfirmModal from './PostModals/DeleteConfirmModal';
+import { editPost, deletePost, getPostById } from "@/services/postService";
+import { useCloudinary } from "@/context/CloudinaryContext";
+import { toast } from "react-toastify";
 
 export const formatDate = (dateString) => {
     try {
@@ -58,21 +63,29 @@ export const formatDate = (dateString) => {
 };
 
 export const PostCard = ({
-    post,
+    post: initialPost,
     onLike,
     onComment,
     onShare,
-    onEdit,
-    onDelete,
     onBookmark,
+    onPostUpdated,
+    onDelete,
 }) => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [showMenu, setShowMenu] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [post, setPost] = useState(initialPost);
     const [isLiked, setIsLiked] = useState(() =>
         post?.likes?.some((id) => id.toString() === user?._id)
     );
-
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const { uploadImage } = useCloudinary();
+
+    useEffect(() => {
+        setPost(initialPost);
+    }, [initialPost]);
 
     const handleLike = () => {
         setIsLiked(!isLiked);
@@ -83,15 +96,66 @@ export const PostCard = ({
         setIsBookmarked(!isBookmarked);
         onBookmark?.(post._id);
     };
+
+    const handleEdit = async (editedData) => {
+        try {
+            // Upload new images if any
+            let uploadedImages = [];
+            if (editedData.newImages?.length > 0) {
+                const uploadPromises = editedData.newImages.map(item => uploadImage(item.file));
+                const uploadedResults = await Promise.all(uploadPromises);
+                uploadedImages = uploadedResults.map(result => result.url);
+            }
+
+            // Get existing image URLs
+            const existingImageUrls = editedData.images.map(img => img.url);
+
+            // Combine all image URLs
+            const allImageUrls = [...existingImageUrls, ...uploadedImages];
+
+            // Prepare data for API
+            const postData = {
+                caption: editedData.caption,
+                recipe: editedData.recipe,
+                imgUri: allImageUrls
+            };
+
+            // Call API to update post
+            await editPost(post._id, postData);
+            
+            // Fetch updated post and update state
+            const response = await getPostById(post._id);
+            const updatedPost = response.data;
+            setPost(updatedPost); // Cập nhật local state
+            onPostUpdated?.(updatedPost); // Thông báo cho component cha (nếu cần)
+            setShowEditModal(false);
+            toast.success('Đã cập nhật bài viết thành công!');
+        } catch (error) {
+            console.error('Error updating post:', error);
+            toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật bài viết');
+        }
+    };
+
+    const handleDelete = async () => {
+        try {
+            console.log(post._id)
+            await deletePost(post._id);
+            onDelete?.(post._id);
+            setShowDeleteModal(false)
+            toast.success('Đã xóa bài viết thành công!');
+        } catch (error) {
+            console.error('Error deleting post:', error);
+            toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa bài viết');
+        }
+    };
+
     useEffect(() => {
-        console.log('post', post);
-        console.log('user', user);
         if (user && post && Array.isArray(user.savedPost)) {
-        setIsBookmarked(
-            user.savedPost.some((id) => id && id.toString() === post._id)
-        );
-    }
-    }, []);
+            setIsBookmarked(
+                user.savedPost.some((id) => id && id.toString() === post._id)
+            );
+        }
+    }, [user, post]);
 
     const getGridClass = (length) => {
         switch (length) {
@@ -141,48 +205,44 @@ export const PostCard = ({
                     </div>
                 </div>
 
-                <div className="relative">
-                    <button
-                        onClick={() => setShowMenu(!showMenu)}
-                        className="p-3 hover:bg-[#FFF4D6] rounded-full transition-all duration-300 hover:scale-110 text-gray-600 hover:text-[#FFB800]"
-                    >
-                        <FaEllipsisH />
-                    </button>
-                    {showMenu && (
-                        <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-[#FFB800]/10 py-2 z-10 animate-popup">
-                            <button
-                                onClick={() => {
-                                    onEdit?.(post);
-                                    setShowMenu(false);
-                                }}
-                                className="w-full px-4 py-3 text-left hover:bg-[#FFF4D6] flex items-center gap-3 text-gray-700 hover:text-[#FFB800] transition-colors group"
-                            >
-                                <div className="p-2 rounded-full bg-gray-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300">
-                                    <FaEdit className="w-4 h-4" />
-                                </div>
-                                <span className="font-medium">Chỉnh sửa</span>
-                            </button>
-                            <button className="w-full px-4 py-3 text-left hover:bg-[#FFF4D6] flex items-center gap-3 text-gray-700 hover:text-[#FFB800] transition-colors group">
-                                <div className={`p-2 rounded-full bg-gray-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300`}>
-                                    <FaBookmark className="w-4 h-4" />
-                                </div>
-                                <span className="font-medium">Lưu bài viết</span>
-                            </button>
-                            <button
-                                onClick={() => {
-                                    onDelete?.(post);
-                                    setShowMenu(false);
-                                }}
-                                className="w-full px-4 py-3 text-left hover:bg-[#FFF4D6] flex items-center gap-3 text-gray-700 hover:text-[#FFB800] transition-colors group"
-                            >
-                                <div className="p-2 rounded-full bg-gray-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300">
-                                    <FaTrash className="w-4 h-4" />
-                                </div>
-                                <span className="font-medium">Xóa bài viết</span>
-                            </button>
-                        </div>
-                    )}
-                </div>
+                {post.author._id === user._id && (
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowMenu(!showMenu)}
+                            className="p-3 hover:bg-[#FFF4D6] rounded-full transition-all duration-300 hover:scale-110 text-gray-600 hover:text-[#FFB800]"
+                        >
+                            <FaEllipsisH />
+                        </button>
+                        {showMenu && (
+                            <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-[#FFB800]/10 py-2 z-10 animate-popup">
+                                <button
+                                    onClick={() => {
+                                        setShowEditModal(true);
+                                        setShowMenu(false);
+                                    }}
+                                    className="w-full px-4 py-3 text-left hover:bg-[#FFF4D6] flex items-center gap-3 text-gray-700 hover:text-[#FFB800] transition-colors group"
+                                >
+                                    <div className="p-2 rounded-full bg-gray-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300">
+                                        <FaEdit className="w-4 h-4" />
+                                    </div>
+                                    <span className="font-medium">Chỉnh sửa</span>
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowDeleteModal(true);
+                                        setShowMenu(false);
+                                    }}
+                                    className="w-full px-4 py-3 text-left hover:bg-[#FFF4D6] flex items-center gap-3 text-gray-700 hover:text-red-500 transition-colors group"
+                                >
+                                    <div className="p-2 rounded-full bg-gray-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300">
+                                        <FaTrash className="w-4 h-4" />
+                                    </div>
+                                    <span className="font-medium">Xóa bài viết</span>
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Nội dung bài viết */}
@@ -294,6 +354,20 @@ export const PostCard = ({
                     <FaBookmark className="w-4 h-4" />
                 </button>
             </div>
+
+            {/* Add Modals */}
+            <EditPostModal
+                isOpen={showEditModal}
+                onClose={() => setShowEditModal(false)}
+                post={post}
+                onSave={handleEdit}
+            />
+
+            <DeleteConfirmModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDelete}
+            />
         </div>
     );
 };

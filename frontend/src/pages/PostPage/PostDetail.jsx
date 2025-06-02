@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { FaChevronLeft, FaChevronRight, FaTimes, FaHeart, FaComment, FaShare, FaBookmark, FaEllipsisH } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight, FaTimes, FaHeart, FaComment, FaShare, FaBookmark, FaEllipsisH, FaEdit, FaTrash } from 'react-icons/fa';
 import CommentList from '../../components/common/PostDetail/CommentList';
 import CommentForm from '../../components/common/PostDetail/CommentForm';
-import postsService, { getPostById } from '@/services/postService';
+import postsService, { getPostById, editPost, deletePost } from '@/services/postService';
 import { formatDate } from '@/components/common/Post';
 import { useAuth } from '@/context/AuthContext';
 import { createComment } from '@/services/commentService';
 import SharePopup from '../../components/common/SharePopup';
 import { useSocket } from '@/context/SocketContext';
 import { deleteSavedPost, savePost } from '@/services/userService';
+import EditPostModal from '@/components/common/PostModals/EditPostModal';
+import DeleteConfirmModal from '@/components/common/PostModals/DeleteConfirmModal';
+import { useCloudinary } from '@/context/CloudinaryContext';
+import { toast } from 'react-toastify';
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -25,6 +29,10 @@ const PostDetail = () => {
   const { user } = useAuth();
   const [sharePopup, setSharePopup] = useState({ open: false, postId: null, postTitle: null });
   const { sendNotification } = useSocket();
+  const [showMenu, setShowMenu] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const { uploadImage } = useCloudinary();
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -153,6 +161,54 @@ const PostDetail = () => {
     }
   };
 
+  const handleEdit = async (editedData) => {
+    try {
+      // Upload new images if any
+      let uploadedImages = [];
+      if (editedData.newImages?.length > 0) {
+        const uploadPromises = editedData.newImages.map(item => uploadImage(item.file));
+        const uploadedResults = await Promise.all(uploadPromises);
+        uploadedImages = uploadedResults.map(result => result.url);
+      }
+
+      // Get existing image URLs
+      const existingImageUrls = editedData.images.map(img => img.url);
+
+      // Combine all image URLs
+      const allImageUrls = [...existingImageUrls, ...uploadedImages];
+
+      // Prepare data for API
+      const postData = {
+        caption: editedData.caption,
+        recipe: editedData.recipe,
+        imgUri: allImageUrls
+      };
+      console.log(postData)
+      // Call API to update post
+      await editPost(post._id, postData);
+
+      // Fetch updated post
+      const updatedPost = await postsService.fetchById(id);
+      setPost(updatedPost.data);
+      setShowEditModal(false);
+      toast.success('Đã cập nhật bài viết thành công!');
+    } catch (error) {
+      console.error('Error updating post:', error);
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật bài viết');
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deletePost(post._id);
+      toast.success('Đã xóa bài viết thành công!');
+      navigate('/');
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa bài viết');
+    }
+  };
+
   return (
     <div className="h-[100vh] bg-gradient-to-br from-[#FFF4D6] via-white to-[#FFF4D6] py-6 px-2 lg:px-8 flex justify-center">
       <div className="bg-white rounded-3xl shadow-2xl w-11/12 max-w-7xl flex overflow-hidden border border-[#FFB800]/20 relative backdrop-blur-sm">
@@ -166,9 +222,45 @@ const PostDetail = () => {
         </button>
 
         {/* More Options Button */}
-        <button className='absolute top-4 right-4 z-20 p-3 bg-black/30 backdrop-blur-md hover:bg-black/50 text-white rounded-full transition-all duration-300 hover:scale-110'>
-          <FaEllipsisH size={18} />
-        </button>
+        {post.author._id === user._id && (
+          <div className="absolute top-4 right-4 z-20">
+            <button 
+              onClick={() => setShowMenu(!showMenu)}
+              className="p-3 bg-black/30 backdrop-blur-md hover:bg-black/50 text-white rounded-full transition-all duration-300 hover:scale-110"
+            >
+              <FaEllipsisH size={18} />
+            </button>
+
+            {showMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-[#FFB800]/10 py-2 animate-popup">
+                <button
+                  onClick={() => {
+                    setShowEditModal(true);
+                    setShowMenu(false);
+                  }}
+                  className="w-full px-4 py-3 text-left hover:bg-[#FFF4D6] flex items-center gap-3 text-gray-700 hover:text-[#FFB800] transition-colors group"
+                >
+                  <div className="p-2 rounded-full bg-gray-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300">
+                    <FaEdit className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium">Chỉnh sửa</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(true);
+                    setShowMenu(false);
+                  }}
+                  className="w-full px-4 py-3 text-left hover:bg-[#FFF4D6] flex items-center gap-3 text-gray-700 hover:text-red-500 transition-colors group"
+                >
+                  <div className="p-2 rounded-full bg-gray-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300">
+                    <FaTrash className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium">Xóa bài viết</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Left Column - Image/Video (70%) */}
         <div className="w-[70%] relative bg-gradient-to-br from-gray-900 via-gray-800 to-black min-h-[80vh] flex items-center justify-center overflow-hidden">
@@ -398,6 +490,20 @@ const PostDetail = () => {
         postId={sharePopup.postId}
         postTitle={sharePopup.postTitle}
         onClose={() => setSharePopup({ open: false, postId: null, postTitle: null })}
+      />
+
+      {/* Add Modals */}
+      <EditPostModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        post={post}
+        onSave={handleEdit}
+      />
+
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
       />
     </div>
   );
