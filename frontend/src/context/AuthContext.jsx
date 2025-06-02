@@ -8,6 +8,7 @@ import {
   resetPassword,
   confirmOtp,
 } from '../services/userService';
+import Loader from '@/components/loader/Loader';
 
 const AuthContext = createContext();
 
@@ -46,8 +47,8 @@ export const AuthProvider = ({ children }) => {
     }
     try {
       await fetchUserData();
-    } catch {
-      localStorage.removeItem('token');
+    } catch (error){
+      console.log(error.messsage)
     } finally {
       setLoading(false);
     }
@@ -147,7 +148,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Đang tải...</div>;
+    return <Loader />;
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

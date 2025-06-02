@@ -14,24 +14,24 @@ import React, { useState } from "react";
 import CreatePostModal from "../../common/Modal/CreatePostModal";
 import { useAuth } from "@/context/AuthContext";
 
-const defaultData = {
-  menu: [
-    { label: "Bài viết", icon: <FaNewspaper />, href: "/explore/posts" },
-    { label: "Reels", icon: <FaVideo />, href: "/explore/reels/1" },
-    { label: "Trang cá nhân", icon: <FaUser />, href: "/profile" },
-    { label: "Bài viết đã lưu", icon: <FaBookmark />, href: "/saved" },
-    { label: "Công thức của tôi", icon: <FaUtensils />, href: "/my-recipes" },
-  ],
-};
+
 
 export const LeftSidebar = ({
   activeTab,
   onTabChange,
-  data = defaultData,
   onAdd,
 }) => {
   const { user } = useAuth();
   console.log("user", user);
+  const data = {
+  menu: [
+    { label: "Bài viết", icon: <FaNewspaper />, href: "/explore/posts" },
+    { label: "Reels", icon: <FaVideo />, href: "/explore/reels" },
+    { label: "Trang cá nhân", icon: <FaUser />, href: `/profile/${user._id}`},
+    { label: "Bài viết đã lưu", icon: <FaBookmark />, href: "/saved" },
+    { label: "Công thức của tôi", icon: <FaUtensils />, href: "/my-recipes" },
+  ],
+};
   return (
     <>
       <aside className="hidden lg:block w-72 pr-4 space-y-6 sticky top-24 h-fit">
