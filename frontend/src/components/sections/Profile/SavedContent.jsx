@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import { EmptyState, RecipeCard, PostItem, VideoCard } from "../Profile";
+import { EmptyState, PostItem, VideoCard } from "../Profile";
 import {
   getSavedRecipes,
   getSavedPost,

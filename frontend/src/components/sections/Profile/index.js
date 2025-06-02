@@ -3,7 +3,6 @@ import PostsTab from './PostsTab';
 import RecipesTab from './RecipesTab';
 import VideosTab from './VideosTab';
 import PostItem from './PostItem';
-import RecipeCard from './RecipeCard';
 import VideoCard from './VideoCard';
 import EmptyState from './EmptyState';
 import ProfileStats from './ProfileStats'; 
@@ -17,7 +16,6 @@ export {
   RecipesTab,
   VideosTab,
   PostItem,
-  RecipeCard,
   VideoCard,
   EmptyState,
   ProfileSidebar,

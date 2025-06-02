@@ -1,0 +1,10 @@
+// Export all RecipeDetail components for cleaner imports
+export { default as ReviewSection } from './ReviewSection';
+export { default as RecipeHeader } from './RecipeHeader';
+export { default as RecipeImageSection } from './RecipeImageSection';
+export { default as NutritionPanel } from './NutritionPanel';
+export { default as IngredientsSection } from './IngredientsSection';
+export { default as InstructionsSection } from './InstructionsSection';
+export { default as RelatedRecipes } from './RelatedRecipes';
+export { default as MoreRecipes } from './MoreRecipes';
+export { default as StarRating } from './StarRating';

@@ -27,6 +27,7 @@ app.use("/api/posts", require("./routes/postRoute"));
 app.use("/api/videos", require("./routes/videoRoute"));
 app.use("/api/ingredients", require("./routes/ingredientRoute"));
 app.use("/api/recipes", require("./routes/recipeRoute"));
+app.use("/api/categories", require("./routes/categoryRoute"));
 app.use("/api/comments", require("./routes/commentRoute"))
 app.use("/api/messages", require("./routes/messageRoute"))
 app.use("/api/conversations", require("./routes/conversationRoute"))

@@ -10,8 +10,8 @@ const BlogSection = ({ blogs }) => {
   const sideBogs = blogs.slice(1, 4);
 
   return (
-    <div className="container mx-auto px-4">
-      <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-black mb-6">
+    <div className="container mx-auto  px-[80px]">
+      <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-black mb-6">
         Tin tức - kiến thức
       </h3>
 
@@ -52,11 +52,11 @@ const BlogSection = ({ blogs }) => {
               key={blog.id}
               className="bg-white rounded-lg shadow overflow-hidden flex items-center hover:-translate-y-1 transition-transform ease-out duration-500"
             >
-                <img
-                  src={blog.image}
-                  alt={blog.title}
-                  className="w-1/3 h-full object-cover"
-                />
+              <img
+                src={blog.image}
+                alt={blog.title}
+                className="w-1/3 h-full object-cover"
+              />
 
               <div className="p-3 flex-1 flex items-center">
                 <p className="font-bold text-sm md:text-base line-clamp-2">
@@ -68,13 +68,7 @@ const BlogSection = ({ blogs }) => {
         </div>
       </div>
 
-      <NavigateButton 
-        title="Xem thêm"
-        linkTo="/blogs"
-        bgColor="bg-[#ff4b4b]"
-        textColor="text-[#FF6363]"
-        borderColor="border-[#FF6363]"
-      />
+      <NavigateButton />
     </div>
   );
 };

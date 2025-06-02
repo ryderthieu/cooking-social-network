@@ -87,9 +87,9 @@ function App() {
     { path: "/account", element: <AccountPage /> },
     { path: "/profile/:userId", element: <ProfilePage /> },
     { path: "/recipes", element: <RecipeCategories /> },
-    { path: "/recipes/:categoryType/:item", element: <Recipes /> },
     { path: "/recipes/create", element: <CreateRecipe /> },
     { path: "/recipes/saved", element: <SavedRecipes /> },
+    { path: "/recipes/:categoryType/:item", element: <Recipes /> },
     { path: "/recipes/:id", element: <RecipeDetail /> },
     // { path: "/posts/:id", element: <PostDetail />}
     { path: "/explore/*", element: <PostPage /> },

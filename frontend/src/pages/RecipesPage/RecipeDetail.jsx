@@ -1,14 +1,16 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import BreadCrumb from "@/components/common/BreadCrumb";
-import ReviewSection from "@/components/sections/Recipe/RecipeDetail/ReviewSection";
-import RecipeHeader from "@/components/sections/Recipe/RecipeDetail/RecipeHeader";
-import RecipeImageSection from "@/components/sections/Recipe/RecipeDetail/RecipeImageSection";
-import NutritionPanel from "@/components/sections/Recipe/RecipeDetail/NutritionPanel";
-import IngredientsSection from "@/components/sections/Recipe/RecipeDetail/IngredientsSection";
-import InstructionsSection from "@/components/sections/Recipe/RecipeDetail/InstructionsSection";
-import RelatedRecipes from "@/components/sections/Recipe/RecipeDetail/RelatedRecipes";
-import MoreRecipes from "@/components/sections/Recipe/RecipeDetail/MoreRecipes";
+import {
+  ReviewSection,
+  RecipeHeader,
+  RecipeImageSection,
+  NutritionPanel,
+  IngredientsSection,
+  InstructionsSection,
+  RelatedRecipes,
+  MoreRecipes
+} from "@/components/sections/Recipe/RecipeDetail/index.js";
 import { getRecipeById } from "@/services/recipeService";
 import { calculateNutrition } from "@/utils/recipeUtils";
 

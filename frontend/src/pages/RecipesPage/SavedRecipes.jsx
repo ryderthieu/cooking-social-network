@@ -275,7 +275,8 @@ export default function SavedRecipes() {
           </svg>
         </div>
       </div>
-      <div className="my-4 mx-4 lg:mx-32">        {/* Collection Tabs */}
+      <div className="my-4 mx-4 lg:mx-32">
+        {/* Collection Tabs */}
         <div className="flex gap-10 justify-start my-6">
           {collections.map((col) => {
             return (
@@ -320,15 +321,17 @@ export default function SavedRecipes() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">
             {collections.find((c) => c._id === activeTab)?.name}
-          </h2>          {/* Options dropdown - show only for custom collections (not default "Công thức của tôi" or "Yêu thích") */}
+          </h2>{" "}
+          {/* Options dropdown - show only for custom collections (not default "Công thức của tôi" or "Yêu thích") */}
           {(() => {
             const activeCollection = collections.find(
               (c) => c._id === activeTab
             );
-            
+
             // Check if this is a default collection
-            const isDefaultCollection = activeCollection?.defaultType === "favorites" || 
-                                      activeCollection?.defaultType === "created";
+            const isDefaultCollection =
+              activeCollection?.defaultType === "favorites" ||
+              activeCollection?.defaultType === "created";
 
             return activeTab &&
               activeTab !== "bo-suu-tap-moi" &&
@@ -436,7 +439,8 @@ export default function SavedRecipes() {
         }}
         collection={selectedCollection}
         onUpdateCollection={handleUpdateCollection}
-      />      {/* Change Collection Image Modal */}
+      />{" "}
+      {/* Change Collection Image Modal */}
       <ChangeCollectionImageModal
         showModal={showChangeImageModal}
         onClose={() => {
