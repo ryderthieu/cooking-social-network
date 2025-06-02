@@ -8,9 +8,9 @@ import b5 from "../../assets/Blog/b5.jpg";
 import b6 from "../../assets/Blog/b6.jpg";
 import b7 from "../../assets/Blog/b7.jpg";
 import avatar1 from "../../assets/avatar1.jpg";
-import Recipe from "../../components/common/Recipe";
 import { Link } from "react-router-dom";
 import banh from "../../assets/Blog/banh.jpg";
+import Recipes from "@/components/sections/Home/Recipes";
 
 const Blog1 = () => {
   return (
@@ -155,14 +155,7 @@ const Blog1 = () => {
         </div>
       </div>
       <div className="mb-8 mt-10">
-        <h1 className="text-center text-[24px] font-semibold ">
-          Gợi ý các món ăn
-        </h1>
-        <div className="grid grid-cols-3 gap-2 mt-3 mb-8">
-          <Recipe />
-          <Recipe />
-          <Recipe />
-        </div>
+        <Recipes />
         <Link to="/recipes" className="flex justify-center">
           <button className="bg-[#FF37A5] text-white font-semibold py-3 px-8 rounded-[30px] text-[14px] hover:bg-[#FF2A8F] transition-colors duration-300">
             Xem tất cả

@@ -3,8 +3,8 @@ import { FaFacebookF, FaTwitter, FaInstagram } from "react-icons/fa";
 import blog1 from "../../assets/Blog/blog1.png";
 import blog2 from "../../assets/Blog/blog2.png";
 import avatar from "../../assets/avatar.jpg";
-import Recipe from "../../components/common/Recipe";
 import { Link } from "react-router-dom";
+import Recipes from "@/components/sections/Home/Recipes";
 
 const NewBlog = () => {
   return (
@@ -87,14 +87,7 @@ const NewBlog = () => {
         </div>
       </div>
       <div className="my-4">
-        <h1 className="text-center text-[24px] font-semibold ">
-          Gợi ý các món ăn
-        </h1>
-        <div className="grid grid-cols-3 gap-2 mt-3 mb-8">
-          <Recipe />
-          <Recipe />
-          <Recipe />
-        </div>
+        <Recipes />
         <Link to="/recipes" className="flex justify-center">
           <button className="bg-[#FF37A5] text-white font-semibold py-3 px-8 rounded-[30px] text-[14px] hover:bg-[#FF2A8F] transition-colors duration-300">
             Xem tất cả
