@@ -73,7 +73,7 @@ categorySchema.index({ type: 1, order: 1 });
 
 // Virtual for full path (useful for nested categories)
 categorySchema.virtual('path').get(function() {
-    return `/recipes?${this.type}=${encodeURIComponent(this.name)}`;
+    return `/recipes/${this.type}/${this.slug}`;
 });
 
 // Method to increment recipe count

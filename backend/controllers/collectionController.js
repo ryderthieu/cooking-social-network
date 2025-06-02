@@ -49,11 +49,16 @@ const getUserCollections = async (req, res) => {
         defaultType: "created",
         thumbnail: userAvatar,
       });      await myRecipesCollection.save();
-    }
-
-    const collections = await Collection.find({ owner: userId })
-      .populate("recipes", "name image averageRating time categories")
-      .sort({ isDefault: -1, createdAt: -1 });    const User = require('../models/user');
+    }    const collections = await Collection.find({ owner: userId })
+      .populate({
+        path: "recipes",
+        select: "name image averageRating time categories",
+        populate: {
+          path: "categories",
+          select: "name type slug image",
+        },
+      })
+      .sort({ isDefault: -1, createdAt: -1 });const User = require('../models/user');
     const user = await User.findById(userId).select('avatar');
     const userAvatar = user?.avatar || DEFAULT_LOGO_PATH;      const updatedCollections = collections.map((collection) => {
       // Special handling for default collections
@@ -408,17 +413,21 @@ const removeRecipeFromCollection = async (req, res) => {
 const getCollectionRecipes = async (req, res) => {
   try {
     const { collectionId } = req.params;
-    const userId = req.user._id;
-
-    const collection = await Collection.findOne({
+    const userId = req.user._id;    const collection = await Collection.findOne({
       _id: collectionId,
       owner: userId,
     }).populate({
       path: "recipes",
-      populate: {
-        path: "author",
-        select: "firstName lastName avatar",
-      },
+      populate: [
+        {
+          path: "author",
+          select: "firstName lastName avatar",
+        },
+        {
+          path: "categories",
+          select: "name type slug image",
+        },
+      ],
     });
 
     if (!collection) {

@@ -6,7 +6,6 @@ export default function BreadCrumb({ category }) {
 
   // Tạo mảng breadcrumb từ URL
   const pathnames = location.pathname.split("/").filter((x) => x);
-
   // Mapping tên hiển thị cho các route
   const routeNames = {
     recipes: "Khám phá công thức",
@@ -17,7 +16,14 @@ export default function BreadCrumb({ category }) {
     breakfast: "Bữa sáng",
     lunch: "Bữa trưa",
     dinner: "Bữa tối",
-    "meal-type": "Loại bữa ăn",
+    mealType: "Loại bữa ăn",
+    cuisine: "Vùng ẩm thực",
+    occasions: "Dịp đặc biệt",
+    dietaryPreferences: "Chế độ ăn",
+    mainIngredients: "Nguyên liệu chính",
+    cookingMethod: "Phương pháp nấu",
+    timeBased: "Thời gian",
+    difficultyLevel: "Mức độ khó",
     create: "Tạo công thức",
   };
 

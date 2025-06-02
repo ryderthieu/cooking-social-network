@@ -319,7 +319,7 @@ export const mockBlogs = [
 
 // Mock data cho category items theo từng type
 export const mockCategoryItems = {
-  "meal-type": {
+  "mealType": {
     title: "Loại bữa ăn",
     items: [
       {
@@ -507,11 +507,10 @@ export const mockCategoryItems = {
         image:
           "https://images.unsplash.com/photo-1627024522062-423243235d50?q=80&w=1926&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       },
-    ],
-    background: "bg-[#E9F0E2]",
+    ],    background: "bg-[#E9F0E2]",
     color: "bg-[#FFFFFF]",
   },
-  "main-ingredients": {
+  "mainIngredients": {
     title: "Nguyên liệu chính",
     items: [
       {
@@ -558,9 +557,8 @@ export const mockCategoryItems = {
       },
     ],
     background: "bg-[#FEDAC8]",
-    color: "bg-[#FFAD5660]",
-  },
-  "cooking-method": {
+    color: "bg-[#FFAD5660]",  },
+  "cookingMethod": {
     title: "Phương pháp nấu",
     items: [
       {

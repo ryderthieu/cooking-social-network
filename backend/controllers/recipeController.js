@@ -409,11 +409,19 @@ const getTopRecipes = async (req, res) => {
           foreignField: "_id",
           as: "author",
         },
-      },
-      // Convert author array to object
+      },      // Convert author array to object
       {
         $addFields: {
           author: { $arrayElemAt: ["$author", 0] },
+        },
+      },
+      // Populate categories info
+      {
+        $lookup: {
+          from: "categories",
+          localField: "categories",
+          foreignField: "_id",
+          as: "categories",
         },
       },
       // Project only needed author fields

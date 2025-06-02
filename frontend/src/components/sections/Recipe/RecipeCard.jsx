@@ -1,14 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const RecipeCard = ({ item, categoryType, category, slugMap }) => {
+const RecipeCard = ({ item, categoryType, category }) => {
+  // Use item's background color if available, otherwise fallback to category background
+  const backgroundClass = item.backgroundColor || category.background || "bg-[#ffefd0]";
+  const colorClass = item.color || category.color || "bg-[#FFD0A1]";
+  
   return (
     <Link
       key={item.name}
-      to={`/recipes/${categoryType}/${
-        slugMap[item.name] || encodeURIComponent(item.name)
-      }`}
-      className={`relative flex w-full max-w-[300px] ${category.background} py-8 px-6 h-[120px] rounded-2xl shadow-lg shadow-gray-300 ring-2 ring-white/50 hover:-translate-y-2 transition-transform ease-in-out duration-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+      to={`/recipes/${categoryType}/${item.slug || encodeURIComponent(item.name)}`}
+      className={`relative flex w-full max-w-[300px] ${backgroundClass} py-8 px-6 h-[120px] rounded-2xl shadow-lg shadow-gray-300 ring-2 ring-white/50 hover:-translate-y-2 transition-transform ease-in-out duration-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
       aria-label={`Xem công thức ${item.name}`}
     >
       <div className="absolute right-6 bottom-3 rounded-full grid place-items-center size-[6em] shadow-lg border border-gray-100 overflow-hidden">
@@ -19,17 +21,16 @@ const RecipeCard = ({ item, categoryType, category, slugMap }) => {
             className="size-full object-cover rounded-full"
           />
         </div>
-      </div>
-      <div
-        className={`rounded-full size-12 ${category.color} absolute blur-lg left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2`}
+      </div>      <div
+        className={`rounded-full size-12 ${colorClass} absolute blur-lg left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2`}
         aria-hidden="true"
       ></div>
       <div
-        className={`rounded-full size-8 ${category.color} absolute blur-lg bottom-0 right-0`}
+        className={`rounded-full size-8 ${colorClass} absolute blur-lg bottom-0 right-0`}
         aria-hidden="true"
       ></div>
       <div
-        className={`rounded-full size-8 ${category.color} absolute blur-lg bottom-8 left-0`}
+        className={`rounded-full size-8 ${colorClass} absolute blur-lg bottom-8 left-0`}
         aria-hidden="true"
       ></div>
       <span className="font-bold text-blue-950 max-w-[150px] text-xl z-10">

@@ -366,9 +366,7 @@ const getFormattedCategories = async (req, res) => {
 const getAllFormattedCategories = async (req, res) => {
   try {
     const categories = await Category.find({ isActive: true })
-      .sort({ type: 1, order: 1, name: 1 });
-
-    // Group categories by type
+      .sort({ type: 1, order: 1, name: 1 });    // Group categories by type
     const groupedCategories = categories.reduce((acc, category) => {
       if (!acc[category.type]) {
         acc[category.type] = [];
@@ -379,11 +377,55 @@ const getAllFormattedCategories = async (req, res) => {
         count: category.recipeCount,
         path: category.path,
         image: category.image,
-        backgroundColor: category.backgroundColor,
-        textColor: category.textColor
+        backgroundColor: category.backgroundColor || "#f3f4f6",
+        textColor: category.textColor || "#374151"
       });
       return acc;
     }, {});
+
+    // Create dynamic background colors based on actual data
+    const getBackgroundForType = (type, items) => {
+      if (items.length > 0 && items[0].backgroundColor) {
+        // Convert hex/color value to Tailwind class if needed
+        const bgColor = items[0].backgroundColor;
+        if (bgColor.startsWith('#')) {
+          // For now, use default mapping - in production you might want a more sophisticated converter
+          return `bg-[${bgColor}]`;
+        }
+        return bgColor.startsWith('bg-') ? bgColor : `bg-[${bgColor}]`;
+      }
+      // Fallback colors for each type
+      const fallbackColors = {
+        mealType: "bg-[#ffefd0]",
+        cuisine: "bg-[#FFE9E9]", 
+        occasions: "bg-[#E8F5E8]",
+        dietaryPreferences: "bg-[#F0E6FF]",
+        mainIngredients: "bg-[#FFE4E1]",
+        cookingMethod: "bg-[#F0F8FF]",
+        timeBased: "bg-[#FFF8DC]",
+        difficultyLevel: "bg-[#E6E6FA]"
+      };
+      return fallbackColors[type] || "bg-[#f3f4f6]";
+    };
+
+    const getColorForType = (type, items) => {
+      if (items.length > 0 && items[0].textColor) {
+        const color = items[0].textColor;
+        return color.startsWith('bg-') ? color : `bg-[${color}]`;
+      }
+      // Fallback colors for each type
+      const fallbackColors = {
+        mealType: "bg-[#FFD0A1]",
+        cuisine: "bg-[#c98c8b4e]",
+        occasions: "bg-[#90EE90]", 
+        dietaryPreferences: "bg-[#DDA0DD]",
+        mainIngredients: "bg-[#FFA07A]",
+        cookingMethod: "bg-[#87CEEB]",
+        timeBased: "bg-[#F0E68C]",
+        difficultyLevel: "bg-[#DDA0DD]"
+      };
+      return fallbackColors[type] || "bg-[#374151]";
+    };
 
     // Format tất cả categories (không filter)
     const allFormattedCategories = [
@@ -391,57 +433,57 @@ const getAllFormattedCategories = async (req, res) => {
         name: "Loại bữa ăn",
         key: "mealType",
         items: groupedCategories.mealType || [],
-        background: "bg-[#ffefd0]",
-        color: "bg-[#FFD0A1]"
+        background: getBackgroundForType("mealType", groupedCategories.mealType || []),
+        color: getColorForType("mealType", groupedCategories.mealType || [])
       },
       {
-        name: "Vùng ẩm thực", 
+        name: "Vùng ẩm thực",
         key: "cuisine",
         items: groupedCategories.cuisine || [],
-        background: "bg-[#FFE9E9]",
-        color: "bg-[#c98c8b4e]"
+        background: getBackgroundForType("cuisine", groupedCategories.cuisine || []),
+        color: getColorForType("cuisine", groupedCategories.cuisine || [])
       },
       {
         name: "Dịp đặc biệt",
         key: "occasions",
         items: groupedCategories.occasions || [],
-        background: "bg-[#E8F5E8]",
-        color: "bg-[#90EE90]"
+        background: getBackgroundForType("occasions", groupedCategories.occasions || []),
+        color: getColorForType("occasions", groupedCategories.occasions || [])
       },
       {
         name: "Chế độ ăn",
         key: "dietaryPreferences",
         items: groupedCategories.dietaryPreferences || [],
-        background: "bg-[#F0E6FF]",
-        color: "bg-[#DDA0DD]"
+        background: getBackgroundForType("dietaryPreferences", groupedCategories.dietaryPreferences || []),
+        color: getColorForType("dietaryPreferences", groupedCategories.dietaryPreferences || [])
       },
       {
         name: "Nguyên liệu chính",
         key: "mainIngredients",
         items: groupedCategories.mainIngredients || [],
-        background: "bg-[#FFE4E1]",
-        color: "bg-[#FFA07A]"
+        background: getBackgroundForType("mainIngredients", groupedCategories.mainIngredients || []),
+        color: getColorForType("mainIngredients", groupedCategories.mainIngredients || [])
       },
       {
         name: "Phương pháp nấu",
         key: "cookingMethod",
         items: groupedCategories.cookingMethod || [],
-        background: "bg-[#F0F8FF]",
-        color: "bg-[#87CEEB]"
+        background: getBackgroundForType("cookingMethod", groupedCategories.cookingMethod || []),
+        color: getColorForType("cookingMethod", groupedCategories.cookingMethod || [])
       },
       {
         name: "Thời gian",
         key: "timeBased",
         items: groupedCategories.timeBased || [],
-        background: "bg-[#FFF8DC]",
-        color: "bg-[#F0E68C]"
+        background: getBackgroundForType("timeBased", groupedCategories.timeBased || []),
+        color: getColorForType("timeBased", groupedCategories.timeBased || [])
       },
       {
         name: "Mức độ khó",
         key: "difficultyLevel",
         items: groupedCategories.difficultyLevel || [],
-        background: "bg-[#E6E6FA]",
-        color: "bg-[#DDA0DD]"
+        background: getBackgroundForType("difficultyLevel", groupedCategories.difficultyLevel || []),
+        color: getColorForType("difficultyLevel", groupedCategories.difficultyLevel || [])
       }
     ].filter(cat => cat.items.length > 0);
 

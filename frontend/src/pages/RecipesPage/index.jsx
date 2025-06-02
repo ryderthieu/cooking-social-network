@@ -1,67 +1,77 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import MainLayout from "../../components/layout/MainLayout";
-import { Korea1 } from "../../assets/Recipe/images";
 import BreadCrumb from "../../components/common/BreadCrumb";
-import { mockCategoryItems } from "../../services/mockData";
+import { getAllFormattedCategories } from "../../services/categoryService";
 import RecipeCard from "../../components/sections/Recipe/RecipeCard";
 
 export default function RecipeCategories() {
-  const categories = mockCategoryItems;
-
-  const slugMap = {
-    "Bữa sáng": "breakfast",
-    "Bữa trưa": "lunch",
-    "Bữa tối": "dinner",
-    "Bữa xế": "snack",
-    "Món tráng miệng": "dessert",
-
-    "Việt Nam": "vietnamese",
-    "Nhật Bản": "japanese",
-    "Hàn Quốc": "korean",
-    "Trung Quốc": "chinese",
-    "Thái Lan": "thai",
-    "Ấn Độ": "indian",
-    Âu: "european",
-    Mỹ: "american",
-    Mexico: "mexican",
-
-    "Tiệc tùng": "party",
-    "Sinh nhật": "birthday",
-    "Ngày lễ Tết": "holiday",
-    "Ăn chay": "vegetarian",
-    "Món ăn ngày lạnh/nóng": "weather-based",
-
-    "Thuần chay": "vegan",
-    "Keto/Low-carb": "keto",
-    "Thực phẩm chức năng": "functional-food",
-    "Không gluten": "gluten-free",
-    "Ăn kiêng giảm cân": "diet",
-
-    "Thịt gà": "chicken",
-    "Thịt bò": "beef",
-    "Thịt heo": "pork",
-    "Hải sản": "seafood",
-    Trứng: "egg",
-    "Rau củ": "vegetables",
-    "Đậu phụ": "tofu",
-
-    Chiên: "fried",
-    Nướng: "grilled",
-    Hấp: "steamed",
-    Xào: "stir-fried",
-    Luộc: "boiled",
-    Hầm: "braised",
-    "Nấu súp": "soup",
-
-    "Nồi chiên không dầu": "air-fryer",
-    "Lò nướng": "oven",
-    "Nồi nấu chậm": "slow-cooker",
-    "Nồi áp suất": "pressure-cooker",
-    "Lò vi sóng": "microwave",
-  };
+  const [categories, setCategories] = useState({});
+  const [, setError] = useState(null);
 
   const [scrollY, setScrollY] = useState(0);
+
+  // Fetch categories from backend
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setError(null);
+
+        const response = await getAllFormattedCategories();
+
+        if (response.data && response.data.success) {
+          // Transform backend data to match frontend structure
+          const formattedCategories = {};
+          response.data.data.forEach((category) => {
+            formattedCategories[category.key] = {
+              title: category.name,
+              items: category.items.map((item) => ({
+                name: item.name,
+                slug: item.slug,
+                description:
+                  item.description ||
+                  `Khám phá các món ăn ${item.name.toLowerCase()}`,
+                image:
+                  item.image ||
+                  "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300",
+                count: item.count || 0,
+                path:
+                  item.path ||
+                  `/recipes?${category.key}=${encodeURIComponent(item.name)}`,
+                // Use item's own background color if available, otherwise use category fallback
+                backgroundColor:
+                  item.backgroundColor && item.backgroundColor.startsWith("bg-")
+                    ? item.backgroundColor
+                    : item.backgroundColor
+                    ? `bg-[${item.backgroundColor}]`
+                    : category.background && category.background.startsWith("bg-")
+                    ? category.background
+                    : "bg-[#ffefd0]",
+                // Use item's own text color if available
+                color:
+                  item.textColor && item.textColor.startsWith("bg-")
+                    ? item.textColor
+                    : item.textColor
+                    ? `bg-[${item.textColor}]`
+                    : category.color && category.color.startsWith("bg-")
+                    ? category.color
+                    : "bg-[#FFD0A1]",
+              })),
+              background: category.background || "bg-[#ffefd0]",
+              color: category.color || "bg-[#FFD0A1]",
+            };
+          });
+
+          setCategories(formattedCategories);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        setError("Không thể tải danh mục. Vui lòng thử lại sau.");
+        // Fallback to empty categories
+        setCategories({});
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -85,7 +95,6 @@ export default function RecipeCategories() {
       margin: "0 auto",
     };
   };
-
   return (
     <>
       <div className="mx-auto w-full">
@@ -95,14 +104,14 @@ export default function RecipeCategories() {
           <div className="w-full bg-gradient-to-tr from-[#fd3cb3] to-yellow-200 h-[400px]"></div>
           <div className="absolute inset-0 bg-opacity-30">
             <div className="p-10 h-full">
-              <BreadCrumb />
+              {/* <BreadCrumb /> */}
 
               <div className="flex justify-center h-full">
                 <h1 className="text-white text-3xl md:text-5xl text-center font-extrabold">
                   Khám phá công thức
                 </h1>
                 {/* Category finder */}
-                <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-6xl">
+                <div className="absolute bottom-5 left-1/2 transform -translate-x-1/2 w-[90%] max-w-7xl">
                   <div className="bg-white/70 backdrop-blur-lg p-6 md:p-10 rounded-xl shadow-lg">
                     <h2 className="text-xl mb-4 font-semibold text-gray-800">
                       Tìm kiếm công thức theo danh mục
@@ -111,6 +120,7 @@ export default function RecipeCategories() {
                       Chọn một trong các danh mục bên dưới để khám phá các công
                       thức phù hợp với nhu cầu của bạn.
                     </p>
+
                     <nav className="flex flex-wrap gap-3">
                       {Object.entries(categories).map(([key, category]) => (
                         <a
@@ -132,28 +142,36 @@ export default function RecipeCategories() {
 
         {/* Categories section */}
         <main className="my-12 mx-4 lg:mx-[100px]">
-          {Object.entries(categories).map(([categoryType, category]) => (
-            <section
-              key={categoryType}
-              id={categoryType}
-              className="rounded-lg p-6 scroll-mt-24 relative mb-8"
-            >
-              <h2 className="text-[24px] font-bold text-blue-950 mb-6">
-                {category.title}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {category.items.map((item) => (
-                  <RecipeCard
-                    key={item.name}
-                    item={item}
-                    categoryType={categoryType}
-                    category={category}
-                    slugMap={slugMap}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
+          {Object.keys(categories).length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-500 text-lg">
+                Không có danh mục nào để hiển thị.
+              </p>
+            </div>
+          ) : (
+            Object.entries(categories).map(([categoryType, category]) => (
+              <section
+                key={categoryType}
+                id={categoryType}
+                className="rounded-lg p-6 scroll-mt-24 relative mb-8"
+              >
+                <h2 className="text-[24px] font-bold text-blue-950 mb-6">
+                  {category.title}
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {" "}
+                  {category.items.map((item) => (
+                    <RecipeCard
+                      key={item.name}
+                      item={item}
+                      categoryType={categoryType}
+                      category={category}
+                    />
+                  ))}
+                </div>
+              </section>
+            ))
+          )}{" "}
         </main>
       </div>
     </>

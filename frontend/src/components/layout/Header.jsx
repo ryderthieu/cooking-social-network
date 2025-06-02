@@ -148,11 +148,11 @@ const Header = () => {
             <div className="fixed left-0 top-[80px] z-20 flex bg-white shadow-xl w-full h-[390px] rounded-lg overflow-hidden">
               <div className="w-[20%] p-4 ml-[110px]">
                 {
-                  <ul className="scale-y-105 text-gray-700 font-medium">
+                  <ul className=" text-gray-700 font-medium">
                     {dynamicCategories.map((category, index) => (
                       <li key={category.name}>
                         <div
-                          className={`cursor-pointer text-[17px] pb-4 transition-all duration-200 font-medium ${
+                          className={`cursor-pointer text-[17px] scale-y-105 pb-4 transition-all duration-200 font-medium ${
                             index === selectedCategoryIndex
                               ? "text-[#FF6363]"
                               : "hover:text-[#FF6363]"
