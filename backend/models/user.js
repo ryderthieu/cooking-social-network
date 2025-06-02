@@ -40,7 +40,6 @@ userSchema.statics.register = async function (
   firstName,
   gender,
   birthday,
-  username
 ) {
   if (
     !email ||
@@ -48,8 +47,7 @@ userSchema.statics.register = async function (
     !lastName ||
     !firstName ||
     !gender ||
-    !birthday ||
-    !username
+    !birthday 
   ) {
     console.log(
       email,
@@ -58,7 +56,6 @@ userSchema.statics.register = async function (
       firstName,
       gender,
       birthday,
-      username
     );
     throw Error("Bạn chưa điền hết thông tin!");
   }
@@ -83,7 +80,6 @@ userSchema.statics.register = async function (
     firstName,
     gender,
     birthday,
-    username,
   });
 
   return user;

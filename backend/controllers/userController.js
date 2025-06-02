@@ -27,7 +27,7 @@ const login = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { email, password, lastName, firstName, gender, birthDay, username } =
+  const { email, password, lastName, firstName, gender, birthday, username } =
     req.body;
   try {
     const user = await User.register(
@@ -36,9 +36,10 @@ const register = async (req, res) => {
       lastName,
       firstName,
       gender,
-      birthDay,
+      birthday,
       username
     );
+    console.log(user)
     res
       .status(200)
       .json({ message: "Đăng ký thành công! Vui lòng đăng nhập để tiếp tục." });

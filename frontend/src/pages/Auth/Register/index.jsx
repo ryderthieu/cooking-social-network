@@ -124,7 +124,7 @@ const Register = () => {
                     lastName: formData.lastName,
                     firstName: formData.firstName,
                     gender: formData.gender,
-                    birthDay: formData.birthDate
+                    birthday: formData.birthDate
                 }
                 await register(userData)
                 naviagate('/login')

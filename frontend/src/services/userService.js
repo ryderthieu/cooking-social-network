@@ -11,15 +11,16 @@ export const register = ({
   lastName,
   firstName,
   gender,
-  birthDay,
+  birthday,
 }) => {
+  console.log(birthday)
   return API.post("/users/register", {
     email,
     password,
     lastName,
     firstName,
     gender,
-    birthDay,
+    birthday,
   });
 };
 
