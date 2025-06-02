@@ -53,6 +53,7 @@ import { useCloudinary } from "../../context/CloudinaryContext";
 import postsService from "@/services/postService";
 import { getVideoById } from "@/services/videoService";
 import EmojiPicker from "emoji-picker-react";
+import Tooltip from "../../components/Tooltip";
 
 export const formatRelativeTime = (dateString) => {
   if (!dateString) return "";
@@ -1960,8 +1961,8 @@ export default function MessagePage() {
                                     content: formatDetailedMessageTime(
                                       message.createdAt
                                     ),
-                                    top: rect.top + rect.height / 2,
-                                    left: rect.left,
+                                    top: rect.top,
+                                    left: rect.left, 
                                   });
                                 }
                               }}
@@ -2613,6 +2614,14 @@ export default function MessagePage() {
         </div>
       </div>
       {renderReactionPicker()} {/* Gọi hàm renderReactionPicker ở đây */}
+      
+      {/* Add Tooltip component */}
+      <Tooltip
+        content={tooltipConfig.content}
+        top={tooltipConfig.top}
+        left={tooltipConfig.left}
+        visible={tooltipConfig.visible}
+      />
     </div>
   );
 }

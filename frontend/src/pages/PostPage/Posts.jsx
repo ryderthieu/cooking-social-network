@@ -5,13 +5,14 @@ import SharePopup from '../../components/common/SharePopup';
 import postsService, { getAllPosts } from '@/services/postService';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@/context/AuthContext';
+import { deleteSavedPost, savePost } from '@/services/userService';
 
 const Posts = () => {
   const [posts, setPosts] = useState([]);
   const [sharePopup, setSharePopup] = useState({ open: false, postId: null, postTitle: null });
   const navigate = useNavigate();
   const { sendNotification } = useSocket();
-  const {user} = useAuth()
+  const { user } = useAuth()
   useEffect(() => {
     const fetchPosts = async () => {
       try {
@@ -48,7 +49,19 @@ const Posts = () => {
       console.log(error.message)
     }
   };
-
+  const handleBookmark = async (id) => {
+    try {
+      if (user.savedPost.includes(id)) {
+        await deleteSavedPost({ postId: id })
+      }
+      else {
+        await savePost({ postId: id })
+      }
+    }
+    catch (error) {
+      console.log(error)
+    }
+  }
   return (
     <div className="max-w-2xl">
       {posts?.map(post => (
@@ -58,6 +71,7 @@ const Posts = () => {
           onLike={() => handleLike(post._id)}
           onComment={() => navigate(`/posts/${post._id}`)}
           onShare={() => setSharePopup({ open: true, postId: post._id, postTitle: post.content })}
+          onBookmark={handleBookmark}
         />
       ))}
 

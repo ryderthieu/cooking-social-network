@@ -258,6 +258,7 @@ const commentPost = async (req, res) => {
 const sharePost = async (req, res) => {
   try {
     const { id } = req.params;
+    const { userId } = req.user._id;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "ID không hợp lệ" });
     }
@@ -266,9 +267,14 @@ const sharePost = async (req, res) => {
       return res.status(404).json({ message: "Post không tồn tại" });
     }
 
-    post.shares += 1;
-    await post.save();
-    res.status(200).json({ message: "Post đã được share", post });
+    const isShared = post.shares.includes(userId);
+    if (isShared) {
+      return res.status(200).json({ message: "Đã share bài viết này" });
+    } else {
+      post.shares.push(userId)
+      await post.save();
+      res.status(200).json({ message: "Post đã được share", post });
+    }
   } catch (error) {
     console.error("Lỗi khi share post:", error);
     res

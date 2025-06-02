@@ -490,6 +490,7 @@ const deleteSavedPost = async (req, res) => {
     const userId = req.user._id;
     const { postId } = req.body;
     const user = await User.findById(userId);
+
     if (!user) {
       return res.status(404).json({ error: "Nguời dùng không tồn tại!" });
     }
@@ -560,7 +561,7 @@ const savePost = async (req, res) => {
   try {
     const userId = req.user._id;
     const { postId } = req.body;
-
+    console.log(postId)
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: "Người dùng không tồn tại!" });
