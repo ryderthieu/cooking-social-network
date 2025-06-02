@@ -175,7 +175,7 @@ const Login = () => {
                             </div>
                             <button
                                 type="submit"
-                                className={`w-full bg-[#04043F] hover:bg-[#1a1a5f] text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
+                                className={`w-full bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
                                     }`}
                                 disabled={isLoading}
                             >
