@@ -96,9 +96,11 @@ export const editProfile = ({
   gender,
   birthday,
   avatar,
-  username,
+  username, 
+  bio,
+  location,
 }) => {
-  const newInfo = { firstName, lastName, gender, birthday, avatar, username };
+  const newInfo = { firstName, lastName, gender, birthday, avatar, username, bio, location };
   return API.patch("/users/edit-profile", newInfo);
 };
 

@@ -27,6 +27,8 @@ const userSchema = new Schema(
         "https://res.cloudinary.com/dfaq5hbmx/image/upload/v1748692877/sushi_x1k4mg.png",
     },
     username: { type: String },
+    bio : {type: String},
+    location : {type: String}
   },
   {
     timestamps: true,

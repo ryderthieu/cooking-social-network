@@ -27,7 +27,7 @@ const login = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { email, password, lastName, firstName, gender, birthday, username } =
+  const { email, password, lastName, firstName, gender, birthday } =
     req.body;
   try {
     const user = await User.register(
@@ -37,7 +37,6 @@ const register = async (req, res) => {
       firstName,
       gender,
       birthday,
-      username
     );
     console.log(user)
     res
@@ -248,7 +247,7 @@ const searchUser = async (req, res) => {
 const editProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { firstName, lastName, gender, birthday, avatar, username } =
+    const { firstName, lastName, gender, birthday, avatar, username, bio, location } =
       req.body;
 
     const user = await User.findById(userId).select(
@@ -264,6 +263,8 @@ const editProfile = async (req, res) => {
     if (birthday) user.birthday = birthday;
     if (avatar) user.avatar = avatar;
     if (username) user.username = username;
+    if (bio) user.bio = bio
+    if (location) user.location = location
     await user.save();
 
     res.status(200).json(user);

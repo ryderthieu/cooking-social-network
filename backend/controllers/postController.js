@@ -62,7 +62,7 @@ const addPost = async (req, res) => {
 
     await newPost.save();
     const post = await Post.findById(newPost._id)
-      .populate("author", "email firstName lastName")
+      .populate("author", "avatar firstName lastName")
       .populate("recipe", "name");
 
     res.status(201).json({ message: "Post upload thành công", post });

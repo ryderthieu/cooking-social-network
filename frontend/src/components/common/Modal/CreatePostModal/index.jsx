@@ -161,6 +161,7 @@ const CreatePostModal = ({ isOpen, onClose, onDone }) => {
 
         const response = await createPost(postData);
         const newPost = response.data.post;
+        console.log(newPost)
         onDone?.(newPost);
         toast.success('Đã tạo bài viết thành công!');
       } else {

@@ -107,6 +107,8 @@ const AccountPage = () => {
         gender: pendingData.gender,
         birthday: pendingData.birthDay,
         avatar: avatar,
+        bio: bio,
+        location: bio,
       });
       if (pendingData.password) {
         await resetPassword({

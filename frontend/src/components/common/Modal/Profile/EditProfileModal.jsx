@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { X, Camera, MapPin, Calendar } from "lucide-react";
+import { editProfile } from "@/services/userService";
+import { useCloudinary } from "@/context/CloudinaryContext";
+import { toast } from "react-toastify";
 
 export default function EditProfileModal({
   isOpen,
   onClose,
   user,
-  onSave,
+  onSave
 }) {
   const [formData, setFormData] = useState({
     firstName: user?.firstName || "",
@@ -17,6 +20,8 @@ export default function EditProfileModal({
   
   const [isLoading, setIsLoading] = useState(false);
   const [previewAvatar, setPreviewAvatar] = useState(user?.avatar || "");
+  const [avatarFile, setAvatarFile] = useState(null);
+  const { uploadImage } = useCloudinary();
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -28,13 +33,10 @@ export default function EditProfileModal({
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setAvatarFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         setPreviewAvatar(e.target.result);
-        setFormData(prev => ({
-          ...prev,
-          avatar: e.target.result
-        }));
       };
       reader.readAsDataURL(file);
     }
@@ -43,10 +45,30 @@ export default function EditProfileModal({
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      await onSave(formData);
+      // Upload ảnh mới nếu có
+      let avatarUrl = formData.avatar;
+      if (avatarFile) {
+        const uploadResult = await uploadImage(avatarFile);
+        avatarUrl = uploadResult.url;
+      }
+
+      // Chuẩn bị dữ liệu để gửi lên server
+      const profileData = {
+        ...formData,
+        avatar: avatarUrl
+      };
+
+      // Gọi API cập nhật profile
+      const response = await editProfile(profileData);
+      
+      // Gọi callback để cập nhật UI
+      onSave(response.data);
+      
+      toast.success('Cập nhật hồ sơ thành công!');
       onClose();
     } catch (error) {
       console.error('Error saving profile:', error);
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật hồ sơ');
     } finally {
       setIsLoading(false);
     }
