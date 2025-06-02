@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import CommentItem from './CommentItem';
 import { FaSortAmountDown } from 'react-icons/fa';
-import { getCommentsByTarget } from '@/services/commentService';
+import { getCommentsByTarget, createComment } from '@/services/commentService';
+import { useSocket } from '@/context/SocketContext';
+import { toast } from 'react-toastify';
 
-const CommentList = ({ post, reel, key }) => { 
+const CommentList = ({ post, reel }) => { 
   const [sortBy, setSortBy] = useState('newest');
   const [comments, setComments] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [hasNextPage, setHasNextPage] = useState(true)
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const { sendNotification } = useSocket();
+  
   const targetId = post ? post._id : reel ? reel._id : '';
   const targetType = post ? 'post' : reel ? 'video' : '';
   const totalComments = post ? post.comments?.length : reel ? reel.comments?.length : 0;
 
-  useEffect(() => {
-    console.log('update comment')
-  }, [])
   const fetchComments = async (currentPage = 1) => {
     if (loading) return;
     
     try {
       setLoading(true);
-      console.log('Fetching comments for page:', currentPage);
       
       const res = await getCommentsByTarget({ 
         targetId, 
@@ -29,62 +29,177 @@ const CommentList = ({ post, reel, key }) => {
         page: currentPage, 
         limit: 5 
       });
-      setHasNextPage(res.data.data.pagination.hasNextPage)
+      setHasNextPage(res.data.data.pagination.hasNextPage);
       const newComments = res.data.data.comments || [];
-      console.log('Fetched comments:', newComments.length);
       
       if (currentPage === 1) {
         setComments(newComments);
       } else {
-        setComments(prev => {
-          console.log('Previous comments:', prev.length);
-          const updated = [...prev, ...newComments];
-          console.log('Updated comments:', updated.length);
-          return updated;
-        });
+        setComments(prev => [...prev, ...newComments]);
       }
       
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      toast.error('Không thể tải bình luận');
     } finally {
       setLoading(false);
     }
   };
 
-  // Load comments when component mounts or targetId changes
   useEffect(() => {
     if (targetId) {
-      console.log('Initial load for targetId:', targetId);
       setPage(1);
       setComments([]);
       fetchComments(1);
     }
   }, [targetId, targetType]);
 
-  // Load more comments when page changes (but not on initial page 1)
   useEffect(() => {
     if (page > 1) {
-      console.log('Loading page:', page);
       fetchComments(page);
     }
-    console.log(page, comments)
   }, [page]);
 
   const handleLoadMore = () => {
-    console.log('Load more clicked, current page:', page);
-    console.log('Current comments length:', comments.length);
-    console.log('Total comments:', totalComments);
-    
-    if (!loading && comments.length < totalComments) {
-      setPage(prev => {
-        const newPage = prev + 1;
-        console.log('Setting new page:', newPage);
-        return newPage;
-      });
+    if (!loading && hasNextPage) {
+      setPage(prev => prev + 1);
     }
   };
 
-  console.log('Render - Comments length:', comments.length, 'Total:', totalComments, 'Loading:', loading);
+  const handleReply = async (parentId, text) => {
+    try {
+      const response = await createComment({
+        targetId,
+        targetType,
+        text,
+        replyOf: parentId
+      });
+
+      if (response.data.success) {
+        // Tìm comment gốc và thêm reply vào
+        setComments(prevComments => {
+          return prevComments.map(comment => {
+            if (comment._id === parentId) {
+              // Nếu là reply cho comment cấp 1, thêm thông tin người được reply
+              const replyData = {
+                ...response.data.data,
+                replyToUser: comment.userId
+              };
+              return {
+                ...comment,
+                replies: [...(comment.replies || []), replyData]
+              };
+            }
+            // Nếu là reply cho comment cấp 2, tìm trong replies
+            if (comment.replies) {
+              const replyParent = comment.replies.find(r => r._id === parentId);
+              if (replyParent) {
+                const replyData = {
+                  ...response.data.data,
+                  replyToUser: replyParent.userId
+                };
+                return {
+                  ...comment,
+                  replies: [...comment.replies, replyData]
+                };
+              }
+            }
+            return comment;
+          });
+        });
+
+        // Gửi thông báo
+        const parentComment = comments.find(c => {
+          if (c._id === parentId) return true;
+          return c.replies?.some(r => r._id === parentId);
+        });
+        
+        if (parentComment && parentComment.userId._id !== response.data.data.userId._id) {
+          sendNotification({
+            type: 'reply_comment',
+            receiverId: parentComment.userId._id,
+            postId: targetType === 'post' ? targetId : undefined,
+            videoId: targetType === 'video' ? targetId : undefined,
+            commentId: response.data.data._id
+          });
+        }
+
+        toast.success('Đã thêm phản hồi');
+      }
+    } catch (error) {
+      toast.error('Không thể thêm phản hồi');
+    }
+  };
+
+  const handleDelete = (commentId) => {
+    setComments(prevComments => {
+      return prevComments.filter(comment => {
+        // Nếu là comment gốc
+        if (comment._id === commentId) {
+          return false;
+        }
+        // Nếu là reply, lọc ra khỏi replies
+        if (comment.replies) {
+          comment.replies = comment.replies.filter(reply => reply._id !== commentId);
+        }
+        return true;
+      });
+    });
+  };
+
+  const handleUpdate = (updatedComment) => {
+    setComments(prevComments => {
+      return prevComments.map(comment => {
+        // Nếu là comment gốc
+        if (comment._id === updatedComment._id) {
+          return { ...comment, ...updatedComment };
+        }
+        // Nếu là reply
+        if (comment.replies) {
+          comment.replies = comment.replies.map(reply =>
+            reply._id === updatedComment._id ? { ...reply, ...updatedComment } : reply
+          );
+        }
+        return comment;
+      });
+    });
+  };
+
+  const handleLike = async (commentId) => {
+    try {
+      const response = await likeComment({ commentId });
+      if (response.data.success) {
+        setComments(prevComments => {
+          return prevComments.map(comment => {
+            // Nếu là comment gốc
+            if (comment._id === commentId) {
+              return response.data.data;
+            }
+            // Nếu là reply
+            if (comment.replies) {
+              comment.replies = comment.replies.map(reply =>
+                reply._id === commentId ? response.data.data : reply
+              );
+            }
+            return comment;
+          });
+        });
+
+        // Gửi thông báo nếu là like (không phải unlike)
+        const likedComment = response.data.data;
+        if (likedComment.likes.includes(user._id) && likedComment.userId._id !== user._id) {
+          sendNotification({
+            type: 'like_comment',
+            receiverId: likedComment.userId._id,
+            postId: targetType === 'post' ? targetId : undefined,
+            videoId: targetType === 'video' ? targetId : undefined,
+            commentId: likedComment._id
+          });
+        }
+      }
+    } catch (error) {
+      toast.error('Không thể thực hiện thao tác');
+    }
+  };
 
   return (
     <div className="flex-1 overflow-y-auto">
@@ -132,21 +247,28 @@ const CommentList = ({ post, reel, key }) => {
       {/* Comments */}
       <div className="px-6 py-4 space-y-6">
         {comments?.map(comment => (
-          <CommentItem key={comment._id} comment={comment} />
+          <CommentItem
+            key={comment._id}
+            comment={comment}
+            onReply={handleReply}
+            onDelete={handleDelete}
+            onUpdate={handleUpdate}
+            onLike={handleLike}
+          />
         ))}
         
-        {/* Load More Button - giống code gốc */}
+        {/* Load More Button */}
         {hasNextPage && (
           <button 
             onClick={handleLoadMore}
             disabled={loading}
             className='hover:cursor-pointer text-[#FFB800] hover:text-[#FF9500] py-2 disabled:opacity-50 disabled:cursor-not-allowed'
           >
-            {loading ? 'Đang tải...' : `Xem thêm bình luận`}
+            {loading ? 'Đang tải...' : 'Xem thêm bình luận'}
           </button>
         )}
         
-        {/* Loading indicator cho lần đầu load */}
+        {/* Loading indicator */}
         {loading && comments.length === 0 && (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FFB800]"></div>

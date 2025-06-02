@@ -29,3 +29,7 @@ export const updateComment = ({commentId, text, sticker}) => {
 export const deleteComment = ({commentId}) => {
     return API.delete(`/comments/${commentId}`)
 }
+
+export const likeComment = ({commentId}) => {
+    return API.post(`/comments/${commentId}/like`)
+}
