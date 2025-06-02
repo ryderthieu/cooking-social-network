@@ -127,3 +127,7 @@ export const saveReel = ({ reelId }) => {
 export const deleteSavedReel = ({ reelId }) => {
   return API.patch("/users/delete-saved-video", { reelId });
 };
+
+export const loginWithGoogle = (credential) => {
+  return API.post("/users/google-login", { credential });
+};
