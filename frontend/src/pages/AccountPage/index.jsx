@@ -32,6 +32,7 @@ const AccountPage = () => {
           lastName: lastName || "",
           email: email || "",
           password: "",
+          userName: userName || "",
         });
         setAvatar(avatar || "");
         setOriginalEmail(email || "");
@@ -65,6 +66,7 @@ const AccountPage = () => {
           firstName: form.firstName,
           lastName: form.lastName,
           email: form.email,
+          userName: form.userName,
         });
         toast.success("Cập nhật thông tin thành công!");
       } catch (error) {
@@ -81,6 +83,7 @@ const AccountPage = () => {
         firstName: pendingData.firstName,
         lastName: pendingData.lastName,
         email: pendingData.email,
+        userName: pendingData.userName,
       });
       if (pendingData.password) {
         await resetPassword({
@@ -99,9 +102,9 @@ const AccountPage = () => {
   };
 
   return (
-    <div className="px-[110px] bg-[#F5F1E8] h-screen">
-      <div className="flex gap-4 pt-[30px]">
-        <div className="bg-white rounded-md w-[70%] h-[650px]">
+    <div className="px-[110px] bg-[#F5F1E8]">
+      <div className="flex gap-4 pt-[30px] pb-[10px]">
+        <div className="bg-white rounded-md w-[70%] h-[750px]">
           <div className="relative p-4">
             <div className="w-full h-[250px] rounded-3xl bg-gradient-to-r from-amber-200 via-orange-200 to-yellow-200"></div>
             <div>
@@ -154,6 +157,19 @@ const AccountPage = () => {
                 </div>
 
                 <div className="flex flex-col">
+                  <label htmlFor="text" className="text-sm text-gray-600 mb-1">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={form.userName || ""}
+                    onChange={handleChange}
+                    name="userName"
+                    className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#FF6363]"
+                  />
+                </div>
+
+                <div className="flex flex-col">
                   <label htmlFor="email" className="text-sm text-gray-600 mb-1">
                     Email
                   </label>
@@ -181,8 +197,24 @@ const AccountPage = () => {
                     className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#FF6363]"
                   />
                 </div>
+
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="password"
+                    className="text-sm text-gray-600 mb-1"
+                  >
+                    Nhập lại mật khẩu mới
+                  </label>
+                  <input
+                    name="password"
+                    type="password"
+                    value={form.password}
+                    onChange={handleChange}
+                    className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#FF6363]"
+                  />
+                </div>
               </div>
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-end w-full">
                 <button
                   type="submit"
                   className="bg-[#FF6363] text-white px-6 py-2 rounded-md hover:opacity-90 transition"
