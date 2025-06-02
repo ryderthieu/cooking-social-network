@@ -4,8 +4,8 @@ import blog9 from "../../assets/Blog/blog9.png";
 import blog4 from "../../assets/Blog/blog4.png";
 import blog5 from "../../assets/Blog/blog5.png";
 import avatar2 from "../../assets/avatar2.jpg";
-import Recipe from "../../components/common/Recipe";
 import { Link } from "react-router-dom";
+import Recipes from "@/components/sections/Home/Recipes";
 
 const TopBlog = () => {
   return (
@@ -76,14 +76,7 @@ const TopBlog = () => {
         </div>
       </div>
       <div className="my-4">
-        <h1 className="text-center text-[24px] font-semibold ">
-          Gợi ý các món ăn
-        </h1>
-        <div className="grid grid-cols-3 gap-2 mt-3 mb-8">
-          <Recipe />
-          <Recipe />
-          <Recipe />
-        </div>
+        <Recipes />
         <Link to="/recipes" className="flex justify-center">
           <button className="bg-[#FF37A5] text-white font-semibold py-3 px-8 rounded-[30px] text-[14px] hover:bg-[#FF2A8F] transition-colors duration-300">
             Xem tất cả
