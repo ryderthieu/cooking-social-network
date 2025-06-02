@@ -272,14 +272,14 @@ const Header = () => {
                       if (event.key === "Enter") navigate(`/search?q=${searchQuery}`);
                     }}
                   />
-                  {searchQuery && (
+                  {/* {searchQuery && (
                     <div
                       onClick={() => setSearchQuery("")}
                       className="p-1 hover:bg-gray-200 rounded-full transition-colors cursor-pointer ml-2"
                     >
                       <FaTimes className="w-3 h-3 text-gray-400" />
                     </div>
-                  )}
+                  )} */}
                   <div
                     onClick={() => setIsSearchOpen(false)}
                     className="p-1 hover:bg-gray-200 rounded-full transition-colors cursor-pointer ml-2"

@@ -48,7 +48,9 @@ const Posts = () => {
       console.log(error.message)
     }
   };
-
+  const handleBookmark = async () => {
+    
+  }
   return (
     <div className="max-w-2xl">
       {posts?.map(post => (
@@ -58,6 +60,7 @@ const Posts = () => {
           onLike={() => handleLike(post._id)}
           onComment={() => navigate(`/posts/${post._id}`)}
           onShare={() => setSharePopup({ open: true, postId: post._id, postTitle: post.content })}
+          onBookmark={handleBookmark}
         />
       ))}
 

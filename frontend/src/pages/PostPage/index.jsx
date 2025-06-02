@@ -14,7 +14,6 @@ import {
 import SharePopup from "../../components/common/SharePopup";
 import Posts from "./Posts";
 import Reels from "./Reels";
-import { rightSidebarData } from "./mockData";
 import CreatePostModal from "../../components/common/Modal/CreatePostModal";
 
 const PostPage = () => {
@@ -24,7 +23,7 @@ const PostPage = () => {
   const [sharePopup, setSharePopup] = useState({ open: false, postId: null });
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createType, setCreateType] = useState("post");
-
+  const rightSidebarData = {}
   return (
     <div className="min-h-screen bg-[#F5F1E8] py-10 px-2 lg:px-8">
       <div className="max-w-7xl mx-auto flex gap-8 relative">

@@ -11,6 +11,8 @@ import { getUserConversations } from "@/services/conversationService";
 import { createMessage } from "@/services/messageService";
 import { toast } from "react-toastify";
 import { useAuth } from "@/context/AuthContext";
+import { sharePost } from "@/services/postService";
+import { shareVideo } from "@/services/videoService";
 
 const SharePopup = ({ open, onClose, postId, postTitle, videoId }) => {
   const [activeTab, setActiveTab] = useState("social");
@@ -62,6 +64,12 @@ const SharePopup = ({ open, onClose, postId, postTitle, videoId }) => {
   const handleShareToChat = async (conversationId) => {
     try {
       setSharing(true);
+      if (postId) {
+        await sharePost(postId)
+      }
+      else if (videoId) {
+        await shareVideo(videoId)
+      }
       await createMessage({
         conversationId,
         type: "share",

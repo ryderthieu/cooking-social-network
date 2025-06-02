@@ -78,14 +78,16 @@ export const PostCard = ({
 
     const handleLike = () => {
         setIsLiked(!isLiked);
-        onLike?.();
+        onLike?.(post._id);
     };
 
     const handleBookmark = () => {
         setIsBookmarked(!isBookmarked);
         onBookmark?.();
     };
-
+    useEffect(() => {
+        console.log(post)
+    }, [])
     const getGridClass = (length) => {
         switch (length) {
             case 1:
@@ -156,7 +158,7 @@ export const PostCard = ({
                                 <span className="font-medium">Chỉnh sửa</span>
                             </button>
                             <button className="w-full px-4 py-3 text-left hover:bg-[#FFF4D6] flex items-center gap-3 text-gray-700 hover:text-[#FFB800] transition-colors group">
-                                <div className="p-2 rounded-full bg-gray-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300">
+                                <div className={`p-2 rounded-full bg-gray-100 group-hover:bg-white group-hover:scale-110 transition-all duration-300`}>
                                     <FaBookmark className="w-4 h-4" />
                                 </div>
                                 <span className="font-medium">Lưu bài viết</span>
@@ -276,7 +278,14 @@ export const PostCard = ({
                     </span>
                 </button>
 
-                <button className="p-2 rounded-full bg-gray-100 hover:bg-[#FFF4D6] text-gray-600 hover:text-[#FFB800] transition-all duration-300 hover:scale-110">
+                <button
+                    onClick={() => { handleBookmark() }}
+                    className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-all duration-300 group ${isBookmarked
+                        ? "bg-[#FFB800]/20 text-[#FFB800] shadow-md"
+                        : "text-gray-600 hover:text-[#FFB800] hover:bg-[#FFF4D6]/50"
+                        }`
+
+                    }>
                     <FaBookmark className="w-4 h-4" />
                 </button>
             </div>
