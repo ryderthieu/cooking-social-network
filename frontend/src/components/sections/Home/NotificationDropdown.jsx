@@ -112,7 +112,7 @@ export default function NotificationDropdown() {
       if (notification.postId) {
         navigate(`/posts/${notification.postId}`);
       } else if (notification.videoId) {
-        navigate(`/reels/${notification.videoId}`);
+        navigate(`/explore/reels/${notification.videoId}`);
       }
     } else if (notification.type === "follow") {
       navigate(`/profile/${notification.sender._id}`);

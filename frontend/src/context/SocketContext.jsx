@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import io from 'socket.io-client';
+import { toast } from 'react-toastify';
 
 const SocketContext = createContext();
 
@@ -25,14 +26,17 @@ export const SocketProvider = ({ children }) => {
         auth: {
           token: token.startsWith('Bearer ') ? token : `Bearer ${token}`
         },
-        // transports: ['websocket'], // Optional: force websocket if polling is an issue
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
       });
 
       setSocket(newSocket);
 
       newSocket.on('connect', () => {
         console.log('Socket connected:', newSocket.id);
-        newSocket.emit('join_conversations'); // Client tells server to join its conversation rooms
+        newSocket.emit('join_conversations');
       });
 
       // Nhận danh sách người dùng online ban đầu từ server
@@ -57,7 +61,8 @@ export const SocketProvider = ({ children }) => {
       });
 
       newSocket.on('new_notification', (notification) => {
-        setNotifications(prev => [notification, ...prev].slice(0, 20)); // Keep last 20 notifications
+        console.log('Received new notification:', notification);
+        setNotifications(prev => [notification, ...prev].slice(0, 20));
         setUnreadNotifications(prev => prev + 1);
         showNotificationToast(notification);
       });
@@ -85,15 +90,10 @@ export const SocketProvider = ({ children }) => {
 
       newSocket.on('connect_error', (error) => {
         console.error('Socket connection error:', error.message);
-        // Potentially handle token expiry or auth issues here
         if (error.message === 'Authentication error') {
-            // Handle logout or token refresh
             console.log("Authentication failed, need to re-login or refresh token.");
         }
       });
-
-      // No need to listen for 'new_message' here if MessagePage handles it directly
-      // newSocket.on('new_message', (data) => {\n      //   console.log('SocketContext received new_message:', data);\n      // });\n
 
       return () => {
         console.log('Closing socket connection for:', newSocket.id);
@@ -107,27 +107,32 @@ export const SocketProvider = ({ children }) => {
         newSocket.off('disconnect');
         newSocket.off('error');
         newSocket.off('connect_error');
-        // newSocket.off('new_message');
         newSocket.close();
-        setSocket(null); // Clear socket state on cleanup
+        setSocket(null);
       };
     } else {
-        // No token, so clear socket if it exists from a previous session
         if(socket) {
             socket.close();
             setSocket(null);
         }
-        setOnlineUsers([]); // Clear online users if no token
+        setOnlineUsers([]);
     }
-  }, []); // Run only once on mount and unmount
+  }, []);
 
   const showNotificationToast = (notification) => {
-    console.log('Toast:: New notification:', notification.message);
-    // Replace with actual toast library call, e.g., toast.info(notification.message)
+    console.log('Toast:: New notification:', notification);
+    if (notification.type === 'like') {
+      toast.info('Có người đã thích bài viết của bạn!');
+    } else if (notification.type === 'comment') {
+      toast.info(notification.message || 'Có người đã bình luận bài viết của bạn!');
+    } else if (notification.type === 'share') {
+      toast.info('Có người đã chia sẻ bài viết của bạn!');
+    }
   };
 
   const sendMessage = (messageData) => {
     if (socket) {
+      console.log('Sending message:', messageData);
       socket.emit('send_message', messageData);
     } else {
       console.error('Socket not initialized to send message');
@@ -136,7 +141,10 @@ export const SocketProvider = ({ children }) => {
 
   const sendNotification = (notificationData) => {
     if (socket) {
+      console.log('Sending notification:', notificationData);
       socket.emit('send_notification', notificationData);
+    } else {
+      console.error('Socket not initialized to send notification');
     }
   };
 
@@ -172,10 +180,9 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
-  const markAsRead = (conversationId) => { // This might be for marking messages in a conversation as read
+  const markAsRead = (conversationId) => {
     if (socket) {
       socket.emit('mark_as_read', { conversationId });
-      // You might want UI feedback or state update here if needed
     }
   };
 

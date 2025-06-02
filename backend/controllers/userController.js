@@ -27,7 +27,7 @@ const login = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { email, password, lastName, firstName, gender, birthDay, username } =
+  const { email, password, lastName, firstName, gender, birthday } =
     req.body;
   try {
     const user = await User.register(
@@ -36,9 +36,9 @@ const register = async (req, res) => {
       lastName,
       firstName,
       gender,
-      birthDay,
-      username
+      birthday,
     );
+    console.log(user)
     res
       .status(200)
       .json({ message: "Đăng ký thành công! Vui lòng đăng nhập để tiếp tục." });
@@ -247,7 +247,7 @@ const searchUser = async (req, res) => {
 const editProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { firstName, lastName, gender, birthDay, avatar, username } =
+    const { firstName, lastName, gender, birthday, avatar, username, bio, location } =
       req.body;
 
     const user = await User.findById(userId).select(
@@ -260,9 +260,11 @@ const editProfile = async (req, res) => {
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
     if (gender) user.gender = gender;
-    if (birthDay) user.birthday = birthDay;
+    if (birthday) user.birthday = birthday;
     if (avatar) user.avatar = avatar;
     if (username) user.username = username;
+    if (bio) user.bio = bio
+    if (location) user.location = location
     await user.save();
 
     res.status(200).json(user);
@@ -561,7 +563,7 @@ const savePost = async (req, res) => {
   try {
     const userId = req.user._id;
     const { postId } = req.body;
-    console.log(postId)
+    console.log(postId);
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ error: "Người dùng không tồn tại!" });

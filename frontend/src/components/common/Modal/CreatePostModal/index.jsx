@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 import { addVideo } from '@/services/videoService';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-const CreatePostModal = ({ isOpen, onClose }) => {
+const CreatePostModal = ({ isOpen, onClose, onDone }) => {
   const { user } = useAuth();
   const { uploadImage, uploadVideo } = useCloudinary();
   const [postType, setPostType] = useState('post'); // 'post' hoặc 'reels'
@@ -159,7 +159,10 @@ const CreatePostModal = ({ isOpen, onClose }) => {
           imgUri: images
         };
 
-        await createPost(postData);
+        const response = await createPost(postData);
+        const newPost = response.data.post;
+        console.log(newPost)
+        onDone?.(newPost);
         toast.success('Đã tạo bài viết thành công!');
       } else {
         // Xử lý tạo video
@@ -182,7 +185,8 @@ const CreatePostModal = ({ isOpen, onClose }) => {
           videoUri: videoUrl
         };
 
-        await addVideo(videoData);
+        const data = await addVideo(videoData);
+        onDone?.(data.data.video)
         toast.success('Đã tạo video thành công!');
       }
       

@@ -283,6 +283,7 @@ export default function ProfilePage() {
       // Gọi API để update profile
       console.log("Saving profile:", formData);
       // await updateUserProfile(formData);
+      setUserData(formData)
 
       setIsEditModalOpen(false);
     } catch (error) {

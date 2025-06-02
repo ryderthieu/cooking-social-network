@@ -7,7 +7,8 @@ const commentSchema = new Schema ({
     userId: {type: Schema.Types.ObjectId, ref: 'User', required: true},
     text: {type: String},
     sticker: {type: String},
-    replyOf: {type: Schema.Types.ObjectId, ref: 'Comment', default: null}
+    replyOf: {type: Schema.Types.ObjectId, ref: 'Comment', default: null},
+    likes: [{type: Schema.Types.ObjectId, ref: 'User'}]
 }, {
     timestamps: true
 })

@@ -417,4 +417,56 @@ const Notification = require('../models/notification');
     }
   }
 
-module.exports = {createComment, getCommentsByTarget, getReplies, searchComments, getCommentById, updateComment, deleteComment};
+  // Thích/Bỏ thích comment
+  const likeComment = async (req, res) => {
+    try {
+      const { commentId } = req.params;
+      const userId = req.user._id;
+
+      const comment = await Comment.findById(commentId);
+      if (!comment) {
+        return res.status(404).json({
+          success: false,
+          message: 'Không tìm thấy bình luận'
+        });
+      }
+
+      const isLiked = comment.likes.includes(userId);
+      if (isLiked) {
+        // Bỏ thích
+        comment.likes = comment.likes.filter(id => id.toString() !== userId.toString());
+      } else {
+        // Thích
+        comment.likes.push(userId);
+
+        // Tạo thông báo cho chủ comment (nếu không phải chính mình)
+        if (comment.userId.toString() !== userId.toString()) {
+          const notification = new Notification({
+            receiver: comment.userId,
+            sender: userId,
+            type: 'like_comment',
+            postId: comment.targetType === 'post' ? comment.targetId : undefined,
+            videoId: comment.targetType === 'video' ? comment.targetId : undefined,
+            commentId: comment._id
+          });
+          await notification.save();
+        }
+      }
+
+      await comment.save();
+      await comment.populate('userId', 'firstName lastName avatar');
+
+      res.json({
+        success: true,
+        data: comment,
+        message: isLiked ? 'Đã bỏ thích bình luận' : 'Đã thích bình luận'
+      });
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+
+module.exports = {createComment, getCommentsByTarget, getReplies, searchComments, getCommentById, updateComment, deleteComment, likeComment};

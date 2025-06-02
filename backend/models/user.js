@@ -27,6 +27,8 @@ const userSchema = new Schema(
         "https://res.cloudinary.com/dfaq5hbmx/image/upload/v1748692877/sushi_x1k4mg.png",
     },
     username: { type: String },
+    bio : {type: String},
+    location : {type: String}
   },
   {
     timestamps: true,
@@ -40,7 +42,6 @@ userSchema.statics.register = async function (
   firstName,
   gender,
   birthday,
-  username
 ) {
   if (
     !email ||
@@ -48,8 +49,7 @@ userSchema.statics.register = async function (
     !lastName ||
     !firstName ||
     !gender ||
-    !birthday ||
-    !username
+    !birthday 
   ) {
     console.log(
       email,
@@ -58,7 +58,6 @@ userSchema.statics.register = async function (
       firstName,
       gender,
       birthday,
-      username
     );
     throw Error("Bạn chưa điền hết thông tin!");
   }
@@ -83,7 +82,6 @@ userSchema.statics.register = async function (
     firstName,
     gender,
     birthday,
-    username,
   });
 
   return user;

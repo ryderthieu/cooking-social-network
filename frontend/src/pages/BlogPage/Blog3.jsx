@@ -7,9 +7,9 @@ import sn4 from "../../assets/Blog/sn4.jpg";
 import sn5 from "../../assets/Blog/sn5.jpg";
 import sn6 from "../../assets/Blog/sn6.jpg";
 import avatar2 from "../../assets/avatar2.jpg";
-import Recipe from "../../components/common/Recipe";
 import { Link } from "react-router-dom";
 import rc from "../../assets/Blog/rc.jpg";
+import Recipes from "@/components/sections/Home/Recipes";
 
 const Blog3 = () => {
   return (
@@ -160,14 +160,7 @@ const Blog3 = () => {
         </div>
       </div>
       <div className="mb-8 mt-16">
-        <h1 className="text-center text-[24px] font-semibold ">
-          Gợi ý các món ăn
-        </h1>
-        <div className="grid grid-cols-3 gap-2 mt-3 mb-8">
-          <Recipe />
-          <Recipe />
-          <Recipe />
-        </div>
+        <Recipes />
         <Link to="/recipes" className="flex justify-center">
           <button className="bg-[#FF37A5] text-white font-semibold py-3 px-8 rounded-[30px] text-[14px] hover:bg-[#FF2A8F] transition-colors duration-300">
             Xem tất cả

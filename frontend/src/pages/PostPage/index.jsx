@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   LeftSidebar,
   RightSidebar,
@@ -19,11 +19,22 @@ import CreatePostModal from "../../components/common/Modal/CreatePostModal";
 const PostPage = () => {
   const location = useLocation();
   const currentPath = location.pathname;
+  const postsRef = useRef();
 
   const [sharePopup, setSharePopup] = useState({ open: false, postId: null });
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createType, setCreateType] = useState("post");
   const rightSidebarData = {}
+
+  const handlePostCreated = (newPost) => {
+    // Đóng modal
+    setShowCreateModal(false);
+    // Cập nhật danh sách bài viết
+    if (postsRef.current?.handleNewPost) {
+      postsRef.current.handleNewPost(newPost);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50  py-10 px-2 lg:px-8">
       <div className="max-w-7xl mx-auto flex gap-8 relative">
@@ -34,7 +45,7 @@ const PostPage = () => {
 
         <div className="flex-1">
           <Routes>
-            <Route path="/posts" element={<Posts />} />
+            <Route path="/posts" element={<Posts ref={postsRef} />} />
             <Route path="/reels/:id" element={<Reels />} />
             <Route path="/reels" element={<Reels />} />
             <Route path="/" element={<Navigate to="posts" replace />} />
@@ -43,7 +54,7 @@ const PostPage = () => {
 
         <div className="w-80 flex-shrink-0 hidden lg:block">
           <div className="sticky top-24">
-            <RightSidebar data={rightSidebarData} />
+            <RightSidebar />
           </div>
         </div>
       </div>
@@ -56,6 +67,7 @@ const PostPage = () => {
       <CreatePostModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+        onDone={handlePostCreated}
         type={createType}
       />
     </div>

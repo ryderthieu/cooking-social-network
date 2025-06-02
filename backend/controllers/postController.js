@@ -62,7 +62,7 @@ const addPost = async (req, res) => {
 
     await newPost.save();
     const post = await Post.findById(newPost._id)
-      .populate("author", "email firstName lastName")
+      .populate("author", "avatar firstName lastName")
       .populate("recipe", "name");
 
     res.status(201).json({ message: "Post upload thành công", post });
@@ -82,7 +82,7 @@ const editPost = async (req, res) => {
     }
 
     const { caption, recipe, videoUri, imgUri } = req.body;
-
+    console.log(recipe)
     const post = await Post.findById(id);
     if (!post) {
       return res.status(404).json({ message: "Post không tồn tại" });
@@ -111,7 +111,7 @@ const editPost = async (req, res) => {
     }
 
     if (caption) post.caption = caption;
-    if (recipe) post.recipe = recipe;
+     post.recipe = recipe;
     if (media.length > 0) post.media = media;
 
     await post.save();

@@ -11,15 +11,16 @@ export const register = ({
   lastName,
   firstName,
   gender,
-  birthDay,
+  birthday,
 }) => {
+  console.log(birthday)
   return API.post("/users/register", {
     email,
     password,
     lastName,
     firstName,
     gender,
-    birthDay,
+    birthday,
   });
 };
 
@@ -95,9 +96,11 @@ export const editProfile = ({
   gender,
   birthday,
   avatar,
-  username,
+  username, 
+  bio,
+  location,
 }) => {
-  const newInfo = { firstName, lastName, gender, birthday, avatar, username };
+  const newInfo = { firstName, lastName, gender, birthday, avatar, username, bio, location };
   return API.patch("/users/edit-profile", newInfo);
 };
 

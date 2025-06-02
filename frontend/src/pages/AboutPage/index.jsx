@@ -9,6 +9,7 @@ import ntruong from "../../assets/About/ntruong.png";
 import tnhi from "../../assets/About/tnhi.jpg";
 import CarouselPlugin from "../../components/sections/Home/CarouselHero.jsx";
 import AllBlogs from "@/components/sections/Home/AllBlogs";
+import khai from "../../assets/About/k.jpg";
 
 import { ArrowRight, Users, BookOpen, Eye } from "lucide-react";
 
@@ -74,10 +75,10 @@ const testimonials = [
       "Mỗi ngày đều có cảm hứng mới để vào bếp nhờ Oshisha. Thật tuyệt vời!",
   },
   {
-    name: "Anh Thơ",
-    avatar: atho,
+    name: "Quang Khải",
+    avatar: khai,
     content:
-      "Mỗi ngày đều có cảm hứng mới để vào bếp nhờ Oshisha. Thật tuyệt vời!",
+      "Oshisha giúp mình học nấu nhiều món mới và kết nối với bạn bè có cùng đam mê.",
   },
 ];
 
