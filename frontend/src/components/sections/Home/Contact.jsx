@@ -129,48 +129,21 @@ export default function Contact() {
       <div className="relative z-10 mx-auto px-[120px] py-10">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-orange-200/50 rounded-full px-4 py-2 mb-6">
-            <Sparkles className="h-4 w-4 text-orange-500" />
-            <span className="text-sm font-medium text-orange-700">
-              Kết nối cùng chúng tôi
-            </span>
-          </div>
-
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Kết nối với <span className="text-[#FFB800]">Oshisha</span>
+          
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
+            Kết nối với <span className="bg-gradient-to-r from-orange-500 to-amber-500 text-transparent bg-clip-text">Oshisha</span>
           </h1>
           <p className="text-lg text-gray-600 mx-auto">
             Khám phá thế giới ẩm thực cùng chúng tôi và chia sẻ những công thức
             tuyệt vời
           </p>
         </div>
-        {/* Success Message
-        {successMessage && (
-          <div className="fixed bottom-6 right-6 z-50 max-w-sm ">
-            <div className="bg-white rounded-lg shadow-lg border border-green-200 p-4 flex items-center gap-3">
-              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                <Check className="h-4 w-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-medium text-gray-800">
-                  {successMessage.message}
-                </p>
-              </div>
-              <button
-                onClick={() => setSuccessMessage(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        )} */}
         {/* Main Content */}
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Contact Form */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-[#ffa200] rounded-lg flex items-center justify-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-400 rounded-lg flex items-center justify-center">
                 <Send className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -266,7 +239,7 @@ export default function Contact() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-[#ffa200] hover:bg-[#ff9900] text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-tr from-rose-500 via-orange-500/80 to-yellow-400/70 hover:from-bg-[#ff9900] hover:to-bg-amber-200 text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (
                   <>
@@ -293,7 +266,7 @@ export default function Contact() {
           {/* Newsletter Section */}
           <div className="space-y-6">
             {/* Newsletter Banner */}
-            <div className="bg-gradient-to-tr from-orange-500/80 to-yellow-400/70 rounded-2xl p-6 text-white">
+            <div className="bg-gradient-to-tr from-rose-400 via-orange-500/50 to-yellow-400/70 rounded-2xl p-6 text-white">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
                   <Bell className="h-6 w-6 text-white" />
@@ -329,7 +302,7 @@ export default function Contact() {
                 <button
                   type="submit"
                   disabled={isSubscribing}
-                  className="w-full bg-white text-[#ff9500] px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-white text-[black] px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubscribing ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#FFB800] border-t-transparent"></div>

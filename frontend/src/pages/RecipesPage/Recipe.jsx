@@ -6,20 +6,16 @@ import RecipeGrid from "../../components/sections/Recipe/RecipeGrid.jsx";
 import BlogSection from "../../components/sections/Recipe/BlogSection.jsx";
 import ExploreSection from "../../components/sections/Recipe/ExploreSection.jsx";
 import RecipeHeader from "../../components/sections/Recipe/RecipeHeader.jsx";
-import { Korea1 } from "../../assets/Recipe/images/index.js";
 import { getAllRecipes, filterRecipes } from "../../services/recipeService.js";
-import { getAllPosts } from "../../services/postService.js";
 import categoryService from "../../services/categoryService.js";
 
 const Recipes = () => {
   const { categoryType, item } = useParams();
   const location = useLocation();
   const [scrollY, setScrollY] = useState(0);
-  const [filteredPopularRecipes, setFilteredPopularRecipes] = useState([]);
-  const [filteredAllRecipes, setFilteredAllRecipes] = useState([]);
+  const [filteredPopularRecipes, setFilteredPopularRecipes] = useState([]);  const [filteredAllRecipes, setFilteredAllRecipes] = useState([]);
   const [visibleRecipes, setVisibleRecipes] = useState(8);
   const [error, setError] = useState(null);
-  const [blogs, setBlogs] = useState([]);
   const [currentCategory, setCurrentCategory] = useState(null);
   const [allRecipes, setAllRecipes] = useState([]);
 
@@ -116,38 +112,14 @@ const Recipes = () => {
           } catch (categoryError) {
             console.warn("Failed to load category info:", categoryError);
             setCurrentCategory(null);
-          }
-        }
+          }        }
 
-        // Fetch blogs/posts
-        try {
-          const blogsResponse = await getAllPosts();
-          const postsData = Array.isArray(blogsResponse.data)
-            ? blogsResponse.data
-            : [];
-          // Transform posts to blog format if needed
-          const formattedBlogs = postsData.slice(0, 4).map((post) => ({
-            id: post._id,
-            title: post.caption || "Bài viết mới",
-            image: post.media?.[0]?.url || Korea1,
-            author: post.author
-              ? `${post.author.firstName} ${post.author.lastName}`
-              : "Oshisha",
-            date: post.createdAt,
-            path: `/posts/${post._id}`,
-          }));
-          setBlogs(formattedBlogs);
-        } catch (blogError) {
-          console.warn("Failed to load blogs:", blogError);
-          setBlogs([]);
-        }
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Có lỗi xảy ra khi tải dữ liệu");
         // Fallback to empty arrays
         setFilteredPopularRecipes([]);
         setFilteredAllRecipes([]);
-        setBlogs([]);
       }
     };
 
@@ -248,10 +220,9 @@ chúng tôi mang đến cho bạn những trải nghiệm ẩm thực đa dạng
         categoryDescription={categoryDescription}
         categoryType={categoryType}
         currentCategory={currentCategory}
-      />
-      <div className="mx-auto space-y-10 my-10">
+      />      <div className="mx-auto space-y-10 my-10">
         {/* Blog Section */}
-        <BlogSection blogs={blogs} />
+        <BlogSection />
 
         {/* Popular Recipes Section */}
         <RecipeGrid

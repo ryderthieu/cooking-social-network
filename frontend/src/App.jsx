@@ -8,6 +8,7 @@ import Blog1 from "./pages/BlogPage/Blog1";
 import Blog2 from "./pages/BlogPage/Blog2";
 import Blog3 from "./pages/BlogPage/Blog3";
 import Blog4 from "./pages/BlogPage/Blog4";
+import BlogDetail from "./pages/BlogPage/BlogDetail";
 import LayoutRoute from "./routes/LayoutRoute";
 import TermsPage from "./pages/SupportPage/TermsAndConditions/TermsPage";
 import ConditionsPage from "./pages/SupportPage/TermsAndConditions/ConditionsPage";
@@ -61,6 +62,7 @@ function App() {
     { path: "/blog/bai-viet-moi", element: <NewBlog /> },
     { path: "/blog/bai-viet-noi-bat", element: <HighlightBlog /> },
     { path: "/blog/bai-viet-pho-bien", element: <TopBlog /> },
+    { path: "/blog/:id", element: <BlogDetail /> },
     { path: "/blog/1", element: <Blog1 /> },
     { path: "/blog/2", element: <Blog2 /> },
     { path: "/blog/3", element: <Blog3 /> },
