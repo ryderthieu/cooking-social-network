@@ -13,15 +13,15 @@ const categorySchema = new Schema({
         required: true,
         unique: true,
         lowercase: true
-    },
-    type: {
+    },    type: {
         type: String,
         required: true,
         enum: ["mealType", "cuisine", "occasions", "dietaryPreferences", "mainIngredients", "cookingMethod", "timeBased", "difficultyLevel"]
     },
     description: {
         type: String,
-        trim: true
+        trim: true,
+        required: true
     },
     image: {
         type: String,
@@ -96,6 +96,11 @@ categorySchema.statics.getByType = function(type, options = {}) {
     return this.find(query)
         .sort({ order: 1, name: 1 })
         .limit(options.limit || 0);
+};
+
+// Static method to get category by slug and type
+categorySchema.statics.getBySlugAndType = function(slug, type) {
+    return this.findOne({ slug, type, isActive: true });
 };
 
 // Static method to get featured categories

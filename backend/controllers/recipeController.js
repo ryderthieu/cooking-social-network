@@ -4,12 +4,14 @@ const slugify = require("slugify");
 const { locales } = require("validator/lib/isIBAN");
 
 // ✅ GET: Lấy tất cả công thức
-const getAllRecipes = async (req, res) => {
-  try {
+const getAllRecipes = async (req, res) => {  try {
     const recipes = await Recipe.find()
       .populate("author", "firstName lastName  avatar")
-      .populate("ingredients.ingredient", "name unit")
+      .populate("ingredients.ingredient", "name unit image")
       .populate("categories", "name type slug image");
+    
+    console.log(`📊 Total recipes in database: ${recipes.length}`);
+    
     res
       .status(200)
       .json({ success: true, count: recipes.length, data: recipes });
@@ -30,10 +32,9 @@ const getRecipeById = async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(id)) {
     res.status(404).json({ success: false, message: "Invalid Id" });
   }
-  try {
-    const recipe = await Recipe.findById(id)
+  try {    const recipe = await Recipe.findById(id)
       .populate("author", "firstName lastName avatar")
-      .populate("ingredients.ingredient", "name unit")
+      .populate("ingredients.ingredient", "name unit image")
       .populate("categories", "name type slug image");
     if (!recipe) {
       return res.status(404).json({
@@ -73,16 +74,20 @@ const searchRecipe = async (req, res) => {
       limit = 10,
     } = req.query;
 
-    const filter = {};
-
-    // Tìm kiếm theo từ khóa (tên công thức)
+    const filter = {};    // Tìm kiếm theo từ khóa (tên công thức hoặc slug)
     if (keyword) {
       const slug = slugify(keyword, {
         lower: true,
         locale: "vi",
         remove: /[*+~.()'"!:@]/g,
       });
-      filter.slug = { $regex: slug, $options: "i" };
+      console.log(`🔍 Search keyword: "${keyword}" -> slug: "${slug}"`);
+      
+      // Tìm kiếm theo cả name và slug
+      filter.$or = [
+        { name: { $regex: keyword, $options: "i" } },
+        { slug: { $regex: slug, $options: "i" } }
+      ];
     }
 
     // Import Category model for category searches
@@ -169,31 +174,30 @@ const searchRecipe = async (req, res) => {
     // Tìm kiếm theo nguyên liệu
     if (ingredient) {
       filter["ingredients.ingredient"] = ingredient;
-    }
-
-    // Kiểm tra nếu không có điều kiện tìm kiếm nào
+    }    // Nếu không có điều kiện tìm kiếm nào, trả về tất cả recipes (thay vì lỗi)
     if (Object.keys(filter).length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Vui lòng nhập ít nhất một điều kiện tìm kiếm",
-      });
+      console.log(`📝 No search filters provided, returning all recipes`);
     }
 
     // Tính số lượng document khi chuyển sang các trang (trang 1 - skip 0, trang 2 - skip 10,...)
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-
-    // Đếm tổng document thỏa mãn điều kiện
+    const skip = (parseInt(page) - 1) * parseInt(limit);    // Đếm tổng document thỏa mãn điều kiện
     const total = await Recipe.countDocuments(filter);
 
     // Tổng số trang cần thiết để hiện thị kết quả, dùng ceil để làm tròn lên
     const totalPages = Math.ceil(total / parseInt(limit));
+
+    console.log(`🔍 Search filter:`, JSON.stringify(filter, null, 2));
+    console.log(`📊 Found ${total} total recipes matching filter`);
+
     const recipes = await Recipe.find(filter)
       .populate("author", "firstName lastName avatar")
-      .populate("ingredients.ingredient", "name unit")
+      .populate("ingredients.ingredient", "name unit image")
       .populate("categories", "name type slug image")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
+
+    console.log(`📦 Returned ${recipes.length} recipes in this page`);
 
     res.status(200).json({
       success: true,
@@ -484,12 +488,10 @@ const getSimilarRecipes = async (req, res) => {
       similarityQuery.categories = {
         $in: currentRecipe.categories.map(cat => cat._id)
       };
-    }
-
-    // Tìm recipes tương tự
+    }    // Tìm recipes tương tự
     const similarRecipes = await Recipe.find(similarityQuery)
       .populate("author", "firstName lastName avatar")
-      .populate("ingredients.ingredient", "name unit")
+      .populate("ingredients.ingredient", "name unit image")
       .populate("categories", "name type slug image")
       .sort({ averageRating: -1, createdAt: -1 }) // Ưu tiên rating cao và mới
       .limit(parseInt(limit));
@@ -504,7 +506,7 @@ const getSimilarRecipes = async (req, res) => {
         },
       })
         .populate("author", "firstName lastName avatar")
-        .populate("ingredients.ingredient", "name unit")
+        .populate("ingredients.ingredient", "name unit image")
         .populate("categories", "name type slug image")
         .sort({ createdAt: -1 })
         .limit(remainingLimit);

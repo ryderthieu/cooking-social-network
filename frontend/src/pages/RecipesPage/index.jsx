@@ -36,7 +36,6 @@ export default function RecipeCategories() {
                 path:
                   item.path ||
                   `/recipes?${category.key}=${encodeURIComponent(item.name)}`,
-                // Use item's own background color if available, otherwise use category fallback
                 backgroundColor:
                   item.backgroundColor && item.backgroundColor.startsWith("bg-")
                     ? item.backgroundColor
@@ -45,7 +44,6 @@ export default function RecipeCategories() {
                     : category.background && category.background.startsWith("bg-")
                     ? category.background
                     : "bg-[#ffefd0]",
-                // Use item's own text color if available
                 color:
                   item.textColor && item.textColor.startsWith("bg-")
                     ? item.textColor
@@ -103,9 +101,8 @@ export default function RecipeCategories() {
           {/* Background */}
           <div className="w-full bg-gradient-to-tr from-[#fd3cb3] to-yellow-200 h-[400px]"></div>
           <div className="absolute inset-0 bg-opacity-30">
-            <div className="p-10 h-full">
-              {/* <BreadCrumb /> */}
-
+            <div className="px-10 pt-20 h-full">
+            
               <div className="flex justify-center h-full">
                 <h1 className="text-white text-3xl md:text-5xl text-center font-extrabold">
                   Khám phá công thức

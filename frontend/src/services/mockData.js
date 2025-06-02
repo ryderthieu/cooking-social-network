@@ -557,8 +557,9 @@ export const mockCategoryItems = {
       },
     ],
     background: "bg-[#FEDAC8]",
-    color: "bg-[#FFAD5660]",  },
-  "cookingMethod": {
+    color: "bg-[#FFAD5660]",
+  },
+  "cooking-method": {
     title: "Phương pháp nấu",
     items: [
       {

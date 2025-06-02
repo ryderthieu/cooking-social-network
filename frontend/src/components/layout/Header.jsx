@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import logo from "../../assets/logo.png";
 import { FaAngleDown, FaChevronDown, FaSearch, FaTimes } from "react-icons/fa";
 import { FiBookmark } from "react-icons/fi";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { categories, search, supports } from "./MenuData";
 import { IoNotifications, IoSearchOutline } from "react-icons/io5";
 import { MdMessage } from "react-icons/md";
@@ -114,8 +114,8 @@ const Header = () => {
         <img src={logo} alt="Oshisha" className="h-9 w-auto" />
       </a>
       <div className="flex items-center gap-10" ref={navRef}>
-        <Link
-          to="/"
+        <a
+          href="/"
           onClick={() => {
             setIsExploreOpen(false);
             setIsSearchOpen(false);
@@ -128,7 +128,7 @@ const Header = () => {
           <p className="font-semibold text-[17px] transform scale-y-[1.05] relative">
             Trang chủ
           </p>
-        </Link>
+        </a>
         {/* KHÁM PHÁ CÔNG THỨC */}
         <div
           onClick={() => {
@@ -184,8 +184,8 @@ const Header = () => {
                 {!isLoadingCategories &&
                   dynamicCategories[selectedCategoryIndex] &&
                   dynamicCategories[selectedCategoryIndex].items.map((item) => (
-                    <Link
-                      to={item.path}
+                    <a
+                      href={item.path}
                       key={item.name}
                       className="text-center group"
                     >
@@ -219,21 +219,16 @@ const Header = () => {
                       </div>
                       <p className="text-[17px] font-medium text-gray-700 hover:text-[#FF6363] transition-all duration-200">
                         {item.name}
-                        {item.count && (
-                          <span className="text-sm text-gray-400 ml-2">
-                            ({item.count})
-                          </span>
-                        )}
                       </p>
-                    </Link>
+                    </a>
                   ))}
               </div>
             </div>
           )}
         </div>
 
-        <Link
-          to="/explore"
+        <a
+          href="/explore"
           onClick={() => {
             setIsExploreOpen(false);
             setIsSearchOpen(false);
@@ -246,11 +241,11 @@ const Header = () => {
           <p className="font-semibold text-[17px] transform scale-y-[1.05]">
             Khám phá
           </p>
-        </Link>
+        </a>
 
         {/* VỀ OSHISHA */}
-        <Link
-          to="/about"
+        <a
+          href="/about"
           onClick={() => {
             setIsExploreOpen(false);
             setIsSearchOpen(false);
@@ -263,7 +258,7 @@ const Header = () => {
           <p className="font-semibold text-[17px] transform scale-y-[1.05]">
             Về OSHISHA
           </p>
-        </Link>
+        </a>
 
         {/* HỖ TRỢ */}
         <div
@@ -306,7 +301,7 @@ const Header = () => {
 
               <div className="w-[80%] grid grid-cols-3 gap-6 pr-[110px] p-4 bg-gradient-to-br from-[#fef2f2] to-[#fff7ed]">
                 {selectedSupport.items.map((item) => (
-                  <Link to={item.path} key={item.name} className="text-center">
+                  <a href={item.path} key={item.name} className="text-center">
                     <div className="h-[280px] rounded-2xl mb-4 overflow-hidden bg-pink-100 flex items-center justify-center">
                       {item.src ? (
                         <img
@@ -321,7 +316,7 @@ const Header = () => {
                     <p className="text-[17px] font-medium text-gray-700 hover:text-[#FF6363] transition-all duration-200">
                       {item.name}
                     </p>
-                  </Link>
+                  </a>
                 ))}
               </div>
             </div>
@@ -342,9 +337,9 @@ const Header = () => {
             >
               {isSearchOpen ? (
                 <div className="flex items-center w-full bg-gray-50 rounded-full px-4 py-2 border border-gray-200 focus-within:border-[#FF6363] focus-within:shadow-md transition-all duration-200">
-                  <Link to={"/search"}>
+                  <a to={"/search"}>
                     <IoSearchOutline className="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
-                  </Link>
+                  </a>
                   <input
                     type="text"
                     placeholder="Tìm kiếm..."
@@ -424,12 +419,9 @@ const Header = () => {
             {isDropdownOpen && (
               <div className="absolute top-[91px] right-[100px] bg-white shadow-2xl rounded-lg w-[200px] text-[18px] z-10 border border-gray-100 overflow-hidden">
                 <div className="p-2">
-                  <div
-                    onClick={() => navigate("/profile")}
-                    className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200"
-                  >
+                  <a href={`/profile/${user._id}`} className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200">
                     Trang cá nhân
-                  </div>
+                  </a>
                   <div
                     onClick={() => navigate("/account")}
                     className="text-[#04043F] font-medium text-[18px] mb-2 cursor-pointer mx-4 my-3 hover:text-[#FF6363] transition-colors duration-200"

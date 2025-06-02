@@ -1,77 +1,37 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import BreadCrumb from "../../components/common/BreadCrumb.jsx";
 import CategoryCard from "../../components/sections/Recipe/CategoriesCard.jsx";
 import RecipeGrid from "../../components/sections/Recipe/RecipeGrid.jsx";
 import BlogSection from "../../components/sections/Recipe/BlogSection.jsx";
 import ExploreSection from "../../components/sections/Recipe/ExploreSection.jsx";
 import { Korea1 } from "../../assets/Recipe/images/index.js";
-import { getAllRecipes } from "../../services/recipeService.js";
+import { getAllRecipes, filterRecipes } from "../../services/recipeService.js";
 import { getAllPosts } from "../../services/postService.js";
+import categoryService from "../../services/categoryService.js";
 
-// Move slug mapping outside component for performance and reusability
-const slugToVietnamese = {
-  breakfast: "Bữa sáng",
-  lunch: "Bữa trưa",
-  dinner: "Bữa tối",
-  snack: "Bữa xế",
-  dessert: "Món tráng miệng",
-  vietnamese: "Việt Nam",
-  japanese: "Nhật Bản",
-  korean: "Hàn Quốc",
-  chinese: "Trung Quốc",
-  thai: "Thái Lan",
-  indian: "Ấn Độ",
-  european: "Âu",
-  american: "Mỹ",
-  mexican: "Mexico",
-  party: "Tiệc tùng",
-  birthday: "Sinh nhật",
-  holiday: "Ngày lễ Tết",
-  vegetarian: "Ăn chay",
-  "weather-based": "Món ăn ngày lạnh/nóng",
-  vegan: "Thuần chay",
-  keto: "Keto/Low-carb",
-  "functional-food": "Thực phẩm chức năng",
-  "gluten-free": "Không gluten",
-  diet: "Ăn kiêng giảm cân",
-  chicken: "Thịt gà",
-  beef: "Thịt bò",
-  pork: "Thịt heo",
-  seafood: "Hải sản",
-  egg: "Trứng",
-  vegetables: "Rau củ",
-  tofu: "Đậu phụ",
-  fried: "Chiên",
-  grilled: "Nướng",
-  steamed: "Hấp",
-  "stir-fried": "Xào",
-  boiled: "Luộc",
-  braised: "Hầm",
-  soup: "Nấu súp",
-  "air-fryer": "Nồi chiên không dầu",
-  oven: "Lò nướng",
-  "slow-cooker": "Nồi nấu chậm",
-  "pressure-cooker": "Nồi áp suất",
-  microwave: "Lò vi sóng",
-};
-
-// Move getDisplayName outside component to fix dependency issues
-const getDisplayName = (slug) => {
-  return slugToVietnamese[slug] || decodeURIComponent(slug);
-};
 
 const Recipes = () => {
   const { categoryType, item } = useParams();
+  const location = useLocation();
   const [scrollY, setScrollY] = useState(0);
   const [filteredPopularRecipes, setFilteredPopularRecipes] = useState([]);
   const [filteredAllRecipes, setFilteredAllRecipes] = useState([]);
   const [visibleRecipes, setVisibleRecipes] = useState(8);
   const [error, setError] = useState(null);
   const [blogs, setBlogs] = useState([]);
+  const [currentCategory, setCurrentCategory] = useState(null);
+  const [allRecipes, setAllRecipes] = useState([]);
+
+  // Parse query parameters
+  const queryParams = new URLSearchParams(location.search);
+  const dietaryPreferences = queryParams.get('dietaryPreferences');
+  const cookingMethod = queryParams.get('cookingMethod');
+  const isQueryFiltering = dietaryPreferences || cookingMethod;
+
   // Filter recipes based on current category
   const filterRecipesByCategory = React.useCallback((recipes) => {
-    if (!categoryType || !item) {
+    if (!categoryType || !item || !currentCategory) {
       return recipes;
     }
     
@@ -93,9 +53,8 @@ const Recipes = () => {
               return true;
             }
             
-            // If slug doesn't match, try matching by converted Vietnamese name
-            const targetCategoryName = getDisplayName(item);
-            if (categoryName === targetCategoryName) {
+            // If slug doesn't match, try matching by name from database
+            if (categoryName === currentCategory.name) {
               return true;
             }
           }
@@ -104,62 +63,49 @@ const Recipes = () => {
         return false;
       });
     });
-  }, [categoryType, item]);
-  
+  }, [categoryType, item, currentCategory]);
+  // Fetch initial data (recipes, blogs, category info)
   useEffect(() => {
     const fetchData = async () => {
       try {
         setError(null);
         
-        // Fetch recipes
-        let recipeResponse;
+        // Handle different filtering scenarios
+        let recipes = [];
         
-        if (item && categoryType) {
-          // Build search parameters based on categoryType and item
-          const searchParams = {};
-          
-          // Map categoryType to the correct API parameter (now using camelCase directly)
-          const categoryMapping = {
-            'mealType': 'mealType',
-            'cuisine': 'cuisine',
-            'occasions': 'occasions',
-            'dietaryPreferences': 'dietaryPreferences',
-            'mainIngredients': 'mainIngredients',
-            'cookingMethod': 'cookingMethod',
-            'timeBased': 'timeBased',
-            'difficultyLevel': 'difficultyLevel'
-          };
-          
-          const apiParam = categoryMapping[categoryType];
-          if (apiParam) {
-            // Convert English slug to Vietnamese name for API
-            const vietnameseName = getDisplayName(item);
-            searchParams[apiParam] = vietnameseName;
-          } else {
-            // Fallback to keyword search
-            searchParams.keyword = item;
-          }
+        if (isQueryFiltering) {
+          // Use query parameter filtering - call backend API with filters
+          const filters = {};
+          if (dietaryPreferences) filters.dietaryPreferences = dietaryPreferences;
+          if (cookingMethod) filters.cookingMethod = cookingMethod;
           
           try {
-            // For now, skip search API and use getAllRecipes to avoid category name mismatch
-            recipeResponse = await getAllRecipes();
-          } catch (searchError) {
-            // If search fails (e.g., authentication issue), fall back to getAllRecipes
-            console.warn('Search failed, falling back to getAllRecipes:', searchError);
-            recipeResponse = await getAllRecipes();
+            const recipeResponse = await filterRecipes(filters);
+            recipes = recipeResponse.data.data || [];
+          } catch (filterError) {
+            console.warn('Failed to filter recipes, falling back to all recipes:', filterError);
+            // Fallback to getting all recipes
+            const recipeResponse = await getAllRecipes();
+            recipes = recipeResponse.data.data || [];
           }
         } else {
-          // Get all recipes if no specific category
-          recipeResponse = await getAllRecipes();        }
+          // Get all recipes for path parameter filtering or no filtering
+          const recipeResponse = await getAllRecipes();
+          recipes = recipeResponse.data.data || [];
+        }
         
-        const recipes = recipeResponse.data.data || [];
-        console.log("Fetched recipes from API:", recipes);
-        console.log("First recipe categories:", recipes[0]?.categories);
+        setAllRecipes(recipes);
         
-        // Filter recipes for current category
-        const filtered = filterRecipesByCategory(recipes);
-        setFilteredPopularRecipes(filtered.slice(0, 4));
-        setFilteredAllRecipes(filtered);
+        // First, fetch category information if we have categoryType and item
+        if (categoryType && item) {
+          try {
+            const categoryResponse = await categoryService.getCategoryBySlugAndType(categoryType, item);
+            setCurrentCategory(categoryResponse.data.data);
+          } catch (categoryError) {
+            console.warn('Failed to load category info:', categoryError);
+            setCurrentCategory(null);
+          }
+        }
         
         // Fetch blogs/posts
         try {
@@ -170,7 +116,7 @@ const Recipes = () => {
             id: post._id,
             title: post.caption || 'Bài viết mới',
             image: post.media?.[0]?.url || Korea1,
-            author: post.author ? `${post.author.firstName} ${post.author.lastName}` : 'Tác giả ẩn danh',
+            author: post.author ? `${post.author.firstName} ${post.author.lastName}` : 'Oshisha',
             date: post.createdAt,
             path: `/posts/${post._id}`
           }));
@@ -189,9 +135,24 @@ const Recipes = () => {
         setBlogs([]);
       }
     };
-    
+
     fetchData();
-  }, [item, categoryType, filterRecipesByCategory]);
+  }, [categoryType, item, dietaryPreferences, cookingMethod, isQueryFiltering]);
+  // Filter recipes when currentCategory or allRecipes changes
+  useEffect(() => {
+    if (allRecipes.length > 0) {
+      let filtered = allRecipes;
+      
+      // Apply path parameter filtering (category-based) if not using query filters
+      if (!isQueryFiltering && (categoryType && item && currentCategory)) {
+        filtered = filterRecipesByCategory(allRecipes);
+      }
+      // If using query filters, recipes are already filtered from backend
+      
+      setFilteredPopularRecipes(filtered.slice(0, 4));
+      setFilteredAllRecipes(filtered);
+    }
+  }, [allRecipes, filterRecipesByCategory, isQueryFiltering, categoryType, item, currentCategory]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -201,9 +162,19 @@ const Recipes = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   // Get category name for display
   const getCategoryDisplayName = () => {
+    if (isQueryFiltering) {
+      // Handle query parameter display names
+      if (dietaryPreferences) {
+        return `Chế độ ăn: ${dietaryPreferences}`;
+      }
+      if (cookingMethod) {
+        return `Phương pháp nấu: ${cookingMethod}`;
+      }
+    }
+    
+    // Handle path parameter display names
     const categoryTypeMap = {
       'mealType': 'Loại bữa ăn',
       'cuisine': 'Vùng ẩm thực',
@@ -217,8 +188,12 @@ const Recipes = () => {
     return categoryTypeMap[categoryType] || categoryType;
   };
 
-  const displayItemName = getDisplayName(item);
+  // Get display names from database or fallback
+  const displayItemName = currentCategory?.name || item || '';
   const displayCategoryName = getCategoryDisplayName();
+  const categoryDescription = currentCategory?.description || `Khám phá các công thức ${displayItemName.toLowerCase()} tuyệt vời! 
+Từ những món ăn truyền thống đến hiện đại, 
+chúng tôi mang đến cho bạn những trải nghiệm ẩm thực đa dạng và phong phú.`;
 
   const getBannerStyles = () => {
     const maxScroll = 200;
@@ -237,7 +212,6 @@ const Recipes = () => {
   const handleLoadMoreRecipes = () => {
     setVisibleRecipes((prev) => Math.min(prev + 8, filteredAllRecipes.length));
   };
-
 
   // Show error state
   if (error) {
@@ -260,13 +234,12 @@ const Recipes = () => {
     <>
       <div className="relative h-[580px] overflow-hidden mt-4" style={getBannerStyles()}>
         {/* BreadCrumb navigation */}
-        <div className="absolute top-4 left-4 z-40">
+        {/* <div className="absolute top-4 left-4 z-40">
           <BreadCrumb />
-        </div>
+        </div> */}
         
         {/* Gradient background layers */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B8A] via-[#FF8E9B] to-[#FFB5C1]"></div>
-        <div className="absolute inset-0 bg-gradient-to-tr from-yellow-300/30 via-transparent to-blue-400/20"></div>
+        <div className="absolute inset-0 bg-[#ffefd0]"></div>
 
         {/* Decorative raspberry (top right) */}
         <img
@@ -292,9 +265,7 @@ const Recipes = () => {
             </h1>
             <h2 className="text-white text-4xl font-bold mb-4">{displayItemName.toUpperCase()}</h2>
             <p className="text-white/90 text-lg leading-relaxed mb-8">
-              Khám phá các công thức {displayItemName.toLowerCase()} tuyệt vời! 
-              Từ những món ăn truyền thống đến hiện đại, 
-              chúng tôi mang đến cho bạn những trải nghiệm ẩm thực đa dạng và phong phú.
+              {categoryDescription}
             </p>
           </div>
 
@@ -321,12 +292,12 @@ const Recipes = () => {
             <g filter="url(#filter0_d_66_4)">
               <path
                 d="M0 539.311L1.23565 485.838C1.23565 485.838 0 575.741 0 539.311Z"
-                fill="#FF6B8A"
+                fill="#FF6B8A50"
                 fillOpacity="0.85"
               />
               <path
                 d="M1.23545 0H644.343C644.343 0 858.4 69.2099 825.577 205.309C792.755 341.408 691.334 281.114 631.722 281.114C572.11 281.114 521.615 346.743 596.12 378.892C670.626 411.042 602.744 568.339 516.638 503.407C430.532 438.476 439.639 558.408 286.469 476.671C133.3 394.934 200.363 507.227 134.127 476.671C67.8915 446.115 60.44 550.769 0 539.311L1.23545 0Z"
-                fill="#FF6B8A"
+                fill="#FF6B8A50"
                 fillOpacity="0.85"
               />
             </g>

@@ -15,7 +15,7 @@ const router = express.Router();
 
 // READ
 router.get('/', getAllRecipes);
-router.get('/search', authenticateJWT, searchRecipe);
+router.get('/search', searchRecipe);
 router.get('/top', getTopRecipes);
 router.get('/:id/similar', getSimilarRecipes);
 router.get('/:id', getRecipeById);

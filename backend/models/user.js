@@ -15,11 +15,18 @@ const userSchema = new Schema(
     savedRecipe: [{ type: Schema.Types.ObjectId, ref: "Recipe", default: [] }],
     savedPost: [{ type: Schema.Types.ObjectId, ref: "Post", default: [] }],
     savedVideo: [{ type: Schema.Types.ObjectId, ref: "Video", default: [] }],
-    ingredients: [{type: Schema.Types.ObjectId, ref: "Ingredient", default: []}],
+    ingredients: [
+      { type: Schema.Types.ObjectId, ref: "Ingredient", default: [] },
+    ],
     followers: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     following: [{ type: Schema.Types.ObjectId, ref: "User", default: [] }],
     birthday: { type: Date },
-    avatar: { type: String, default: 'https://res.cloudinary.com/dfaq5hbmx/image/upload/v1748692877/sushi_x1k4mg.png' },
+    avatar: {
+      type: String,
+      default:
+        "https://res.cloudinary.com/dfaq5hbmx/image/upload/v1748692877/sushi_x1k4mg.png",
+    },
+    username: { type: String },
   },
   {
     timestamps: true,
@@ -32,10 +39,27 @@ userSchema.statics.register = async function (
   lastName,
   firstName,
   gender,
-  birthDay
+  birthday,
+  username
 ) {
-  if (!email || !password || !lastName || !firstName || !gender || !birthDay) {
-    console.log(email, password, lastName, firstName, gender, birthDay)
+  if (
+    !email ||
+    !password ||
+    !lastName ||
+    !firstName ||
+    !gender ||
+    !birthday ||
+    !username
+  ) {
+    console.log(
+      email,
+      password,
+      lastName,
+      firstName,
+      gender,
+      birthday,
+      username
+    );
     throw Error("Bạn chưa điền hết thông tin!");
   }
 
@@ -58,7 +82,8 @@ userSchema.statics.register = async function (
     lastName,
     firstName,
     gender,
-    birthDay
+    birthday,
+    username,
   });
 
   return user;

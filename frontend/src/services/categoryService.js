@@ -22,10 +22,11 @@ const categoryService = {
   getCategoriesByType: (type, limit = null) => {
     const params = limit ? `?limit=${limit}` : '';
     return API.get(`${endpoint}/type/${type}${params}`);
-  },
+  },  // Get category by ID
+  getCategoryById: (id) => API.get(`${endpoint}/id/${id}`),
 
-  // Get category by ID
-  getCategoryById: (id) => API.get(`${endpoint}/${id}`),
+  // Get category by slug and type
+  getCategoryBySlugAndType: (type, slug) => API.get(`${endpoint}/${type}/${slug}`),
 
   // Create new category (admin only)
   createCategory: (categoryData) => API.post(endpoint, categoryData),
@@ -38,15 +39,13 @@ const categoryService = {
 
   // Get featured categories
   getFeaturedCategories: () => API.get(`${endpoint}?featured=true`),
-
   // Helper methods for specific category types
   getMealTypes: (limit = null) => categoryService.getCategoriesByType('mealType', limit),
   getCuisines: (limit = null) => categoryService.getCategoriesByType('cuisine', limit),
   getOccasions: (limit = null) => categoryService.getCategoriesByType('occasions', limit),
   getDietaryPreferences: (limit = null) => categoryService.getCategoriesByType('dietaryPreferences', limit),
   getMainIngredients: (limit = null) => categoryService.getCategoriesByType('mainIngredients', limit),
-  getCookingMethods: (limit = null) => categoryService.getCategoriesByType('cookingMethod', limit),
-  getTimeBased: (limit = null) => categoryService.getCategoriesByType('timeBased', limit)
+  getCookingMethods: (limit = null) => categoryService.getCategoriesByType('cookingMethod', limit)
 };
 
 export default categoryService;
@@ -63,7 +62,7 @@ export const getCategoriesByType = (type, limit = null) => {
   const params = limit ? `?limit=${limit}` : '';
   return API.get(`${endpoint}/type/${type}${params}`);
 };
-export const getCategoryById = (id) => API.get(`${endpoint}/${id}`);
+export const getCategoryById = (id) => API.get(`${endpoint}/id/${id}`);
 
 export {
   categoryService

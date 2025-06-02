@@ -46,13 +46,13 @@ import { useState, useEffect } from "react";
 function App() {
   const { user } = useAuth();
   const location = useLocation();
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    setIsLoading(true);
-    const timeout = setTimeout(() => setIsLoading(false), 500);
-    return () => clearTimeout(timeout);
-  }, [location.pathname]);
+  // useEffect(() => {
+  //   setIsLoading(true);
+  //   const timeout = setTimeout(() => setIsLoading(false), 500);
+  //   return () => clearTimeout(timeout);
+  // }, [location.pathname]);
 
   const routes = [
     { path: "/", element: <HomePage /> },
@@ -76,14 +76,14 @@ function App() {
     { path: "/notification", element: <NotificationPage /> },
     { path: "/search", element: <SearchPage /> },
     { path: "/posts", element: <PostPage /> },
-    {
-      path: "/profile",
-      element: user ? (
-        <Navigate to={`/profile/${user._id}`} replace />
-      ) : (
-        <Navigate to="/login" replace />
-      ),
-    },
+    // {
+    //   path: "/profile",
+    //   element: user ? (
+    //     <Navigate to={`/profile/${user._id}`} replace />
+    //   ) : (
+    //     <Navigate to="/login" replace />
+    //   ),
+    // },
     { path: "/account", element: <AccountPage /> },
     { path: "/profile/:userId", element: <ProfilePage /> },
     { path: "/recipes", element: <RecipeCategories /> },
@@ -102,8 +102,8 @@ function App() {
 
   return (
     <>
-      {isLoading && <Loader />}
-      {!isLoading && (
+      {/* {isLoading && <Loader />}
+      {!isLoading && ( */}
         <Routes>
           {routes.map(({ path, element }) => (
             <Route
@@ -127,7 +127,7 @@ function App() {
             />
           ))}
         </Routes>
-      )}
+      {/* )} */}
     </>
   );
 }

@@ -1,8 +1,9 @@
 const express = require('express')
-const { getConversation, getUserConversations, searchConversations, createConversation, addMembers, leaveConversation, removeMember, updateConversationName, deleteConversation, getRecentConversations } = require('../controllers/conversationController')
+const { getConversation, getUserConversations, searchConversations, createConversation, addMembers, leaveConversation, removeMember, updateConversationName, deleteConversation, getRecentConversations, findPrivateConversation } = require('../controllers/conversationController')
 const { authenticateJWT } = require('../middlewares/authMiddleware')
 
 const router = express.Router()
+router.get('/find-private', findPrivateConversation)
 router.get('/search', authenticateJWT, searchConversations)
 router.get('/:conversationId', authenticateJWT, getConversation)
 router.get('/',authenticateJWT, getUserConversations)

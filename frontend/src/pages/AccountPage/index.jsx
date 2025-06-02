@@ -16,7 +16,11 @@ const AccountPage = () => {
     lastName: "",
     email: "",
     password: "",
+    userName: "",
+    gender: "",
+    birthDay: "",
   });
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [showOtp, setShowOtp] = useState(false);
   const [pendingData, setPendingData] = useState(null);
@@ -26,12 +30,24 @@ const AccountPage = () => {
   useEffect(() => {
     getUserInfo()
       .then((response) => {
-        const { firstName, lastName, email, avatar } = response.data;
+        const {
+          firstName,
+          lastName,
+          email,
+          avatar,
+          username,
+          gender,
+          birthday,
+        } = response.data;
+
         setForm({
           firstName: firstName || "",
           lastName: lastName || "",
           email: email || "",
           password: "",
+          userName: username || "",
+          gender: gender || "",
+          birthDay: birthday ? birthday.slice(0, 10) : "",
         });
         setAvatar(avatar || "");
         setOriginalEmail(email || "");
@@ -50,6 +66,10 @@ const AccountPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (form.password && form.password !== confirmPassword) {
+      toast.error("Mật khẩu mới và nhập lại mật khẩu không khớp!");
+      return;
+    }
     if (form.email !== originalEmail || form.password) {
       try {
         await forgotPassword({ email: form.email });
@@ -64,7 +84,10 @@ const AccountPage = () => {
         await editProfile({
           firstName: form.firstName,
           lastName: form.lastName,
-          email: form.email,
+          username: form.userName,
+          gender: form.gender,
+          birthday: form.birthDay,
+          avatar: avatar,
         });
         toast.success("Cập nhật thông tin thành công!");
       } catch (error) {
@@ -80,7 +103,10 @@ const AccountPage = () => {
       await editProfile({
         firstName: pendingData.firstName,
         lastName: pendingData.lastName,
-        email: pendingData.email,
+        username: pendingData.userName,
+        gender: pendingData.gender,
+        birthday: pendingData.birthDay,
+        avatar: avatar,
       });
       if (pendingData.password) {
         await resetPassword({
@@ -93,15 +119,16 @@ const AccountPage = () => {
       setOtp("");
       setPendingData(null);
       setForm((prev) => ({ ...prev, password: "" }));
+      setConfirmPassword("");
     } catch (error) {
       toast.error("OTP không đúng hoặc đã hết hạn!");
     }
   };
 
   return (
-    <div className="px-[110px] bg-[#F5F1E8] h-screen">
-      <div className="flex gap-4 pt-[30px]">
-        <div className="bg-white rounded-md w-[70%] h-[650px]">
+    <div className="px-[110px] bg-[#F5F1E8]">
+      <div className="flex gap-4 pt-[30px] pb-[10px]">
+        <div className="bg-white rounded-md w-[70%] h-[850px]">
           <div className="relative p-4">
             <div className="w-full h-[250px] rounded-3xl bg-gradient-to-r from-amber-200 via-orange-200 to-yellow-200"></div>
             <div>
@@ -154,6 +181,19 @@ const AccountPage = () => {
                 </div>
 
                 <div className="flex flex-col">
+                  <label htmlFor="text" className="text-sm text-gray-600 mb-1">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    value={form.userName}
+                    onChange={handleChange}
+                    name="userName"
+                    className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#FF6363]"
+                  />
+                </div>
+
+                <div className="flex flex-col">
                   <label htmlFor="email" className="text-sm text-gray-600 mb-1">
                     Email
                   </label>
@@ -162,6 +202,41 @@ const AccountPage = () => {
                     value={form.email}
                     onChange={handleChange}
                     name="email"
+                    className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#FF6363]"
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="gender"
+                    className="text-sm text-gray-600 mb-1"
+                  >
+                    Giới tính
+                  </label>
+                  <select
+                    name="gender"
+                    value={form.gender}
+                    onChange={handleChange}
+                    className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#FF6363]"
+                  >
+                    <option value="">Chọn giới tính</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Nữ">Nữ</option>
+                  </select>
+                </div>
+
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="birthDay"
+                    className="text-sm text-gray-600 mb-1"
+                  >
+                    Ngày sinh
+                  </label>
+                  <input
+                    type="date"
+                    name="birthDay"
+                    value={form.birthDay}
+                    onChange={handleChange}
                     className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#FF6363]"
                   />
                 </div>
@@ -181,8 +256,24 @@ const AccountPage = () => {
                     className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#FF6363]"
                   />
                 </div>
+
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="confirmPassword"
+                    className="text-sm text-gray-600 mb-1"
+                  >
+                    Nhập lại mật khẩu mới
+                  </label>
+                  <input
+                    name="confirmPassword"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="border rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#FF6363]"
+                  />
+                </div>
               </div>
-              <div className="mt-6 flex justify-end">
+              <div className="mt-6 flex justify-end w-full">
                 <button
                   type="submit"
                   className="bg-[#FF6363] text-white px-6 py-2 rounded-md hover:opacity-90 transition"

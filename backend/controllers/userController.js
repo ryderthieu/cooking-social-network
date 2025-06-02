@@ -27,7 +27,8 @@ const login = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { email, password, lastName, firstName, gender, birthDay } = req.body;
+  const { email, password, lastName, firstName, gender, birthDay, username } =
+    req.body;
   try {
     const user = await User.register(
       email,
@@ -35,7 +36,8 @@ const register = async (req, res) => {
       lastName,
       firstName,
       gender,
-      birthDay
+      birthDay,
+      username
     );
     res
       .status(200)
@@ -245,7 +247,8 @@ const searchUser = async (req, res) => {
 const editProfile = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { firstName, lastName, gender, birthDay, avatar } = req.body;
+    const { firstName, lastName, gender, birthDay, avatar, username } =
+      req.body;
 
     const user = await User.findById(userId).select(
       "-password -otp -otpExpire"
@@ -257,9 +260,9 @@ const editProfile = async (req, res) => {
     if (firstName) user.firstName = firstName;
     if (lastName) user.lastName = lastName;
     if (gender) user.gender = gender;
-    if (birthDay) user.birthDay = birthDay;
+    if (birthDay) user.birthday = birthDay;
     if (avatar) user.avatar = avatar;
-
+    if (username) user.username = username;
     await user.save();
 
     res.status(200).json(user);
@@ -401,7 +404,7 @@ const toggleFollow = async (req, res) => {
 
     // Debug log
     console.log("Toggle follow request: ", {
-      userId: userId ? userId.toString() : 'undefined',
+      userId: userId ? userId.toString() : "undefined",
       followingId,
       action,
       requestBody: req.body,
@@ -440,11 +443,11 @@ const toggleFollow = async (req, res) => {
     if (action === "follow") {
       if (isCurrentlyFollowing) {
         // Already following, return success but don't change anything
-        return res.status(200).json({ 
+        return res.status(200).json({
           message: "Đã follow trước đó!",
           followersCount: followingUser.followers.length,
           followingCount: user.following.length,
-          isFollowing: true
+          isFollowing: true,
         });
       }
       user.following.push(followingId);
@@ -452,11 +455,11 @@ const toggleFollow = async (req, res) => {
     } else {
       if (!isCurrentlyFollowing) {
         // Not following, return success but don't change anything
-        return res.status(200).json({ 
+        return res.status(200).json({
           message: "Đã unfollow trước đó!",
           followersCount: followingUser.followers.length,
           followingCount: user.following.length,
-          isFollowing: false
+          isFollowing: false,
         });
       }
       user.following = user.following.filter(
@@ -470,13 +473,12 @@ const toggleFollow = async (req, res) => {
     await user.save();
     await followingUser.save();
 
-    res.status(200).json({ 
+    res.status(200).json({
       message: `${action} thành công!`,
       followersCount: followingUser.followers.length,
       followingCount: user.following.length,
-      isFollowing: action === "follow"
+      isFollowing: action === "follow",
     });
-
   } catch (error) {
     console.error("Toggle follow error:", error.message);
     res.status(500).json({ error: "Đã xảy ra lỗi, vui lòng thử lại!" });
