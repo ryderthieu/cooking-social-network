@@ -11,53 +11,27 @@ export default function RecipeCategories() {
 
   // Fetch categories from backend
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
+    const fetchCategories = async () => {      try {
         setError(null);
-
         const response = await getAllFormattedCategories();
-
+        
+        console.log("API Response:", response);
+        
         if (response.data && response.data.success) {
-          // Transform backend data to match frontend structure
+          console.log("Categories data:", response.data.data);
+          
+          // Transform array to object structure expected by frontend
           const formattedCategories = {};
           response.data.data.forEach((category) => {
             formattedCategories[category.key] = {
               title: category.name,
-              items: category.items.map((item) => ({
-                name: item.name,
-                slug: item.slug,
-                description:
-                  item.description ||
-                  `Khám phá các món ăn ${item.name.toLowerCase()}`,
-                image:
-                  item.image ||
-                  "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300",
-                count: item.count || 0,
-                path:
-                  item.path ||
-                  `/recipes?${category.key}=${encodeURIComponent(item.name)}`,
-                backgroundColor:
-                  item.backgroundColor && item.backgroundColor.startsWith("bg-")
-                    ? item.backgroundColor
-                    : item.backgroundColor
-                    ? `bg-[${item.backgroundColor}]`
-                    : category.background && category.background.startsWith("bg-")
-                    ? category.background
-                    : "bg-[#ffefd0]",
-                color:
-                  item.textColor && item.textColor.startsWith("bg-")
-                    ? item.textColor
-                    : item.textColor
-                    ? `bg-[${item.textColor}]`
-                    : category.color && category.color.startsWith("bg-")
-                    ? category.color
-                    : "bg-[#FFD0A1]",
-              })),
-              background: category.background || "bg-[#ffefd0]",
-              color: category.color || "bg-[#FFD0A1]",
+              items: category.items,
+              background: category.background,
+              color: category.color,
             };
           });
-
+          
+          console.log("Formatted categories:", formattedCategories);
           setCategories(formattedCategories);
         }
       } catch (error) {
@@ -79,7 +53,6 @@ export default function RecipeCategories() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
   const getBannerStyles = () => {
     const maxScroll = 200; // Scroll 200px để hoàn thành animation
     const scrollProgress = Math.min(scrollY / maxScroll, 1);
@@ -92,6 +65,41 @@ export default function RecipeCategories() {
       transition: "width 0.5s ease-out, border-radius 0.5s ease-out",
       margin: "0 auto",
     };
+  };
+  // Smooth scroll function với hiệu ứng mượt mà
+  const scrollToCategory = (categoryKey) => {
+    const element = document.getElementById(categoryKey);
+    if (element) {
+      const headerOffset = 120; // Offset để tránh header che khuất
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      // Sử dụng requestAnimationFrame để tạo smooth scroll tùy chỉnh
+      const startPosition = window.pageYOffset;
+      const distance = offsetPosition - startPosition;
+      const duration = 1200; // 1.2 giây
+      let start = null;
+
+      const step = (timestamp) => {
+        if (!start) start = timestamp;
+        const progress = timestamp - start;
+        const progressPercentage = Math.min(progress / duration, 1);
+        
+        // Easing function để tạo hiệu ứng mượt mà hơn
+        const easeInOutCubic = (t) => 
+          t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
+        
+        const easedProgress = easeInOutCubic(progressPercentage);
+        
+        window.scrollTo(0, startPosition + distance * easedProgress);
+
+        if (progress < duration) {
+          requestAnimationFrame(step);
+        }
+      };
+
+      requestAnimationFrame(step);
+    }
   };
   return (
     <>
@@ -116,18 +124,16 @@ export default function RecipeCategories() {
                     <p className="mb-4 text-gray-700">
                       Chọn một trong các danh mục bên dưới để khám phá các công
                       thức phù hợp với nhu cầu của bạn.
-                    </p>
-
-                    <nav className="flex flex-wrap gap-3">
+                    </p>                    <nav className="flex flex-wrap gap-3">
                       {Object.entries(categories).map(([key, category]) => (
-                        <a
+                        <button
                           key={key}
-                          href={`#${key}`}
-                          className="px-4 py-2 bg-white hover:bg-[#FF6363] hover:text-white rounded-full border border-gray-200 transition-colors duration-300 text-sm md:text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6363] focus:ring-offset-2"
+                          onClick={() => scrollToCategory(key)}
+                          className="px-4 py-2 bg-white hover:bg-[#FF6363] hover:text-white rounded-full border border-gray-200 transition-all duration-500 ease-in-out text-sm md:text-base shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FF6363] focus:ring-offset-2 hover:shadow-md hover:scale-105 active:scale-95"
                           aria-label={`Chuyển đến danh mục ${category.title}`}
                         >
                           {category.title}
-                        </a>
+                        </button>
                       ))}
                     </nav>
                   </div>
@@ -146,17 +152,15 @@ export default function RecipeCategories() {
               </p>
             </div>
           ) : (
-            Object.entries(categories).map(([categoryType, category]) => (
-              <section
+            Object.entries(categories).map(([categoryType, category]) => (              <section
                 key={categoryType}
                 id={categoryType}
-                className="rounded-lg p-6 scroll-mt-24 relative mb-8"
+                className="rounded-lg p-6 scroll-mt-24 relative mb-8 transition-all duration-700 ease-out opacity-100 transform translate-y-0"
               >
                 <h2 className="text-[24px] font-bold text-blue-950 mb-6">
                   {category.title}
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {" "}
                   {category.items.map((item) => (
                     <RecipeCard
                       key={item.name}

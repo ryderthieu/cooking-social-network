@@ -30,9 +30,9 @@ const getRecipeById = async (req, res) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    res.status(404).json({ success: false, message: "Invalid Id" });
+    return res.status(404).json({ success: false, message: "Invalid Id" });
   }
-  try {    const recipe = await Recipe.findById(id)
+  try {const recipe = await Recipe.findById(id)
       .populate("author", "firstName lastName avatar")
       .populate("ingredients.ingredient", "name unit image")
       .populate("categories", "name type slug image");

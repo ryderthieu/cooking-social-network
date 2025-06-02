@@ -16,6 +16,7 @@ const router = express.Router();
 // READ
 router.get('/', getAllRecipes);
 router.get('/search', searchRecipe);
+router.get('/filter', searchRecipe); // Add filter route that uses searchRecipe function
 router.get('/top', getTopRecipes);
 router.get('/:id/similar', getSimilarRecipes);
 router.get('/:id', getRecipeById);

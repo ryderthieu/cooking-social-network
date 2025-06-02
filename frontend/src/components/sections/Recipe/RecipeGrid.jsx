@@ -20,7 +20,7 @@ const RecipeGrid = ({ title, recipes, showLoadMore, onLoadMore }) => {
         <div className="flex justify-center mt-8">
           <button 
             onClick={onLoadMore}
-            className="px-6 md:px-8 py-2 md:py-3 bg-gradient-to-r from-orange-400 to-yellow-400 text-white font-bold rounded-full border-2 border-transparent hover:from-orange-500 hover:to-yellow-500 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+            className="px-6 md:px-8 py-2 md:py-3 bg-[#ff4b4b] text-white font-bold rounded-3xl border-2 hover:bg-transparent hover:text-[#FF6363] hover:border-[#FF6363] transition duration-300 text-sm md:text-base shadow-md hover:shadow-lg"
           >
             Xem thêm
           </button>

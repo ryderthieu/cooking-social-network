@@ -12,22 +12,14 @@ import { toast } from "react-toastify";
 
 const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
   const [authorData, setAuthorData] = useState(null);
-  const [isLoadingAuthor, setIsLoadingAuthor] = useState(false);
   const [isInFavorites, setIsInFavorites] = useState(false);
-  const [isLoadingFavorites, setIsLoadingFavorites] = useState(false);
   const [showCollectionDropdown, setShowCollectionDropdown] = useState(false);
 
   const { user } = useAuth();
   const location = useLocation();
   const isLoggedIn = !!user;
-  // Debug logging
-  console.log("SavedCard received recipe:", recipe);
-  console.log("Recipe categories:", recipe.categories);
-  console.log("Categories type:", typeof recipe.categories);
-  if (recipe.categories && Array.isArray(recipe.categories)) {
-    console.log("First category:", recipe.categories[0]);
-    console.log("First category type:", typeof recipe.categories[0]);
-  }// Get difficulty level (1-3)
+
+  // Get difficulty level (1-3)
   const getDifficultyLevel = () => {
     // First check if difficulty is directly on recipe object
     const difficulty = recipe.difficultyLevel || recipe.difficulty;
@@ -62,15 +54,12 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
       // If author is just an ID, fetch the author data
       if (recipe.author && typeof recipe.author === "string") {
         try {
-          setIsLoadingAuthor(true);
           const response = await getUserById({ userId: recipe.author });
           if (response.status === 200) {
             setAuthorData(response.data);
           }
         } catch (error) {
           console.error("Error fetching author data:", error);
-        } finally {
-          setIsLoadingAuthor(false);
         }
       }
     };
@@ -106,7 +95,6 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
     }
 
     try {
-      setIsLoadingFavorites(true);
       const response = await toggleRecipeInFavorites(recipe._id);
       if (response.success) {
         setIsInFavorites(response.isInFavorites);
@@ -115,8 +103,6 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
     } catch (error) {
       console.error("Error toggling favorites:", error);
       toast.error("Không thể cập nhật yêu thích");
-    } finally {
-      setIsLoadingFavorites(false);
     }
   };
 
@@ -149,8 +135,6 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
 
   // Helper to render author name properly
   const renderAuthorName = () => {
-    if (isLoadingAuthor) return "";
-
     if (authorData) {
       if (authorData.firstName && authorData.lastName) {
         return `${authorData.firstName} ${authorData.lastName}`;
@@ -161,134 +145,95 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
 
     return "Oshisha";
   };
+
   // Helper to get recipe cooking time
   const getCookingTime = () => recipe.cookingTime || recipe.time || "30";
-
-  // Slug to Vietnamese mapping (matching Recipe.jsx)
-  const slugToVietnamese = {
-    breakfast: "Bữa sáng",
-    lunch: "Bữa trưa", 
-    dinner: "Bữa tối",
-    snack: "Bữa xế",
-    dessert: "Món tráng miệng",
-    vietnamese: "Việt Nam",
-    japanese: "Nhật Bản",
-    korean: "Hàn Quốc",
-    chinese: "Trung Quốc",
-    thai: "Thái Lan",
-    indian: "Ấn Độ",
-    european: "Âu",
-    american: "Mỹ",
-    mexican: "Mexico",
-    party: "Tiệc tùng",
-    birthday: "Sinh nhật",
-    holiday: "Ngày lễ Tết",
-    vegetarian: "Ăn chay",
-    "weather-based": "Món ăn ngày lạnh/nóng",
-    vegan: "Thuần chay",
-    keto: "Keto/Low-carb",
-    "functional-food": "Thực phẩm chức năng",
-    "gluten-free": "Không gluten",
-    diet: "Ăn kiêng giảm cân",
-    chicken: "Thịt gà",
-    beef: "Thịt bò",
-    pork: "Thịt heo",
-    seafood: "Hải sản",
-    egg: "Trứng",
-    vegetables: "Rau củ",
-    tofu: "Đậu phụ",
-    fried: "Chiên",
-    grilled: "Nướng",
-    steamed: "Hấp",
-    "stir-fried": "Xào",
-    boiled: "Luộc",
-    braised: "Hầm",
-    soup: "Nấu súp",
-    "air-fryer": "Nồi chiên không dầu",
-    oven: "Lò nướng",
-    "slow-cooker": "Nồi nấu chậm",
-    "pressure-cooker": "Nồi áp suất",
-    microwave: "Lò vi sóng",
-  };
-
   // Get current page context
   const getCurrentPageContext = () => {
-    const pathParts = location.pathname.split('/');
-    if (pathParts[1] === 'recipes' && pathParts[2] && pathParts[3]) {
+    const pathParts = location.pathname.split("/");
+    if (pathParts[1] === "recipes" && pathParts[2] && pathParts[3]) {
       return {
         categoryType: pathParts[2],
         item: pathParts[3],
-        itemName: slugToVietnamese[pathParts[3]] || decodeURIComponent(pathParts[3])
+        itemName: decodeURIComponent(pathParts[3]),
       };
     }
     return null;
-  };  // Helper to get categories for display (max 2, prioritize current page category)
+  };
+
+  // Helper to get categories for display (max 2, prioritize current page category)
   const getDisplayCategories = () => {
     const currentContext = getCurrentPageContext();
     let allCategories = [];
-    
-    console.log("Processing categories:", recipe.categories);
-    
-    // Extract all categories from recipe
+
+    // Extract all categories from recipe using real database data
     if (recipe.categories && Array.isArray(recipe.categories)) {
-      // New structure: array of populated category objects
-      allCategories = recipe.categories.map(cat => {
-        console.log("Processing category:", cat, "Type:", typeof cat);
-        
-        if (typeof cat === 'object' && cat !== null) {
-          if (cat.name) {
-            console.log("Found category name:", cat.name);
-            return cat.name;
-          } else if (cat._id && cat.slug) {
-            // Category has ObjectId but no name field, try slug
-            console.log("Using slug for category:", cat.slug);
-            return slugToVietnamese[cat.slug] || cat.slug;
+      // New structure: array of populated category objects from database
+      allCategories = recipe.categories
+        .map((cat) => {
+          if (typeof cat === "object" && cat !== null) {
+            // Use the actual name from database category object
+            if (cat.name) {
+              return cat.name;
+            } else if (cat.slug) {
+              // If name is not available, use slug as fallback
+              return cat.slug;
+            } else {
+              return null;
+            }
+          } else if (typeof cat === "string") {
+            // Direct string category name
+            return cat;
           } else {
-            console.log("Category object has no name or slug:", cat);
             return null;
           }
-        } else if (typeof cat === 'string') {
-          console.log("String category:", cat);
-          return cat;
-        } else {
-          console.log("Unknown category type:", cat);
-          return null;
-        }
-      }).filter(Boolean);
+        })
+        .filter(Boolean);
     } else if (recipe.categories && typeof recipe.categories === "object") {
       // Old structure: categories object with arrays
-      console.log("Using old category structure");
-      const { mealType, cuisine, mainIngredients, cookingMethod, dietaryPreferences } = recipe.categories;
-      [mealType, cuisine, mainIngredients, cookingMethod, dietaryPreferences].forEach(categoryArray => {
+      const {
+        mealType,
+        cuisine,
+        mainIngredients,
+        cookingMethod,
+        dietaryPreferences,
+      } = recipe.categories;
+      [
+        mealType,
+        cuisine,
+        mainIngredients,
+        cookingMethod,
+        dietaryPreferences,
+      ].forEach((categoryArray) => {
         if (Array.isArray(categoryArray)) {
           allCategories.push(...categoryArray);
         }
       });
     }
 
-    console.log("Extracted categories:", allCategories);
-
     // Remove duplicates and filter out invalid entries
-    allCategories = [...new Set(allCategories)].filter(cat => 
-      cat && typeof cat === 'string' && cat.trim() !== ''
+    allCategories = [...new Set(allCategories)].filter(
+      (cat) => cat && typeof cat === "string" && cat.trim() !== ""
     );
-
-    console.log("Filtered categories:", allCategories);
 
     // If we're on a recipes page, prioritize the current category
     if (currentContext && currentContext.itemName) {
-      const currentCategoryIndex = allCategories.findIndex(cat => cat === currentContext.itemName);
+      const currentCategoryIndex = allCategories.findIndex(
+        (cat) => cat === currentContext.itemName
+      );
       if (currentCategoryIndex > -1) {
         // Move current category to front
-        const currentCategory = allCategories.splice(currentCategoryIndex, 1)[0];
+        const currentCategory = allCategories.splice(
+          currentCategoryIndex,
+          1
+        )[0];
         allCategories.unshift(currentCategory);
       }
     }
 
     // Return max 2 categories
-    const result = allCategories.slice(0, 2);
-    console.log("Final categories to display:", result);
-    return result;};
+    return allCategories.slice(0, 2);
+  };
   return (
     <Link
       to={`/recipes/${recipe._id || recipe.id}`}
@@ -342,7 +287,6 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
                   ? "Bỏ khỏi yêu thích"
                   : "Thêm vào yêu thích"
               }
-              disabled={isLoadingFavorites}
             >
               <Heart
                 size={16}
@@ -372,11 +316,12 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
               <MoreVertical size={16} className="text-gray-600" />
             </button>
           </div>
-        )}        {/* Recipe categories badges */}
+        )}{" "}
+        {/* Recipe categories badges */}
         <div className="absolute top-4 left-4 z-20">
           <div className="flex flex-wrap gap-2">
             {getDisplayCategories().map((category, index) => (
-              <span 
+              <span
                 key={index}
                 className="px-3 py-1.5 bg-gradient-to-r from-orange-50 to-yellow-50 backdrop-blur-md rounded-full text-xs font-semibold text-orange-700 shadow-lg border border-orange-100"
               >

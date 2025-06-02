@@ -1,151 +1,178 @@
 import React, { useState, useEffect } from "react";
-import { getCategoryItems, mockCategoryItems } from "../../../services/mockData";
+import { getAllFormattedCategories } from "../../../services/categoryService";
 import RecipeCard from "./RecipeCard";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "../../ui/carousel";
 
 const ExploreSection = ({ categoryType, currentItem }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [slidesToShow, setSlidesToShow] = useState(4);
+  const [categoryItems, setCategoryItems] = useState([]);
+  const [categoryData, setCategoryData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Lấy items của category type hiện tại, loại bỏ item hiện tại
-  const items = getCategoryItems(categoryType, currentItem);
-  const categoryData = mockCategoryItems[categoryType];
+  // Use category items from backend
+  const items = categoryItems;
+  const currentCategoryData = categoryData;
 
-  const slugMap = {};
-  items.forEach(item => {
-    if (item.slug) {
-      slugMap[item.name] = item.slug;
-    }
-  });
-
+  console.log(`🎯 ExploreSection props:`, { categoryType, currentItem });
   useEffect(() => {
-    const updateSlidesToShow = () => {
-      if (window.innerWidth < 640) {
-        setSlidesToShow(1);
-      } else if (window.innerWidth < 1024) {
-        setSlidesToShow(2);
-      } else if (window.innerWidth < 1280) {
-        setSlidesToShow(3);
-      } else {
-        setSlidesToShow(4);
+    const fetchCategoryItems = async () => {
+      if (!categoryType || !currentItem) {
+        console.log(`⚠️ Missing required props:`, {
+          categoryType,
+          currentItem,
+        });
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        console.log(
+          `🎯 Starting fetch for categoryType: ${categoryType}, currentItem: ${currentItem}`
+        );
+
+        // Get all formatted categories to find the current category data
+        const categoriesResponse = await getAllFormattedCategories();
+        let foundCategory = null;
+
+        if (categoriesResponse.data?.success) {
+          const allCategories = categoriesResponse.data.data;
+          console.log(
+            `📂 All categories:`,
+            allCategories.map((cat) => ({
+              key: cat.key,
+              items: cat.items?.length,
+            }))
+          );
+
+          foundCategory = allCategories.find((cat) => cat.key === categoryType);
+
+          if (foundCategory) {
+            setCategoryData(foundCategory);
+            console.log(`✅ Found category:`, {
+              key: foundCategory.key,
+              itemsCount: foundCategory.items?.length,
+            });
+
+            // Filter out the current item and set the remaining category items
+            const otherCategoryItems =
+              foundCategory.items?.filter(
+                (item) => item.slug !== currentItem
+              ) || [];
+
+            console.log(
+              `📍 Found ${otherCategoryItems.length} other category items`
+            );
+            console.log(
+              `📋 Category items:`,
+              otherCategoryItems.map((item) => item.name)
+            );
+            setCategoryItems(otherCategoryItems);
+          } else {
+            console.warn(
+              `⚠️ Could not find category with key: ${categoryType}`
+            );
+            setCategoryItems([]);
+          }
+        } else {
+          console.error(`❌ Failed to fetch categories:`, categoriesResponse);
+          setError("Không thể tải dữ liệu danh mục");
+          setCategoryItems([]);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching category items:", err);
+        setError(err.message);
+        setCategoryItems([]);
+      } finally {
+        setLoading(false);
       }
     };
-
-    updateSlidesToShow();
-    window.addEventListener("resize", updateSlidesToShow);
-    return () => window.removeEventListener("resize", updateSlidesToShow);
-  }, []);
-
-  const nextSlide = () => {
-    if (currentSlide < items.length - slidesToShow) {
-      setCurrentSlide(currentSlide + 1);
-    }
-  };
-
-  const prevSlide = () => {
-    if (currentSlide > 0) {
-      setCurrentSlide(currentSlide - 1);
-    }
-  };
-
+    fetchCategoryItems();
+  }, [categoryType, currentItem]);
   return (
     <div
-      className={`px-4 lg:px-[130px] pt-10 pb-10 ${categoryData.color} w-full`}
+      className="relative w-full px-[140px] pt-10 pb-16"
+      style={{
+        backgroundColor: currentCategoryData?.background 
+          ? currentCategoryData.background.includes('[') 
+            ? currentCategoryData.background.match(/\[(.*?)\]/)?.[1] + '70'
+            : '#f3f4f630' 
+          : '#f3f4f630'
+      }}
     >
-      <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-black mb-6 md:mb-8">
-        Khám phá thêm trong danh mục này
-      </h3>
-
-      <div className="relative">
-        <div
-          className="flex transition-transform duration-500 ease-in-out gap-6 mb-2"
-          style={{
-            transform: `translateX(-${currentSlide * (100 / slidesToShow)}%)`,
-          }}
-        >
-          {items.map((item, index) => (
-            <div
-              key={item.slug || index}
-              className="min-w-[calc(100%-24px)] sm:min-w-[calc(50%-12px)] lg:min-w-[calc(33.333%-16px)] xl:min-w-[calc(25%-18px)]"
-            >
-              <RecipeCard
-                item={item}
-                slugMap={slugMap}
-                category={categoryData}
-                categoryType={categoryType}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Navigation Buttons */}
-        {items.length > slidesToShow && (
+      <div className="relative z-10">
+        <h3 className="text-lg md:text-xl lg:text-2xl font-bold text-black mb-6 md:mb-8">
+          Khám phá thêm trong danh mục này
+        </h3>
+        
+        {loading && (
+          <div className="text-center py-8">
+            <p className="text-gray-500">Đang tải danh mục tương tự...</p>
+          </div>
+        )}
+        
+        {error && !items.length && !loading && (
+          <div className="text-center py-8">
+            <p className="text-gray-500">
+              Không thể tải dữ liệu. Vui lòng thử lại sau.
+            </p>
+          </div>
+        )}
+        
+        {items.length === 0 && !error && !loading && (
+          <div className="text-center py-8">
+            <p className="text-gray-500">Không tìm thấy danh mục tương tự.</p>
+          </div>
+        )}
+        
+        {items.length > 0 && (
           <>
-            {currentSlide === 0 ? null : (
-              <button
-                onClick={prevSlide}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 z-999"
-                disabled={currentSlide === 0}
+            {items.length > 4 ? (
+              // Use carousel for more than 4 items
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: false,
+                }}
+                className="w-full relative z-20"
               >
-                <svg
-                  className="w-6 h-6 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
-            )}
-
-            {currentSlide >= items.length - slidesToShow ? null : (
-              <button
-                onClick={nextSlide}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 z-10"
-                disabled={currentSlide >= items.length - slidesToShow}
-              >
-                <svg
-                  className="w-6 h-6 text-gray-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </button>
+                <CarouselContent className="-ml-2 md:-ml-4 p-3">
+                  {items.map((item, index) => (
+                    <CarouselItem
+                      key={item.slug || item._id || index}
+                      className="pl-2 md:pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4 relative z-30"
+                    >                      <div className="z-40">
+                        <RecipeCard 
+                          item={item} 
+                          categoryType={categoryType}
+                        />
+                      </div>
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <CarouselPrevious className="-left-[50px] z-50" />
+                <CarouselNext className="-right-[50px] z-50" />
+              </Carousel>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 relative z-20">
+                {items.map((item, index) => (
+                  <div key={item.slug || item._id || index} className="z-30">                    <RecipeCard
+                      item={item}
+                      categoryType={categoryType}
+                    />
+                  </div>
+                ))}
+              </div>
             )}
           </>
         )}
       </div>
-
-      {/* Dots indicator */}
-      {items.length > slidesToShow && (
-        <div className="flex justify-center mt-6 space-x-2">
-          {Array.from(
-            { length: Math.ceil(items.length / slidesToShow) },
-            (_, index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentSlide(index * slidesToShow)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${
-                  Math.floor(currentSlide / slidesToShow) === index
-                    ? "bg-[#ff4b4b]"
-                    : "bg-gray-300 hover:bg-gray-400"
-                }`}
-              />
-            )
-          )}
-        </div>
-      )}
     </div>
   );
 };

@@ -4,78 +4,167 @@ import {Backgrounds} from '../../../assets/Recipe/images'
 
 export default function Banner() {
   return (
-    <div className="w-full h-screen flex justify-center overflow-hidden">
-      <div className="container mx-auto relative">
-        {/* Decorative gradient circle */}
-        <div className="absolute size-60 rounded-full left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 opacity-50 bg-gradient-to-tr from-yellow-400 via-orange-400 to-yellow-300 blur-lg shadow-[0_10px_30px_rgba(255,214,107, 0.5)]"></div>
-        {/* Main banner with gradient background */}
-        <div className="w-[85%] h-[60%] bg-gradient-to-r from-[#FF9D6C] to-[#ffd66b] px-12 py-10 rounded-[50px] mx-auto flex flex-col relative">
-          <nav className="flex items-center" aria-label="Breadcrumb">
-            <ol className="inline-flex items-center space-x-1 md:space-x-2">
-              <li className="inline-flex items-center ">
-                <Link
-                  to="/"
-                  className="text-gray-800 hover:text-gray-900 font-bold"
-                >
-                  Oshisha
-                </Link>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <span className="mx-2 text-gray-800">&gt;</span>
-                  <Link
-                    to="/categories"
-                    className="text-gray-800 hover:text-gray-900 font-bold"
-                  >
-                    Khám phá công thức
-                  </Link>
-                </div>
-              </li>
-              <li>
-                <div className="flex items-center">
-                  <span className="mx-2 text-gray-800">&gt;</span>
-                  <span className="text-gray-800 font-bold">Ăn kiêng</span>
-                </div>
-              </li>
-            </ol>
-          </nav>
-          <h1 className="text-center text-1em sm:text-[2em] md:text-[3em] right-30 text-white font-black pt-10">
-            Khám phá công thức
-          </h1>
-        </div>
-        {/* Main content card */}{" "}
-        <div className="absolute w-[75%] left-1/2 transform -translate-x-1/2 top-[12em] rounded-[30px] p-8 z-20">
-        <img src={Backgrounds.BannerGreen} alt="" />
-          <div className="flex items-center justify-between h-full">
-            {/* Left side content */}
-            <div className="max-w-md">
-              <h2 className="text-3xl font-bold text-[#2D3748] mb-3">
-                Ăn kiêng
-              </h2>
-              <p className="text-gray-700">
-                Whether you're feeling indulgent or healthy, we have the best
-                snack recipe ideas for you.
-              </p>
-            </div>
+   <div className="relative h-[580px] overflow-hidden mt-4">
+        {/* BreadCrumb navigation */}
+        {/* <div className="absolute top-4 left-4 z-40">
+          <BreadCrumb />
+        </div> */}
+        
+        {/* Gradient background layers */}
+        <div className="absolute inset-0 bg-[#ffefd0]"></div>
 
-            {/* Right side with image and circle */}
-            <div className="relative">
-              {/* Circle outline */}
-              <div className="w-64 h-64 rounded-full border-2 border-[#E8DBC5]"></div>
+        {/* Decorative raspberry (top right) */}
+        <img
+          src="https://pngimg.com/d/raspberry_PNG104.png"
+          alt="Raspberry"
+          className="absolute top-8 right-8 w-20 z-20"
+        />
 
-              {/* Main image */}
-              <img
-                src="/images/fruit-bowl.png"
-                alt="Colorful fruit bowl"
-                className="w-60 h-60 object-cover rounded-full absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-              />
-            </div>
+        {/* Decorative strawberry (bottom center) */}
+        <img
+          src="https://pngimg.com/d/strawberry_PNG2637.png"
+          alt="Strawberry"
+          className="absolute bottom-10 right-1/4 w-24 z-20"
+          style={{ transform: "translateX(-50%)" }}
+        />
+
+        {/* Main content */}
+        <div className="relative z-30 flex flex-row items-center justify-between h-full pl-[110px]">
+          {/* Left text section */}
+          <div className="max-w-lg">
+            <h1 className="text-white text-5xl font-bold mb-2 flex items-center gap-2">
+              {displayCategoryName}
+            </h1>
+            <h2 className="text-white text-4xl font-bold mb-4">{displayItemName.toUpperCase()}</h2>
+            <p className="text-white/90 text-lg leading-relaxed mb-8">
+              {categoryDescription}
+            </p>
           </div>
 
-          {/* Bottom glow effect */}
-          <div className="absolute -bottom-5 left-0 right-0 h-10 bg-gradient-to-t from-[#FFDA9E] to-transparent opacity-30 blur-lg rounded-b-[30px]"></div>
+          {/* Right smoothie bowl */}
+          <div className="relative flex mr-[100px]">
+            <img
+              src="https://pngimg.com/d/smoothie_PNG18.png"
+              alt="Smoothie Bowl"
+              className="w-96 h-96 rounded-full shadow-2xl object-cover p-2 border-8 border-white"
+            />
+          </div>
+        </div>
+
+        {/* Big wavy shape top-left */}
+        <div className="absolute -top-10 -left-5 z-0 pointer-events-none w-full h-full">
+          <svg
+            width="833"
+            height="556"
+            viewBox="0 0 833 556"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ filter: "drop-shadow(0 8px 32px #FF6B8A55)" }}
+          >
+            <g filter="url(#filter0_d_66_4)">
+              <path
+                d="M0 539.311L1.23565 485.838C1.23565 485.838 0 575.741 0 539.311Z"
+                fill="#FF6B8A50"
+                fillOpacity="0.85"
+              />
+              <path
+                d="M1.23545 0H644.343C644.343 0 858.4 69.2099 825.577 205.309C792.755 341.408 691.334 281.114 631.722 281.114C572.11 281.114 521.615 346.743 596.12 378.892C670.626 411.042 602.744 568.339 516.638 503.407C430.532 438.476 439.639 558.408 286.469 476.671C133.3 394.934 200.363 507.227 134.127 476.671C67.8915 446.115 60.44 550.769 0 539.311L1.23545 0Z"
+                fill="#FF6B8A50"
+                fillOpacity="0.85"
+              />
+            </g>
+            <defs>
+              <filter
+                id="filter0_d_66_4"
+                x="-4"
+                y="0"
+                width="837"
+                height="556"
+                filterUnits="userSpaceOnUse"
+                colorInterpolationFilters="sRGB"
+              >
+                <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                <feColorMatrix
+                  in="SourceAlpha"
+                  type="matrix"
+                  values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                  result="hardAlpha"
+                />
+                <feOffset dy="4" />
+                <feGaussianBlur stdDeviation="2" />
+                <feComposite in2="hardAlpha" operator="out" />
+                <feColorMatrix
+                  type="matrix"
+                  values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+                />
+                <feBlend
+                  mode="normal"
+                  in2="BackgroundImageFix"
+                  result="effect1_dropShadow_66_4"
+                />
+                <feBlend
+                  mode="normal"
+                  in="SourceGraphic"
+                  in2="effect1_dropShadow_66_4"
+                  result="shape"
+                />
+              </filter>
+            </defs>
+          </svg>
+        </div>
+
+        {/* Bottom ellipse */}
+        <div className="absolute -bottom-40 -right-40 ">
+          <svg
+            width="512"
+            height="405"
+            viewBox="0 0 512 405"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <g filter="url(#filter0_d_69_2)">
+              <ellipse cx="305.5" cy="299" rx="296.5" ry="290" fill="#FF6B8A90" />
+            </g>
+            <defs>
+              <filter
+                id="filter0_d_69_2"
+                x="0"
+                y="0"
+                width="603"
+                height="590"
+                filterUnits="userSpaceOnUse"
+                colorInterpolationFilters="sRGB"
+              >
+                <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                <feColorMatrix
+                  in="SourceAlpha"
+                  type="matrix"
+                  values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                  result="hardAlpha"
+                />
+                <feOffset dx="-4" dy="-4" />
+                <feGaussianBlur stdDeviation="2.5" />
+                <feComposite in2="hardAlpha" operator="out" />
+                <feColorMatrix
+                  type="matrix"
+                  values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0"
+                />
+                <feBlend
+                  mode="normal"
+                  in2="BackgroundImageFix"
+                  result="effect1_dropShadow_69_2"
+                />
+                <feBlend
+                  mode="normal"
+                  in="SourceGraphic"
+                  in2="effect1_dropShadow_69_2"
+                  result="shape"
+                />
+              </filter>
+            </defs>
+          </svg>
         </div>
       </div>
-    </div>
+
   );
 }
