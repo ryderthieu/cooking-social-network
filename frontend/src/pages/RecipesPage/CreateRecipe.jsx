@@ -20,7 +20,7 @@ import {
   getIngredientUnits,
 } from "@/services/ingredientService";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import toast from "react-toastify";
 
 // Helper function to generate unique IDs
 const generateUniqueId = () => `id_${Math.random().toString(36).substr(2, 9)}`;
