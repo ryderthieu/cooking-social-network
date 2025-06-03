@@ -24,6 +24,7 @@ const Reels = () => {
   const { user } = useAuth();
   const [isInitialized, setIsInitialized] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const [currentReel, setCurrentReel] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,26 +39,48 @@ const Reels = () => {
       try {
         setIsLoading(true);
         const response = await getAllVideos();
+        console.log('Response from getAllVideos:', response);
 
-        if (response.success && response.data) {
-          const allReels = response.data.map((v) => ({
+        const videos = response.data;
+        console.log('Videos:', videos);
+
+        if (Array.isArray(videos)) {
+          const allReels = videos.map((v) => ({
             ...v,
-            liked: v.likes.includes(user._id),
+            liked: v.likes?.includes(user?._id),
           }));
 
+          console.log('Processed reels:', allReels);
           setAllReels(allReels);
 
-          if (!id && response.data.length > 0) {
-            navigate(`/explore/reels/${response.data[0]._id}`);
-          } else if (id && response.data.length > 0) {
-            const index = response.data.findIndex(reel => reel._id === id);
+          // Nếu không có ID và có videos, chuyển đến video đầu tiên
+          if (!id && allReels.length > 0) {
+            navigate(`/explore/reels/${allReels[0]._id}`);
+            setCurrentReel(allReels[0]);
+            setCurrentIndex(0);
+          }
+          // Nếu có ID, tìm video tương ứng
+          else if (id && allReels.length > 0) {
+            const index = allReels.findIndex(reel => reel._id === id);
             if (index === -1) {
-              navigate(`/explore/reels/${response.data[0]._id}`);
+              // Nếu không tìm thấy video với ID đã cho, chuyển đến video đầu tiên
+              navigate(`/explore/reels/${allReels[0]._id}`);
+              setCurrentReel(allReels[0]);
+              setCurrentIndex(0);
             } else {
               setCurrentIndex(index);
+              setCurrentReel(allReels[index]);
+              // Cuộn đến video hiện tại
+              setTimeout(() => {
+                containerRef.current?.scrollTo({
+                  top: index * containerRef.current.clientHeight,
+                  behavior: 'auto'
+                });
+              }, 100);
             }
           }
         } else {
+          console.error('Invalid response format:', videos);
           toast.error("Không thể tải video");
         }
       } catch (error) {
@@ -69,12 +92,13 @@ const Reels = () => {
       }
     };
     fetchAllReels();
-  }, []);
+  }, [id, user, navigate]);
 
   // Xử lý cuộn video
   useEffect(() => {
+    let scrollTimeout;
     const handleScroll = () => {
-      if (!containerRef.current) return;
+      if (!containerRef.current || isScrolling) return;
 
       const container = containerRef.current;
       const scrollTop = container.scrollTop;
@@ -82,64 +106,80 @@ const Reels = () => {
       const index = Math.round(scrollTop / itemHeight);
 
       if (index !== currentIndex && allReels[index]) {
-        setCurrentIndex(index);
-        navigate(`/explore/reels/${allReels[index]._id}`, { replace: true });
+        setIsScrolling(true);
+        clearTimeout(scrollTimeout);
+        
+        scrollTimeout = setTimeout(() => {
+          setCurrentIndex(index);
+          setCurrentReel(allReels[index]);
+          navigate(`/explore/reels/${allReels[index]._id}`, { replace: true });
+          setIsScrolling(false);
+        }, 50); // Đợi 50ms sau khi cuộn dừng lại mới cập nhật
       }
     };
 
     const container = containerRef.current;
     if (container) {
       container.addEventListener('scroll', handleScroll);
-      return () => container.removeEventListener('scroll', handleScroll);
+      return () => {
+        container.removeEventListener('scroll', handleScroll);
+        clearTimeout(scrollTimeout);
+      };
     }
-  }, [currentIndex, allReels]);
+  }, [currentIndex, allReels, navigate, isScrolling]);
 
-  // Cập nhật reel hiện tại khi id thay đổi
+  // Xử lý phím mũi tên
   useEffect(() => {
-    if (!isInitialized || !allReels?.length) return;
-
-    const currentReel = allReels.find(reel => reel._id === id);
-    if (currentReel) {
-      setCurrentReel(currentReel);
-      const index = allReels.findIndex(reel => reel._id === id);
-      if (index !== -1) {
-        setCurrentIndex(index);
-        // Cuộn đến video hiện tại
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowUp' && currentIndex > 0) {
+        const newIndex = currentIndex - 1;
+        setCurrentIndex(newIndex);
+        setCurrentReel(allReels[newIndex]);
+        navigate(`/explore/reels/${allReels[newIndex]._id}`, { replace: true });
         containerRef.current?.scrollTo({
-          top: index * containerRef.current.clientHeight,
+          top: newIndex * containerRef.current.clientHeight,
+          behavior: 'smooth'
+        });
+      } else if (e.key === 'ArrowDown' && currentIndex < allReels.length - 1) {
+        const newIndex = currentIndex + 1;
+        setCurrentIndex(newIndex);
+        setCurrentReel(allReels[newIndex]);
+        navigate(`/explore/reels/${allReels[newIndex]._id}`, { replace: true });
+        containerRef.current?.scrollTo({
+          top: newIndex * containerRef.current.clientHeight,
           behavior: 'smooth'
         });
       }
-    } else if (allReels.length > 0) {
-      // Nếu không tìm thấy video với id hiện tại, chuyển hướng đến video đầu tiên
-      navigate(`/explore/reels/${allReels[0]._id}`);
-    }
-  }, [id, allReels, isInitialized]);
-  useEffect(() => {
-    console.log('allreel change')
-  }, [allReels])
-  useEffect(() => {
-    console.log('current change')
-  }, [])
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentIndex, allReels, navigate]);
+
   const handleLike = async (reelId) => {
     try {
       const res = await likeVideo(reelId);
-      const updatedReel = res.data.video;
-      console.log(updatedReel)
-      const isLiking = res.data.message === "Đã like video";
+      const updatedReel = res.data;
+      const isLiking = updatedReel.likes?.includes(user?._id);
 
       // Cập nhật state cho cả danh sách và video hiện tại
       setAllReels(prevReels =>
         prevReels.map(reel => {
           if (reel._id === reelId) {
-            return updatedReel
-            
+            return {
+              ...updatedReel,
+              liked: updatedReel.likes?.includes(user?._id)
+            };
           }
           return reel;
         })
       );
+      
       setCurrentReel(prevReel =>
-        prevReel._id === reelId ? updatedReel : prevReel
+        prevReel._id === reelId ? {
+          ...updatedReel,
+          liked: updatedReel.likes?.includes(user?._id)
+        } : prevReel
       );
 
       // Gửi thông báo khi like
@@ -191,9 +231,7 @@ const Reels = () => {
       toast.error("Không thể mở bảng bình luận");
     }
   };
-  useEffect(() => {
-    console.log('current change')
-  }, [currentReel])
+
   const handleCloseReelComment = () => {
     try {
       setShowReelComment(false);
@@ -256,32 +294,6 @@ const Reels = () => {
       toast.error('Không thể thêm bình luận. Vui lòng thử lại sau');
     }
   };
-
-  // Xử lý phím mũi tên
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'ArrowUp' && currentIndex > 0) {
-        const newIndex = currentIndex - 1;
-        setCurrentIndex(newIndex);
-        navigate(`/explore/reels/${allReels[newIndex]._id}`, { replace: true });
-        containerRef.current?.scrollTo({
-          top: newIndex * containerRef.current.clientHeight,
-          behavior: 'smooth'
-        });
-      } else if (e.key === 'ArrowDown' && currentIndex < allReels.length - 1) {
-        const newIndex = currentIndex + 1;
-        setCurrentIndex(newIndex);
-        navigate(`/explore/reels/${allReels[newIndex]._id}`, { replace: true });
-        containerRef.current?.scrollTo({
-          top: newIndex * containerRef.current.clientHeight,
-          behavior: 'smooth'
-        });
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentIndex, allReels]);
 
   if (isLoading) {
     return (

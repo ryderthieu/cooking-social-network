@@ -4,13 +4,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaPlay, FaHeart, FaComment, FaShare, FaBookmark, FaVolumeMute, FaVolumeUp } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+
 const ReelCard = ({ reel, onLike, onComment, onShare}) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isLoaded, setIsLoaded] = useState(false);
   const videoRef = useRef(null);
-  const {user} = useAuth()
+  const {user} = useAuth();
+
   useEffect(() => {
-    console.log('reel card')
     const options = {
       root: null,
       rootMargin: '0px',
@@ -20,11 +22,23 @@ const ReelCard = ({ reel, onLike, onComment, onShare}) => {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          videoRef.current?.play();
-          setIsPlaying(true);
+          if (videoRef.current) {
+            videoRef.current.play().catch(error => {
+              console.error("Error playing video:", error);
+            });
+            setIsPlaying(true);
+            if (isLoaded) {
+              setIsMuted(false);
+              videoRef.current.muted = false;
+            }
+          }
         } else {
-          videoRef.current?.pause();
-          setIsPlaying(false);
+          if (videoRef.current) {
+            videoRef.current.pause();
+            setIsPlaying(false);
+            setIsMuted(true);
+            videoRef.current.muted = true;
+          }
         }
       });
     }, options);
@@ -38,24 +52,45 @@ const ReelCard = ({ reel, onLike, onComment, onShare}) => {
         observer.unobserve(videoRef.current);
       }
     };
-  }, []);
+  }, [isLoaded]);
 
   const handleVideoClick = () => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
+        setIsPlaying(false);
       } else {
-        videoRef.current.play();
+        videoRef.current.play().catch(error => {
+          console.error("Error playing video:", error);
+        });
+        setIsPlaying(true);
+        setIsMuted(false);
+        videoRef.current.muted = false;
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
   const toggleMute = (e) => {
     e.stopPropagation();
     if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+      const newMutedState = !isMuted;
+      videoRef.current.muted = newMutedState;
+      setIsMuted(newMutedState);
+    }
+  };
+
+  const handleVideoLoad = () => {
+    setIsLoaded(true);
+    if (videoRef.current) {
+      videoRef.current.play().catch(error => {
+        console.error("Error playing video:", error);
+      });
+      setTimeout(() => {
+        setIsMuted(false);
+        if (videoRef.current) {
+          videoRef.current.muted = false;
+        }
+      }, 500);
     }
   };
 
@@ -75,7 +110,16 @@ const ReelCard = ({ reel, onLike, onComment, onShare}) => {
             muted={isMuted}
             playsInline
             onClick={handleVideoClick}
+            onLoadedData={handleVideoLoad}
+            preload="auto"
           />
+
+          {/* Play button overlay when paused */}
+          {!isPlaying && (
+            <div className="absolute inset-0 flex items-center justify-center z-20">
+              <FaPlay className="w-16 h-16 text-white opacity-80" />
+            </div>
+          )}
 
           {/* Volume control */}
           <button 
@@ -91,7 +135,7 @@ const ReelCard = ({ reel, onLike, onComment, onShare}) => {
 
           {/* Bottom info */}
           <div className="absolute left-0 right-0 bottom-0 p-6 bg-gradient-to-t from-black via-black/60 to-transparent z-20">
-            <Link to={`/profile/${reel._id}`} className="flex items-center gap-3 mb-3">
+            <Link to={`/profile/${reel.author._id}`} className="flex items-center gap-3 mb-3">
               <div className="relative">
                 <img
                   src={reel.author.avatar || 'https://via.placeholder.com/40'}
@@ -124,13 +168,13 @@ const ReelCard = ({ reel, onLike, onComment, onShare}) => {
         <div className="flex flex-col items-center gap-8 py-8 self-center">
           <button onClick={onLike} className="group">
             <div className={`p-4 rounded-full transition-all duration-300 ${
-              reel.likes.includes(user._id)
+              reel.likes?.includes(user?._id)
                 ? 'bg-[#FFB800]/20 scale-110'
                 : 'bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110'
               }`}>
-              <FaHeart className={`w-6 h-6 ${reel.likes.includes(user._id) ? 'text-[#FFB800]' : 'text-gray-600 group-hover:text-[#FFB800]'}`} />
+              <FaHeart className={`w-6 h-6 ${reel.likes?.includes(user?._id) ? 'text-[#FFB800]' : 'text-gray-600 group-hover:text-[#FFB800]'}`} />
             </div>
-            <span className="block text-center mt-2 font-medium text-gray-600">{reel.likes?.length}</span>
+            <span className="block text-center mt-2 font-medium text-gray-600">{reel.likes?.length || 0}</span>
           </button>
 
           <button onClick={onComment} className="group">
@@ -146,7 +190,7 @@ const ReelCard = ({ reel, onLike, onComment, onShare}) => {
             <div className="p-4 rounded-full bg-gray-100 group-hover:bg-[#FFF4D6] group-hover:scale-110 transition-all duration-300">
               <FaShare className="w-6 h-6 text-gray-600 group-hover:text-[#FFB800]" />
             </div>
-            <span className="block text-center mt-2 font-medium text-gray-600">{reel.shares?.length}</span>
+            <span className="block text-center mt-2 font-medium text-gray-600">{reel.shares?.length || 0}</span>
           </button>
 
           <button className="group">
@@ -163,10 +207,10 @@ const ReelCard = ({ reel, onLike, onComment, onShare}) => {
 export const ReelCardReview = ({reel}) => {
   const navigate = useNavigate()
   return (
-    <div
+    <a
+      href={`/explore/reels/${reel._id}`}
       key={reel._id} // Assuming API returns _id
       className="relative group cursor-pointer"
-      onClick={() => navigate(`/explore/reels/${reel._id}`)} // Assuming this route exists
     >
       <div className="aspect-[9/16] relative overflow-hidden rounded-xl">
         <img
@@ -210,7 +254,7 @@ export const ReelCardReview = ({reel}) => {
           </div>
         </div>
       </div>
-    </div>
+    </a>
   )
 }
 
