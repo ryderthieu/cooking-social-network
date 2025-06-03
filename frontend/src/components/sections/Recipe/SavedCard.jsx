@@ -18,25 +18,43 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
   const { user } = useAuth();
   const location = useLocation();
   const isLoggedIn = !!user;
-
   // Get difficulty level (1-3)
   const getDifficultyLevel = () => {
     // First check if difficulty is directly on recipe object
     const difficulty = recipe.difficultyLevel || recipe.difficulty;
 
     // If not found, check inside categories object
-    const categoryDifficulty = recipe.categories?.difficultyLevel;
+    const categoryDifficulty = recipe.categories?.difficultyLevel;    const finalDifficulty = difficulty || categoryDifficulty;
 
-    const finalDifficulty = difficulty || categoryDifficulty;
-
-    if (!finalDifficulty) return 2;
-
+    if (!finalDifficulty) return 2; // Default to medium
+    
     const difficultyMap = {
-      Dễ: 1,
+      "Dễ": 1,
+      "dễ": 1,
+      "Easy": 1,
+      "easy": 1,
       "Trung bình": 2,
-      Khó: 3,
+      "trung bình": 2,
+      "Medium": 2,
+      "medium": 2,
+      "Khó": 3,
+      "khó": 3,
+      "Hard": 3,
+      "hard": 3,
     };
-    return difficultyMap[finalDifficulty] || 2;
+    
+    // Also handle numeric values
+    let mappedLevel = difficultyMap[finalDifficulty];
+    
+    // If not found in map, try to parse as number
+    if (!mappedLevel && !isNaN(parseInt(finalDifficulty))) {
+      const numericLevel = parseInt(finalDifficulty);
+      if (numericLevel >= 1 && numericLevel <= 3) {
+        mappedLevel = numericLevel;
+      }
+    }
+    
+    return mappedLevel || 2;
   };
   // Fetch author data if we only have the author ID
   useEffect(() => {
@@ -235,8 +253,8 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
     return allCategories.slice(0, 2);
   };
   return (
-    <Link
-      to={`/recipes/${recipe._id || recipe.id}`}
+    <a
+      href={`/recipes/${recipe._id || recipe.id}`}
       className="block group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-gray-200 cursor-pointer"
     >
       {/* Recipe Image Container */}
@@ -411,7 +429,7 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
         recipeId={recipe._id}
         onSuccess={handleCollectionSuccess}
       />
-    </Link>
+    </a>
   );
 };
 

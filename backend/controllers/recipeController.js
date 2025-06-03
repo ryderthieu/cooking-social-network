@@ -4,10 +4,9 @@ const slugify = require("slugify");
 const { locales } = require("validator/lib/isIBAN");
 
 // ✅ GET: Lấy tất cả công thức
-const getAllRecipes = async (req, res) => {  try {
-    const recipes = await Recipe.find()
+const getAllRecipes = async (req, res) => {  try {    const recipes = await Recipe.find()
       .populate("author", "firstName lastName  avatar")
-      .populate("ingredients.ingredient", "name unit image")
+      .populate("ingredients.ingredient", "name unit image nutrition")
       .populate("categories", "name type slug image");
     
     console.log(`📊 Total recipes in database: ${recipes.length}`);
@@ -34,7 +33,7 @@ const getRecipeById = async (req, res) => {
   }
   try {const recipe = await Recipe.findById(id)
       .populate("author", "firstName lastName avatar")
-      .populate("ingredients.ingredient", "name unit image")
+      .populate("ingredients.ingredient", "name unit image nutrition")
       .populate("categories", "name type slug image");
     if (!recipe) {
       return res.status(404).json({
@@ -191,7 +190,7 @@ const searchRecipe = async (req, res) => {
 
     const recipes = await Recipe.find(filter)
       .populate("author", "firstName lastName avatar")
-      .populate("ingredients.ingredient", "name unit image")
+      .populate("ingredients.ingredient", "name unit image nutrition")
       .populate("categories", "name type slug image")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -491,7 +490,7 @@ const getSimilarRecipes = async (req, res) => {
     }    // Tìm recipes tương tự
     const similarRecipes = await Recipe.find(similarityQuery)
       .populate("author", "firstName lastName avatar")
-      .populate("ingredients.ingredient", "name unit image")
+      .populate("ingredients.ingredient", "name unit image nutrition")
       .populate("categories", "name type slug image")
       .sort({ averageRating: -1, createdAt: -1 }) // Ưu tiên rating cao và mới
       .limit(parseInt(limit));
@@ -506,7 +505,7 @@ const getSimilarRecipes = async (req, res) => {
         },
       })
         .populate("author", "firstName lastName avatar")
-        .populate("ingredients.ingredient", "name unit image")
+        .populate("ingredients.ingredient", "name unit image nutrition")
         .populate("categories", "name type slug image")
         .sort({ createdAt: -1 })
         .limit(remainingLimit);

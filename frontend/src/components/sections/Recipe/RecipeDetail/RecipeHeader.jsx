@@ -16,7 +16,7 @@ export default function RecipeHeader({ recipe, onShare, onLike, isLiked }) {
     return `${time} phút`;
   };
   const getAuthorName = () => {
-    return `${recipe?.author?.firstName || ""} ${recipe?.author?.lastName || ""}`.trim() || "Chef";
+    return `${recipe?.author?.firstName || ""} ${recipe?.author?.lastName || ""}`.trim() || "Oshisha";
   };
 
   const getDifficultyColor = (difficulty) => {
@@ -57,7 +57,7 @@ export default function RecipeHeader({ recipe, onShare, onLike, isLiked }) {
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
               <img
-                src={recipe?.author?.avatar || "/placeholder.svg?height=32&width=32"}
+                src={recipe?.author?.avatar || "https://res.cloudinary.com/dfaq5hbmx/image/upload/v1748692877/sushi_x1k4mg.png"}
                 alt={getAuthorName()}
                 className="w-full h-full rounded-full object-cover"
               />

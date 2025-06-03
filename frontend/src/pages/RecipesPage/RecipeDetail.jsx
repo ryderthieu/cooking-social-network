@@ -25,6 +25,23 @@ export default function RecipeDetail({ className }) {
   const [error, setError] = useState(null);
   const [servings, setServings] = useState(1);
   const [calculatedNutrition, setCalculatedNutrition] = useState(null);
+  
+    // Calculate nutrition when recipe changes
+  useEffect(() => {
+    if (recipe && recipe.ingredients && recipe.ingredients.length > 0) {
+      try {
+        console.log('Recipe ingredients with nutrition:', recipe.ingredients);
+        const nutrition = calculateNutrition(recipe.ingredients);
+        setCalculatedNutrition(nutrition);
+      } catch (error) {
+        console.error('Error calculating nutrition:', error);
+        setCalculatedNutrition(null);
+      }
+    } else {
+      setCalculatedNutrition(null);
+    }
+  }, [recipe]);
+  
   const [isLiked, setIsLiked] = useState(false);
   const [sharePopup, setSharePopup] = useState({
     open: false,
@@ -40,9 +57,7 @@ export default function RecipeDetail({ className }) {
         if (!objectIdRegex.test(id)) {
           setError("Invalid recipe ID");
           return;
-        }
-
-        const response = await getRecipeById(id);
+        }        const response = await getRecipeById(id);
         const recipeData = response.data.data;
         setRecipe(recipeData);
         setError(null);
@@ -54,7 +69,19 @@ export default function RecipeDetail({ className }) {
           setServings(1); // Fallback to backend default
         }
 
-        console.log(recipeData);
+        console.log('Full recipe data from API:', recipeData);
+        console.log('Recipe ingredients structure:', recipeData?.ingredients);
+        
+        // Log each ingredient structure in detail
+        if (recipeData?.ingredients) {
+          recipeData.ingredients.forEach((ingredient, index) => {
+            console.log(`Ingredient ${index}:`, ingredient);
+            console.log(`- Name: ${ingredient.name || ingredient.ingredient?.name}`);
+            console.log(`- Quantity: ${ingredient.quantity}`);
+            console.log(`- Unit: ${ingredient.unit}`);
+            console.log(`- Nutrition data:`, ingredient.nutrition || ingredient.ingredient?.nutrition);
+          });
+        }
       } catch (err) {
         setError("Failed to load recipe");
         console.error("Error fetching recipe:", err);
@@ -65,24 +92,36 @@ export default function RecipeDetail({ className }) {
       fetchRecipe();
     }
   }, [id]);
-
   // Recalculate nutrition when recipe or servings change
   useEffect(() => {
-    if (recipe && recipe.ingredients) {
-      const originalServings = recipe.servings || 1;
-      const nutrition = calculateNutrition(recipe.ingredients);
+    if (recipe && recipe.ingredients && recipe.ingredients.length > 0) {
+      try {
+        console.log('Recipe ingredients:', recipe.ingredients);
+        const originalServings = recipe.servings || 1;
+        const nutrition = calculateNutrition(recipe.ingredients);
+        console.log('Calculated base nutrition:', nutrition);
 
-      // Adjust nutrition based on serving size
-      const servingRatio = servings / originalServings;
-      const adjustedNutrition = {
-        calories: Math.round(nutrition.calories * servingRatio * 10) / 10,
-        protein: Math.round(nutrition.protein * servingRatio * 10) / 10,
-        fat: Math.round(nutrition.fat * servingRatio * 10) / 10,
-        carbs: Math.round(nutrition.carbs * servingRatio * 10) / 10,
-        cholesterol: Math.round(nutrition.cholesterol * servingRatio * 10) / 10,
-      };
+        // Adjust nutrition based on serving size
+        const servingRatio = servings / originalServings;
+        console.log('Serving ratio:', servingRatio, 'Original:', originalServings, 'Current:', servings);
+        
+        const adjustedNutrition = {
+          calories: Math.round(nutrition.calories * servingRatio * 10) / 10,
+          protein: Math.round(nutrition.protein * servingRatio * 10) / 10,
+          fat: Math.round(nutrition.fat * servingRatio * 10) / 10,
+          carbs: Math.round(nutrition.carbs * servingRatio * 10) / 10,
+          cholesterol: Math.round(nutrition.cholesterol * servingRatio * 10) / 10,
+        };
 
-      setCalculatedNutrition(adjustedNutrition);
+        console.log('Final adjusted nutrition:', adjustedNutrition);
+        setCalculatedNutrition(adjustedNutrition);
+      } catch (error) {
+        console.error('Error calculating nutrition:', error);
+        setCalculatedNutrition(null);
+      }
+    } else {
+      console.log('No ingredients found, setting nutrition to null');
+      setCalculatedNutrition(null);
     }
   }, [recipe, servings]);
 
@@ -140,7 +179,7 @@ export default function RecipeDetail({ className }) {
 
   return (
     <div
-      className={`max-w-7xl mx-auto bg-white px-4 sm:px-6 lg:px-8 ${
+      className={`max-w-7xl mx-auto bg-white${
         className || ""
       }`}
     >
@@ -149,13 +188,13 @@ export default function RecipeDetail({ className }) {
 
         {/* <BreadCrumb category="Chi tiết công thức" /> */}
 
-       <BreadCrumb
+       {/* <BreadCrumb
           items={[
              { label: "Trang chủ", link: "/" },
             { label: "Công thức", link: "/recipes" },
            { label: recipe?.name || "Chi tiết công thức" },
          ]}
-      />
+      /> */}
 
       </div>
 
