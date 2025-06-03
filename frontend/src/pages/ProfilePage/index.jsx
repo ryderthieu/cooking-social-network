@@ -93,7 +93,6 @@ export default function ProfilePage() {
           getUserById({ userId }),
           getUserStats(userId),
         ]);
-
         if (userResponse.status === 200) {
           setUserData(userResponse.data);
 

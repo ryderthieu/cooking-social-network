@@ -530,6 +530,61 @@ const getSimilarRecipes = async (req, res) => {
   }
 };
 
+const getRecipeByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID người dùng không hợp lệ"
+      });
+    }
+
+    const recipes = await Recipe.find({ author: userId })
+      .populate("author", "firstName lastName avatar")
+      .populate("ingredients.ingredient", "name unit image")
+      .populate("categories", "name type slug image")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: recipes.length,
+      data: recipes
+    });
+  } catch (error) {
+    console.error("❌ Error fetching user recipes:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: "Đã xảy ra lỗi khi lấy công thức của người dùng. Xin vui lòng thử lại."
+    });
+  }
+};
+
+const getMyRecipes = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const recipes = await Recipe.find({ author: userId })
+      .populate("author", "firstName lastName avatar")
+      .populate("ingredients.ingredient", "name unit image")
+      .populate("categories", "name type slug image")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: recipes.length,
+      data: recipes
+    });
+  } catch (error) {
+    console.error("❌ Error fetching my recipes:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: "Đã xảy ra lỗi khi lấy công thức của bạn. Xin vui lòng thử lại."
+    });
+  }
+};
+
 module.exports = {
   getAllRecipes,
   getRecipeById,
@@ -539,4 +594,6 @@ module.exports = {
   deleteRecipe,
   getTopRecipes,
   getSimilarRecipes,
+  getRecipeByUserId,
+  getMyRecipes
 };

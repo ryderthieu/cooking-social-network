@@ -7,7 +7,7 @@ const { OAuth2Client } = require('google-auth-library');
 const User = require("../models/user");
 const Post = require("../models/post");
 const Recipe = require("../models/recipe");
-
+const Video = require("../models/video");
 const createToken = (_id) => {
   return jwt.sign({ _id }, process.env.SECRET, { expiresIn: "30d" });
 };
@@ -635,6 +635,9 @@ const getUserStats = async (req, res) => {
       .populate("author", "firstName lastName avatar _id")
       .sort({ createdAt: -1 });
 
+    const videos = await Video.find({ author: userId })
+      .populate("author", "firstName lastName avatar _id")
+      .sort({ createdAt: -1 });
     const stats = {
       posts: {
         count: posts.length,
@@ -651,6 +654,10 @@ const getUserStats = async (req, res) => {
       following: {
         count: user.following.length,
         data: user.following,
+      },
+      videos: {
+        count: videos.length,
+        data: videos,
       },
     };
 

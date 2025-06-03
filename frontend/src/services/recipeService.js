@@ -51,6 +51,12 @@ const recipeService = {
   
   // Get recipe categories (using new category service)
   getRecipeCategories: () => API.get(`/categories/formatted`),
+
+  // Get recipes by user ID
+  getRecipeByUserId: (userId) => API.get(`${endpoint}/user/${userId}`),
+
+  // Get my recipes
+  getMyRecipes: () => API.get(`${endpoint}/my-recipes`),
 };
 
 export const {
@@ -69,6 +75,8 @@ export const {
   unsaveRecipe,
   getSavedRecipes,
   getRecipeCategories,
+  getRecipeByUserId,
+  getMyRecipes,
 } = recipeService;
 
 export default recipeService;

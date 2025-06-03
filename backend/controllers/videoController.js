@@ -291,6 +291,40 @@ const shareVideo = async (req, res) => {
   }
 };
 
+const getVideoByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "ID người dùng không hợp lệ" });
+    }
+
+    const videos = await Video.find({ author: userId })
+      .populate("author", "avatar firstName lastName")
+      .populate("recipe", "name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(videos);
+  } catch (error) {
+    console.error("Lỗi khi lấy video theo user ID:", error);
+    res.status(500).json({ message: "Không thể lấy video", error: error.message });
+  }
+};
+
+const getMyVideos = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const videos = await Video.find({ author: userId })
+      .populate("author", "avatar firstName lastName")
+      .populate("recipe", "name")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(videos);
+  } catch (error) {
+    console.error("Lỗi khi lấy video của tôi:", error);
+    res.status(500).json({ message: "Không thể lấy video", error: error.message });
+  }
+};
+
 module.exports = {
   getAllVideos,
   getVideoById,
@@ -301,4 +335,6 @@ module.exports = {
   likeVideo,
   commentVideo,
   shareVideo,
+  getVideoByUserId,
+  getMyVideos
 };

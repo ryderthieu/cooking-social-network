@@ -167,15 +167,16 @@ export const commentVideo = async (id, data) => {
   }
 };
 
-export const getSavedVideos = async () => {
+export const getVideoByUserId = async (userId) => {
   try {
-    const response = await API.get('/videos/saved');
+    const response = await API.get(`/videos/user/${userId}`);
+    console.log('Video service response:', response);
     return {
       success: true,
       data: response.data
     };
   } catch (error) {
-    console.error('Error in getSavedVideos:', error);
+    console.error('Error in getVideoByUserId:', error);
     return {
       success: false,
       error: error.message
@@ -183,18 +184,18 @@ export const getSavedVideos = async () => {
   }
 };
 
-export const saveVideo = async (id) => {
+export const getMyVideos = async () => {
   try {
-    const response = await API.patch(`/videos/save-video/${id}`);
+    const response = await API.get('/videos/my-videos');
     return {
       success: true,
       data: response.data
     };
   } catch (error) {
-    console.error('Error in saveVideo:', error);
+    console.error('Error in getMyVideos:', error);
     return {
       success: false,
       error: error.message
     };
   }
-}; 
+};

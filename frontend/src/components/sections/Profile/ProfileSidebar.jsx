@@ -36,7 +36,7 @@ export default function ProfileSidebar({
     },
     {
       key: "videos",
-      label: "Video",
+      label: "Reels",
       icon: <FaVideo />,
       count: userStats?.videos?.count || 0,
     },

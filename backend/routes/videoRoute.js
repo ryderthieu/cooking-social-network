@@ -10,13 +10,18 @@ const {
   searchVideos,
   getAllVideos,
   getVideoById,
+  getVideoByUserId,
+  getMyVideos,
 } = require("../controllers/videoController");
 
 const router = express.Router();
 
-router.get("/", getAllVideos);
+router.get("/my-videos", authenticateJWT, getMyVideos);
+router.get("/user/:userId", getVideoByUserId);  
 router.get("/search", searchVideos);
 router.get("/:id", getVideoById);
+router.get("/", getAllVideos);
+
 router.post("/add-video", authenticateJWT, addVideo);
 router.put("/edit-video/:id", authenticateJWT, editVideo);
 router.delete("/delete-video/:id", authenticateJWT, deleteVideo);
