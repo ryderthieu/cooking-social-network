@@ -21,11 +21,11 @@ export default function RecipesTab({ userId }) {
           setError("Thông tin người dùng không khả dụng");
           return;
         }
-
-        if (response.success) {
-          setRecipes(response.data || []);
+        
+        if (response.data.success) {
+          setRecipes(response.data.data || []);
         } else {
-          setError(response.error || "Không thể tải công thức");
+          setError(response.data.error || "Không thể tải công thức");
         }
       } catch (err) {
         console.error("Lỗi khi tải công thức:", err);

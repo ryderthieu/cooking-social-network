@@ -8,12 +8,16 @@ const {
     editRecipe, 
     deleteRecipe, 
     getTopRecipes,
-    getSimilarRecipes
+    getSimilarRecipes,
+    getRecipeByUserId,
+    getMyRecipes
 } = require('../controllers/recipeController');
 
 const router = express.Router();
 
 // READ
+router.get('/user/:userId', getRecipeByUserId);
+router.get('/my-recipes',authenticateJWT, getMyRecipes);
 router.get('/search', searchRecipe);
 router.get('/filter', searchRecipe); // Add filter route that uses searchRecipe function
 router.get('/top', getTopRecipes);
