@@ -315,7 +315,7 @@ export const PostCard = ({
                         <FaHeart className={`w-4 h-4 ${isLiked ? "text-[#FFB800]" : ""}`} />
                     </div>
                     <span className="font-semibold text-sm">
-                        {post.likes?.length || 0}
+                        {post?.likes?.length || 0}
                     </span>
                 </button>
 

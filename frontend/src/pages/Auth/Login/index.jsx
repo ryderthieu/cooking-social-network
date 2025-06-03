@@ -4,10 +4,11 @@ import { useAuth } from '../../../context/AuthContext'
 import bgImage from '../../../assets/images/login/background.png'
 import bowl from '../../../assets/images/login/bowl.png'
 import logo from '../../../assets/logo.svg'
+import { GoogleLogin } from '@react-oauth/google'
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, loginWithGoogle } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -43,7 +44,7 @@ const Login = () => {
         if (!formData.email.trim()) {
             newErrors.email = "Vui lòng nhập email.";
             shake.push("email");
-        } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) { 
+        } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
             newErrors.email = "Email không hợp lệ.";
             shake.push("email");
         }
@@ -73,10 +74,9 @@ const Login = () => {
             setIsLoading(true);
             setApiError('');
             const result = await login(formData.email, formData.password);
-            console.log(result);
-            
+
             if (result.success) {
-                navigate('/'); // Chuyển hướng về trang chủ sau khi đăng nhập thành công
+                navigate('/');
             } else {
                 setApiError(result.error || 'Đăng nhập thất bại. Vui lòng thử lại.');
                 setShakeFields(['email', 'password']);
@@ -88,6 +88,28 @@ const Login = () => {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+        try {
+            setIsLoading(true);
+            setApiError('');
+            const result = await loginWithGoogle(credentialResponse.credential);
+            if (result.success) {
+                navigate('/');
+            } else {
+                setApiError(result.error);
+            }
+        } catch (error) {
+            console.error('Google login error:', error);
+            setApiError('Đăng nhập bằng Google thất bại. Vui lòng thử lại.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleGoogleError = () => {
+        setApiError('Đăng nhập bằng Google thất bại. Vui lòng thử lại.');
     };
 
     return (
@@ -122,9 +144,8 @@ const Login = () => {
                                 <input
                                     type="text"
                                     placeholder="Email"
-                                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${
-                                        errors.email ? 'border-red-500' : 'border-gray-300'
-                                    } ${shakeFields.includes("email") ? "animate-shake" : ""}`}
+                                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${errors.email ? 'border-red-500' : 'border-gray-300'
+                                        } ${shakeFields.includes("email") ? "animate-shake" : ""}`}
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
@@ -137,9 +158,8 @@ const Login = () => {
                                 <input
                                     type="password"
                                     placeholder="Mật khẩu"
-                                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${
-                                        errors.password ? 'border-red-500' : 'border-gray-300'
-                                    } ${shakeFields.includes("password") ? "animate-shake" : ""}`}
+                                    className={`w-full px-4 py-3 rounded-lg bg-white/90 border transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm ${errors.password ? 'border-red-500' : 'border-gray-300'
+                                        } ${shakeFields.includes("password") ? "animate-shake" : ""}`}
                                     name="password"
                                     value={formData.password}
                                     onChange={handleChange}
@@ -155,9 +175,8 @@ const Login = () => {
                             </div>
                             <button
                                 type="submit"
-                                className={`w-full bg-[#04043F] hover:bg-[#1a1a5f] text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg pt-4 ${
-                                    isLoading ? 'opacity-70 cursor-not-allowed' : ''
-                                }`}
+                                className={`w-full bg-gradient-to-r from-pink-600 to-orange-600 hover:from-pink-700 hover:to-orange-700 text-white py-3 rounded-lg font-semibold mt-6 transition duration-300 ease-in-out transform hover:-translate-y-1 shadow-lg ${isLoading ? 'opacity-70 cursor-not-allowed' : ''
+                                    }`}
                                 disabled={isLoading}
                             >
                                 {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
@@ -171,26 +190,19 @@ const Login = () => {
                         </div>
 
                         <div className="flex justify-center items-center gap-5 mb-6">
-                            <button 
-                                className="w-11 h-11 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-110 shadow-sm"
-                                disabled={isLoading}
-                            >
-                                <img
-                                    className="w-6 h-6"
-                                    src="https://www.svgrepo.com/show/475656/google-color.svg"
-                                    alt="Google"
+                            <div>
+                                <GoogleLogin
+                                    onSuccess={handleGoogleSuccess}
+                                    onError={handleGoogleError}
+                                    useOneTap
+                                    theme="outline"
+                                    size="large"
+                                    width="100%"
+                                    locale="vi"
+                                    text="continue_with"
+                                    shape="rectangular"
                                 />
-                            </button>
-                            <button 
-                                className="w-11 h-11 rounded-full border border-gray-200 hover:bg-gray-100 flex items-center justify-center transition duration-300 ease-in-out transform hover:scale-110 shadow-sm"
-                                disabled={isLoading}
-                            >
-                                <img
-                                    className="w-6 h-6"
-                                    src="https://upload.wikimedia.org/wikipedia/commons/b/b9/2023_Facebook_icon.svg"
-                                    alt="Facebook"
-                                />
-                            </button>
+                            </div>
                         </div>
 
                         <p className="text-sm text-center text-gray-600 mt-6">

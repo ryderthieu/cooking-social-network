@@ -7,6 +7,7 @@ import {
   forgotPassword,
   resetPassword,
   confirmOtp,
+  loginWithGoogle as loginWithGoogleService
 } from '../services/userService';
 import Loader from '@/components/loader/Loader';
 
@@ -67,6 +68,22 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (credential) => {
+    try {
+      const response = await loginWithGoogleService(credential);
+      const { token } = response.data;
+      localStorage.setItem('token', token);
+      await fetchUserData();
+      return { success: true };
+    } catch (error) {
+      console.error('Google login failed:', error);
+      return { 
+        success: false, 
+        error: error?.response?.data?.error || 'Đăng nhập bằng Google thất bại' 
+      };
+    }
+  };
+  
   const register = async (userData) => {
     try {
       const response = await registerUser(userData);
@@ -139,6 +156,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     login,
+    loginWithGoogle,
     register,
     logout,
     updateProfile,

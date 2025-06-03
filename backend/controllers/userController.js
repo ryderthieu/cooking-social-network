@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
+const { OAuth2Client } = require('google-auth-library');
 
 const User = require("../models/user");
 const Post = require("../models/post");
@@ -10,6 +11,8 @@ const Recipe = require("../models/recipe");
 const createToken = (_id) => {
   return jwt.sign({ _id }, process.env.SECRET, { expiresIn: "30d" });
 };
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -658,6 +661,52 @@ const getUserStats = async (req, res) => {
   }
 };
 
+const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    const { email, given_name, family_name, picture, sub: googleId } = payload;
+
+    let user = await User.findOne({ googleId });
+    
+    if (!user) {
+      // Kiểm tra xem email đã tồn tại chưa
+      user = await User.findOne({ email });
+      
+      if (user) {
+        // Nếu email đã tồn tại nhưng chưa có googleId, cập nhật googleId
+        user.googleId = googleId;
+        await user.save();
+      } else {
+        // Tạo user mới
+        user = await User.create({
+          email,
+          firstName: given_name,
+          lastName: family_name,
+          avatar: picture,
+          googleId,
+          gender: "Nam", // Giá trị mặc định
+          birthday: new Date(), // Giá trị mặc định
+          isVerified: true
+        });
+      }
+    }
+
+    const token = createToken(user._id);
+    res.status(200).json({ token });
+
+  } catch (error) {
+    console.error('Google login error:', error);
+    res.status(400).json({ error: 'Đăng nhập bằng Google thất bại' });
+  }
+};
+
 module.exports = {
   login,
   register,
@@ -681,4 +730,5 @@ module.exports = {
   getFollowers,
   getFollowing,
   toggleFollow,
+  googleLogin
 };

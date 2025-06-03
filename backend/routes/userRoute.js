@@ -1,5 +1,5 @@
 const express = require('express')
-const {login, register, forgotPassword, resetPassword, confirmOtp, getUserById, getUserInfo, searchUser, editProfile, saveRecipe, deleteSavedRecipe, getSavedRecipe, savePost, getSavedPost, saveVideo, getFollowers, getFollowing, toggleFollow, deleteSavedPost, deleteSavedVideo, getSavedVideo, getUserStats} = require('../controllers/userController')
+const {login, register, forgotPassword, resetPassword, confirmOtp, getUserById, getUserInfo, searchUser, editProfile, saveRecipe, deleteSavedRecipe, getSavedRecipe, savePost, getSavedPost, saveVideo, getFollowers, getFollowing, toggleFollow, deleteSavedPost, deleteSavedVideo, getSavedVideo, getUserStats, googleLogin} = require('../controllers/userController')
 const { authenticateJWT } = require('../middlewares/authMiddleware')
 
 const router = express.Router()
@@ -10,6 +10,7 @@ router.post('/forgot-password', forgotPassword)
 router.post('/reset-password', resetPassword)
 router.post('/confirm-otp', confirmOtp)
 router.post('/toggle-follow', authenticateJWT, toggleFollow)
+router.post('/google-login', googleLogin)
 
 router.get('/get-info', authenticateJWT, getUserInfo)
 router.get('/search', searchUser)

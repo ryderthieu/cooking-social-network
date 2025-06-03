@@ -6,7 +6,12 @@ const validator = require("validator");
 const userSchema = new Schema(
   {
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { 
+      type: String, 
+      required: function() {
+        return !this.googleId; // Password chỉ bắt buộc nếu không có googleId
+      }
+    },
     lastName: { type: String },
     firstName: { type: String },
     gender: { type: String, enum: ["Nam", "Nữ"], default: "Nam" },
@@ -28,7 +33,8 @@ const userSchema = new Schema(
     },
     username: { type: String },
     bio : {type: String},
-    location : {type: String}
+    location : {type: String},
+    googleId: { type: String, sparse: true }
   },
   {
     timestamps: true,

@@ -22,6 +22,9 @@ import {
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
+// Helper function to generate unique IDs
+const generateUniqueId = () => `id_${Math.random().toString(36).substr(2, 9)}`;
+
 export default function CreateRecipeForm() {
   const navigate = useNavigate();
   const [recipeName, setRecipeName] = useState("");
@@ -29,16 +32,22 @@ export default function CreateRecipeForm() {
   const [servings, setServings] = useState("1");
   const [cookingTime, setCookingTime] = useState("");
   const [ingredients, setIngredients] = useState([
-    { name: "", amount: "", unit: "", ingredientId: null },
+    {
+      id: generateUniqueId(),
+      name: "",
+      amount: "",
+      unit: "",
+      ingredientId: null,
+    },
   ]);
   const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
   const [activeIngredientIndex, setActiveIngredientIndex] = useState(-1);
   const [isSearching, setIsSearching] = useState(false);
   const ingredientUnits = getIngredientUnits();
   const [steps, setSteps] = useState([
-    { summary: "", detail: "", time: "", images: [] },
+    { id: generateUniqueId(), summary: "", detail: "", time: "", images: [] },
   ]);
-  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]); // Khởi tạo là mảng rỗng
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [imagePreview, setImagePreview] = useState(null);
@@ -46,6 +55,7 @@ export default function CreateRecipeForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [visibleCategoryCount] = useState(5);
+  const [ingredientSearchTimeout, setIngredientSearchTimeout] = useState(null);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -53,8 +63,18 @@ export default function CreateRecipeForm() {
       try {
         setLoadingCategories(true);
         const response = await getAllFormattedCategories();
-        if (response.data.success) {
-          setCategories(response.data.data);
+        if (response.data?.success) {
+          // Validate and transform the data structure
+          const categoriesData = response.data.data;
+          if (Array.isArray(categoriesData)) {
+            console.log("Fetched categories:", categoriesData);
+            setCategories(
+              categoriesData.filter(
+                (cat) =>
+                  cat && cat.key && cat.name && Array.isArray(cat.items)
+              )
+            );
+          }
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -106,16 +126,28 @@ export default function CreateRecipeForm() {
     // Hiển thị thông báo thành công
     toast.success(`Đã chọn nguyên liệu: ${ingredient.name}`);
   };
-
   // Xử lý thay đổi thông tin nguyên liệu
   const handleIngredientChange = (idx, field, value) => {
     const newIngredients = [...ingredients];
     newIngredients[idx][field] = value;
     setIngredients(newIngredients);
 
-    // Nếu field là name, thực hiện tìm kiếm
-    if (field === "name" && value.length > 1) {
-      handleSearchIngredient(value, idx);
+    // Nếu field là name, thực hiện tìm kiếm với debounce để giảm số lượng API calls
+    if (field === "name") {
+      if (ingredientSearchTimeout) {
+        clearTimeout(ingredientSearchTimeout);
+      }
+
+      if (value.length > 1) {
+        // Set new timeout
+        const timeoutId = setTimeout(() => {
+          handleSearchIngredient(value, idx);
+        }, 500); // Wait 500ms before searching
+
+        setIngredientSearchTimeout(timeoutId);
+      } else {
+        setIngredientSuggestions([]);
+      }
     }
   };
   const addIngredient = () => {
@@ -123,6 +155,7 @@ export default function CreateRecipeForm() {
     setIngredients([
       ...ingredients,
       {
+        id: generateUniqueId(), // Thêm ID duy nhất cho nguyên liệu mới
         name: "",
         amount: "",
         unit: "",
@@ -178,15 +211,41 @@ export default function CreateRecipeForm() {
   };
 
   const addStep = () =>
-    setSteps([...steps, { summary: "", detail: "", time: "", images: [] }]);
+    setSteps([
+      ...steps,
+      { id: generateUniqueId(), summary: "", detail: "", time: "", images: [] },
+    ]);
   const removeStep = (idx) => setSteps(steps.filter((_, i) => i !== idx));
+  const toggleCategory = (category) => {
+    // Validate input
+    if (!category || !category._id || !category.name) {
+      console.error("Invalid category object:", category);
+      return;
+    }
 
-  const toggleCategory = (categoryId) => {
-    setSelectedCategories((prev) =>
-      prev.includes(categoryId)
+    const categoryId = category._id;
+    console.log("Toggling category:", category.name, "with ID:", categoryId);
+    console.log("Current selected categories:", selectedCategories);
+
+    setSelectedCategories((prev) => {
+      // Validate current state
+      if (!Array.isArray(prev)) {
+        console.error("Invalid selectedCategories state:", prev);
+        return [categoryId];
+      }
+
+      // Check if category is already selected using exact comparison
+      const isSelected = prev.some((id) => id === categoryId);
+      console.log("Is category already selected?", isSelected);
+
+      // Create new array based on selection status
+      const newCategories = isSelected
         ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
-    );
+        : [...prev, categoryId];
+
+      console.log("New selected categories:", newCategories);
+      return newCategories;
+    });
   };
 
   const openCategoryModal = () => {
@@ -256,7 +315,7 @@ export default function CreateRecipeForm() {
           image: step.images ? step.images.map((img) => img.file) : [],
           time: step.time ? parseInt(step.time) : null,
         })),
-        categories: selectedCategories,
+        categories: selectedCategories, // Already storing category IDs now
         image: imageFile ? [imageFile] : [],
       };
 
@@ -436,16 +495,43 @@ export default function CreateRecipeForm() {
                 <div className="flex flex-wrap gap-2 py-1">
                   {selectedCategories
                     .slice(0, visibleCategoryCount)
-                    .map((category) => (
-                      <button
-                        key={category}
-                        type="button"
-                        className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-amber-500 text-white shadow-md"
-                        onClick={() => toggleCategory(category)}
-                      >
-                        {category}
-                      </button>
-                    ))}
+                    .map((categoryId, index) => {
+                      // Find the full category object by ID
+                      let categoryName = "Unknown";
+
+                      // Search through all category groups for the matching category
+                      categories.forEach((group) => {
+                        group.items.forEach((cat) => {
+                          if (cat._id === categoryId) {
+                            categoryName = cat.name;
+                          }
+                        });
+                      });
+
+                      return (
+                        <button
+                          key={categoryId}
+                          type="button"
+                          className="px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-amber-500 text-white shadow-md"
+                          onClick={() => {
+                            // Find the full category object to pass to toggleCategory
+                            let categoryObject = null;
+                            categories.forEach((group) => {
+                              group.items.forEach((cat) => {
+                                if (cat._id === categoryId) {
+                                  categoryObject = cat;
+                                }
+                              });
+                            });
+                            if (categoryObject) {
+                              toggleCategory(categoryObject);
+                            }
+                          }}
+                        >
+                          {categoryName}
+                        </button>
+                      );
+                    })}
                   {selectedCategories.length > visibleCategoryCount && (
                     <div className="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600">
                       +{selectedCategories.length - visibleCategoryCount}
@@ -504,15 +590,17 @@ export default function CreateRecipeForm() {
                             <div className="flex flex-wrap gap-2 mb-4">
                               {categoryGroup.items.map((category) => (
                                 <button
-                                  key={category.name}
+                                  key={category._id}
                                   type="button"
                                   className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                                    selectedCategories.includes(category.name)
+                                    selectedCategories.some(
+                                      (id) => id === category._id
+                                    )
                                       ? "bg-amber-500 text-white shadow-md"
                                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                                   }`}
                                   onClick={() => {
-                                    toggleCategory(category.name);
+                                    toggleCategory(category);
                                   }}
                                 >
                                   {category.metadata?.icon && (
@@ -565,7 +653,7 @@ export default function CreateRecipeForm() {
                   {" "}
                   {ingredients.map((ingredient, idx) => (
                     <div
-                      key={idx}
+                      key={`ingredient-${idx}-${ingredient.name}`}
                       className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-gray-100"
                     >
                       {" "}
@@ -652,7 +740,7 @@ export default function CreateRecipeForm() {
                                 <path
                                   className="opacity-75"
                                   fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                  d="M4 12a8 8 0 100-16 8 8 0 000 16zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                 ></path>
                               </svg>
                             </div>
@@ -727,9 +815,10 @@ export default function CreateRecipeForm() {
                 </h3>
 
                 <div className="space-y-4">
+                  {" "}
                   {steps.map((step, idx) => (
                     <div
-                      key={idx}
+                      key={`step-${idx}-${step.summary}`}
                       className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-yellow-400"
                     >
                       {" "}
@@ -831,7 +920,6 @@ export default function CreateRecipeForm() {
                       </div>
                     </div>
                   ))}
-
                   <Button
                     type="button"
                     variant="outline"
@@ -847,14 +935,6 @@ export default function CreateRecipeForm() {
           </div>
           {/* Submit Buttons */}
           <div className="flex justify-end gap-4 p-6 border-t border-gray-200">
-            <Button
-              type="button"
-              variant="outline"
-              className="px-8 py-3 text-sm font-medium border-gray-300 text-gray-700 hover:bg-gray-50"
-              disabled={isSubmitting}
-            >
-              Lưu nháp
-            </Button>
             <Button
               type="submit"
               className="px-8 py-3 text-sm font-medium bg-orange-600 hover:bg-orange-700 text-white shadow-md"

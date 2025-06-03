@@ -164,7 +164,7 @@ const Reels = () => {
       setSharePopup({
         open: true,
         videoId: currentReel._id,
-        postTitle: currentReel.title
+        postTitle: currentReel.title,
       });
 
       // Gửi thông báo khi share
@@ -333,6 +333,7 @@ const Reels = () => {
         videoId={sharePopup.videoId}
         postTitle={sharePopup.postTitle}
         onClose={() => setSharePopup({ open: false, videoId: null, postTitle: null })}
+        type="video"
       />
 
       <style jsx>{`
