@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { getFeaturedBlogs } from "@/services/blogService";
 import { Clock, Eye } from "lucide-react";
 
 export default function RelatedRecipes() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -65,12 +66,11 @@ export default function RelatedRecipes() {
     <div>
       <h3 className="font-semibold mb-6 text-lg text-gray-800">
         Bài viết nổi bật
-      </h3>
-      <div className="space-y-4">
+      </h3>      <div className="space-y-4">
         {blogs.map((blog) => (
-          <a
+          <div
             key={blog._id}
-            href={`/blogs/${blog.slug || blog._id}`}
+            onClick={() => navigate(`/blog/${blog._id}`)}
             className="flex gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group"
           >
             <div className="w-20 h-16 rounded-lg overflow-hidden flex-shrink-0">
@@ -103,7 +103,7 @@ export default function RelatedRecipes() {
                 </div>
               </div>
             </div>
-          </a>
+          </div>
         ))}
       </div>
       

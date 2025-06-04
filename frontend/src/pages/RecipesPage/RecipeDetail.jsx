@@ -17,6 +17,7 @@ import SharePopup from "@/components/common/SharePopup";
 import { checkRecipeInFavorites, toggleRecipeInFavorites } from "../../services/collectionService";
 import { toast } from "react-toastify";
 import { useAuth } from "../../context/AuthContext";
+import Loader from "../../components/loader/Loader"
 
 export default function RecipeDetail({ className }) {
   const { id } = useParams();
@@ -24,9 +25,10 @@ export default function RecipeDetail({ className }) {
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState(null);
   const [servings, setServings] = useState(1);
+  const [isLoading, setLoading] = useState(false);
   const [calculatedNutrition, setCalculatedNutrition] = useState(null);
   
-    // Calculate nutrition when recipe changes
+  // Calculate nutrition when recipe changes
   useEffect(() => {
     if (recipe && recipe.ingredients && recipe.ingredients.length > 0) {
       try {
@@ -52,6 +54,7 @@ export default function RecipeDetail({ className }) {
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
+        setLoading(true);
         // Validate if ID is a valid MongoDB ObjectId format (24 hex characters)
         const objectIdRegex = /^[0-9a-fA-F]{24}$/;
         if (!objectIdRegex.test(id)) {
@@ -86,6 +89,8 @@ export default function RecipeDetail({ className }) {
       } catch (err) {
         setError("Failed to load recipe");
         console.error("Error fetching recipe:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -93,6 +98,7 @@ export default function RecipeDetail({ className }) {
       fetchRecipe();
     }
   }, [id]);
+
   // Recalculate nutrition when recipe or servings change
   useEffect(() => {
     if (recipe && recipe.ingredients && recipe.ingredients.length > 0) {
@@ -161,6 +167,9 @@ export default function RecipeDetail({ className }) {
       toast.error("Không thể cập nhật yêu thích");
     }
   };
+  if (isLoading) {
+    return <Loader />;
+  }
 
   if (error || !recipe) {
     return (

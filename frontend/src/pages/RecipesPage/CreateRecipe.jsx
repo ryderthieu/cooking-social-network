@@ -20,7 +20,7 @@ import {
 } from "@/services/ingredientService";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useCloudinary } from "../../context/CloudinaryContext"
+import { useCloudinary } from "../../context/CloudinaryContext";
 
 // Helper function to generate unique IDs
 const generateUniqueId = () => `id_${Math.random().toString(36).substr(2, 9)}`;
@@ -39,7 +39,8 @@ export default function CreateRecipeForm() {
       unit: "",
       ingredientId: null,
     },
-  ]);  const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
+  ]);
+  const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
   const [activeIngredientIndex, setActiveIngredientIndex] = useState(-1);
   const [isSearching, setIsSearching] = useState(false);
   const [steps, setSteps] = useState([
@@ -47,36 +48,39 @@ export default function CreateRecipeForm() {
   ]);
   const [selectedCategories, setSelectedCategories] = useState([]); // Khởi tạo là mảng rỗng
   const [categories, setCategories] = useState([]);
-  const [loadingCategories, setLoadingCategories] = useState(true); 
+  const [loadingCategories, setLoadingCategories] = useState(true);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [visibleCategoryCount] = useState(5);  const [ingredientSearchTimeout, setIngredientSearchTimeout] = useState(null);
+  const [visibleCategoryCount] = useState(5);
+  const [ingredientSearchTimeout, setIngredientSearchTimeout] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { uploadImage } = useCloudinary();
 
   // Tạo danh sách đơn vị động bao gồm cả đơn vị từ database
   const getDynamicIngredientUnits = (currentIngredient) => {
     const standardUnits = getIngredientUnits();
-    
+
     // Nếu nguyên liệu có đơn vị từ database và không có trong danh sách chuẩn
     if (currentIngredient?.unit && currentIngredient.ingredientId) {
-      const unitExists = standardUnits.some(unit => unit.value === currentIngredient.unit);
+      const unitExists = standardUnits.some(
+        (unit) => unit.value === currentIngredient.unit
+      );
       if (!unitExists) {
         return [
           { value: currentIngredient.unit, label: currentIngredient.unit },
-          ...standardUnits
+          ...standardUnits,
         ];
       }
     }
-    
+
     return standardUnits;
-  };  
-  // Memoized handlers to prevent re-renders and focus loss
-  const handleDescriptionChange = useCallback((e) => {
+  };
+
+  const handleDescriptionChange = (e) => {
     setDescription(e.target.value);
-  }, []);
+  };
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -167,10 +171,10 @@ export default function CreateRecipeForm() {
       }
 
       if (value.length >= 1) {
-       // Set new timeout with appropriate delay
+        // Set new timeout with appropriate delay
         const timeoutId = setTimeout(() => {
           handleSearchIngredient(value, idx);
-        }, 200); 
+        }, 200);
 
         setIngredientSearchTimeout(timeoutId);
       } else {
@@ -299,45 +303,75 @@ export default function CreateRecipeForm() {
   const removeImage = () => {
     setImagePreview(null);
     setImageFile(null);
-  };  
-  
-  const handleSubmit = async (e) => {
+  };  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    try {
-      // Validate required fields
-      if (!recipeName.trim()) {
-        toast.error("Vui lòng nhập tên món ăn");
-        return;
-      }
+    console.log("🚀 Starting recipe creation...");
+    console.log("📝 Form data validation:");
+    console.log("- Recipe name:", recipeName);
+    console.log("- Description:", description);
+    console.log("- Ingredients:", ingredients);
+    console.log("- Steps:", steps);
+    console.log("- Selected categories:", selectedCategories);
+    console.log("- Image file:", imageFile);
 
-      if (!description.trim()) {
-        toast.error("Vui lòng nhập mô tả món ăn");
+    try {      // Validate required fields
+      console.log("✅ Starting validation...");
+      
+      if (!recipeName.trim()) {
+        console.log("❌ Recipe name validation failed");
+        toast.error("Vui lòng nhập tên món ăn");
+        setIsSubmitting(false);
         return;
-      }
+      }      // Description is now optional - removed validation
+      // if (!description.trim()) {
+      //   console.log("❌ Description validation failed");
+      //   toast.error("Vui lòng nhập mô tả món ăn");
+      //   setIsSubmitting(false);
+      //   return;
+      // }
 
       if (ingredients.some((ing) => !ing.name.trim() || !ing.amount.trim())) {
+        console.log("❌ Ingredients validation failed");
+        console.log("Invalid ingredients:", ingredients.filter(ing => !ing.name.trim() || !ing.amount.trim()));
         toast.error("Vui lòng điền đầy đủ thông tin nguyên liệu");
+        setIsSubmitting(false);
         return;
       }
+      
       if (steps.some((step) => !step.detail.trim())) {
+        console.log("❌ Steps validation failed");
+        console.log("Invalid steps:", steps.filter(step => !step.detail.trim()));
         toast.error("Vui lòng điền đầy đủ thông tin các bước thực hiện");
+        setIsSubmitting(false);
         return;
       }
 
-      // Upload main recipe image to Cloudinary first
+      console.log("✅ All validation passed!");      // Upload main recipe image to Cloudinary first
+      console.log("📸 Starting image uploads...");
       let mainImageUrl = null;
       if (imageFile) {
+        console.log("📤 Uploading main recipe image:", imageFile);
         toast.info("Đang tải ảnh chính lên...");
-        const uploadResult = await uploadImage(imageFile, "recipes");
-        mainImageUrl = uploadResult.secure_url;
+        try {
+          const uploadResult = await uploadImage(imageFile, "recipes");
+          console.log("✅ Main image upload successful:", uploadResult);
+          mainImageUrl = uploadResult.secure_url;
+        } catch (error) {
+          console.error("❌ Main image upload failed:", error);
+          throw new Error("Lỗi khi tải ảnh chính: " + error.message);
+        }
+      } else {
+        console.log("ℹ️ No main image to upload");
       }
 
       // Upload step images to Cloudinary
-      const stepsData = [];
-      for (let i = 0; i < steps.length; i++) {
+      console.log("🔄 Processing steps and uploading step images...");
+      const stepsData = [];      for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
+        console.log(`🔄 Processing step ${i + 1}:`, step);
+        
         const stepData = {
           step: `${
             step.summary ? step.summary.trim() + ": " : ""
@@ -348,25 +382,36 @@ export default function CreateRecipeForm() {
 
         // Upload step images to Cloudinary
         if (step.images && step.images.length > 0) {
+          console.log(`📤 Uploading ${step.images.length} images for step ${i + 1}`);
           toast.info(`Đang tải ảnh bước ${i + 1}...`);
+          
           for (const img of step.images) {
-            const uploadResult = await uploadImage(img.file, "recipes/steps");
-            stepData.images.push(uploadResult.secure_url);
+            try {
+              console.log("📤 Uploading step image:", img);
+              const uploadResult = await uploadImage(img.file, "recipes/steps");
+              console.log("✅ Step image upload successful:", uploadResult);
+              stepData.images.push(uploadResult.secure_url);
+            } catch (error) {
+              console.error(`❌ Step image upload failed for step ${i + 1}:`, error);
+              throw new Error(`Lỗi khi tải ảnh bước ${i + 1}: ` + error.message);
+            }
           }
         }
 
         stepsData.push(stepData);
       }
 
+      console.log("✅ All step processing completed:", stepsData);
+
       // Prepare recipe data
-      const recipeData = {
+      console.log("📋 Preparing recipe data...");      const recipeData = {
         name: recipeName.trim(),
-        description: description.trim(),
+        description: description.trim() || "", // Allow empty description
         servings: parseInt(servings) || 1,
-        time: parseInt(cookingTime) || 30,
-        ingredients: ingredients.map((ing) => ({
+        time: parseInt(cookingTime) || 30,ingredients: ingredients.map((ing) => ({
           name: ing.name.trim(),
-          quantity: parseFloat(ing.amount) || 1,
+          amount: parseFloat(ing.amount) || 1, // Use 'amount' to match form field
+          quantity: parseFloat(ing.amount) || 1, // Keep 'quantity' for backend compatibility
           unit: ing.unit || "",
           ingredientId: ing.ingredientId || null,
         })),
@@ -375,21 +420,38 @@ export default function CreateRecipeForm() {
         image: mainImageUrl ? [mainImageUrl] : [], // Send as array
       };
 
-      console.log("Submitting recipe data:", recipeData);
+      console.log("📋 Final recipe data to submit:", recipeData);
 
+      console.log("🌐 Calling createRecipe API...");
       const response = await createRecipe(recipeData);
+      console.log("🌐 API Response received:", response);
 
-      if (response.data.success) {
+      if (response?.data?.success) {
+        console.log("✅ Recipe creation successful!");
+        console.log("📍 Recipe ID:", response.data.data._id);
         toast.success("Công thức đã được tạo thành công!");
         // Navigate to recipe detail or recipes list
         navigate(`/recipes/${response.data.data._id}`);
+      } else {
+        console.log("❌ Recipe creation failed - Unexpected response structure");
+        console.log("Response:", response);
+        throw new Error("Phản hồi không hợp lệ từ server");
+      }    } catch (error) {
+      console.error("❌ Recipe creation failed:");
+      console.error("Error details:", error);
+      console.error("Error message:", error.message);
+      console.error("Error response:", error.response);
+      console.error("Error stack:", error.stack);
+      
+      if (error.response?.data) {
+        console.error("Server error response:", error.response.data);
       }
-    } catch (error) {
-      console.error("Error creating recipe:", error);
+      
       toast.error(
-        error.response?.data?.message || "Có lỗi xảy ra khi tạo công thức"
+        error.response?.data?.message || error.message || "Có lỗi xảy ra khi tạo công thức"
       );
     } finally {
+      console.log("🏁 Recipe creation process ended");
       setIsSubmitting(false);
     }
   };
@@ -472,24 +534,24 @@ export default function CreateRecipeForm() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
                   required
                 />
-              </div>              <div>
+              </div>{" "}
+              <div>
                 <label
                   htmlFor="description"
                   className="block text-base font-medium text-gray-700 mb-2"
                 >
                   Mô tả món ăn
-                </label>                <textarea
-                  key="recipe-description"
+                </label>
+                <textarea
                   id="description"
                   value={description}
                   onChange={handleDescriptionChange}
                   placeholder="Mô tả ngắn gọn về món ăn của bạn..."
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
                   required
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
                 />
               </div>
-
               {/* Quick Info */}{" "}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -599,7 +661,8 @@ export default function CreateRecipeForm() {
                     className="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center transition-all duration-200"
                   >
                     <Plus className="w-4 h-4" />
-                  </button>                </div>{" "}
+                  </button>{" "}
+                </div>{" "}
                 <CategoryModal
                   isOpen={showCategoryModal}
                   onClose={closeCategoryModal}
@@ -611,7 +674,6 @@ export default function CreateRecipeForm() {
               </div>
             </div>
           </div>{" "}
-
           {/* Content Sections */}
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Ingredients Section */}
@@ -627,10 +689,9 @@ export default function CreateRecipeForm() {
                 <div className="space-y-3">
                   {ingredients.map((ingredient, idx) => (
                     <div
-                      key={`ingredient-${idx}-${ingredient.name}`}
+                      key={ingredient.id}
                       className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-gray-100"
                     >
-                      {" "}
                       <div className="flex-1">
                         <div className="relative">
                           <input
@@ -649,7 +710,6 @@ export default function CreateRecipeForm() {
                                 ? "border-green-500 bg-green-50"
                                 : "border-gray-300"
                             }`}
-                            required
                           />
 
                           {ingredient.ingredientId && (
@@ -736,7 +796,8 @@ export default function CreateRecipeForm() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           required
                         />
-                      </div>                      <div className="w-24">
+                      </div>{" "}
+                      <div className="w-24">
                         <select
                           value={ingredient.unit}
                           onChange={(e) =>
@@ -748,7 +809,12 @@ export default function CreateRecipeForm() {
                               ? "border-green-500 bg-green-50 text-gray-600 cursor-not-allowed"
                               : "border-gray-300"
                           }`}
-                          title={ingredient.ingredientId ? "Đơn vị được khóa cho nguyên liệu từ database" : ""}                        >
+                          title={
+                            ingredient.ingredientId
+                              ? "Đơn vị được khóa cho nguyên liệu từ database"
+                              : ""
+                          }
+                        >
                           <option value="">Đơn vị</option>
                           {getDynamicIngredientUnits(ingredient).map((unit) => (
                             <option key={unit.value} value={unit.value}>
@@ -796,7 +862,7 @@ export default function CreateRecipeForm() {
                   {" "}
                   {steps.map((step, idx) => (
                     <div
-                      key={`step-${idx}-${step.summary}`}
+                      key={step.id}
                       className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-yellow-400"
                     >
                       {" "}

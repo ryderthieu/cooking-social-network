@@ -30,7 +30,6 @@ export default function SavedRecipes() {
   const [collectionDescription, setCollectionDescription] = useState("");
   const [collections, setCollections] = useState([]);
   const [currentRecipes, setCurrentRecipes] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Modal states for collection options
@@ -51,7 +50,6 @@ export default function SavedRecipes() {
   // Load user collections on component mount
   const loadUserCollections = useCallback(async () => {
     try {
-      setLoading(true);
       const response = await getUserCollections();
 
       if (response.success) {
@@ -74,8 +72,6 @@ export default function SavedRecipes() {
       setError("Vui lòng đăng nhập để xem được danh sách công thức đã lưu.");
       toast.error("Vui lòng đăng nhập để xem được danh sách công thức đã lưu.");
       console.error("Error loading collections:", error);
-    } finally {
-      setLoading(false);
     }
   }, [activeTab]);
 
@@ -362,16 +358,7 @@ export default function SavedRecipes() {
         </div>
         {/* Recipe Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {loading ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-gray-500 text-lg">Đang tải...</p>
-            </div>
-          ) : error ? (
-            <div className="col-span-full text-center py-12">
-              <p className="text-red-500 text-lg">{error}</p>
-            </div>          
-            
-          ) : getFilteredRecipes().length > 0 ? (
+          { getFilteredRecipes().length > 0 ? (
             getFilteredRecipes().map((recipe) => {
               const activeCollection = collections.find((c) => c._id === activeTab);
               const isMyRecipesCollection = activeCollection?.defaultType === "created";

@@ -33,44 +33,52 @@ export default function InstructionsSection({ recipe }) {
         <div className="space-y-8">
           {recipe.steps.map((instruction, index) => {
             // Handle both single image (string) and multiple images (array)
-            const images = instruction?.image 
-              ? Array.isArray(instruction.image) 
-                ? instruction.image.slice(0, 4) // Limit to 4 images
+            const images = instruction?.image
+              ? Array.isArray(instruction.image)
+                ? instruction.image.slice(0, 4) 
                 : [instruction.image]
               : [];
 
             return (
-              <div
-                key={index}
-                className="border-l-4 border-orange-400 pl-6"
-              >                <h3 className="font-semibold mb-3 text-lg text-gray-800">
+              <div key={index} className="border-l-4 border-orange-400 pl-6">
+                <h3 className="font-semibold mb-3 text-lg text-gray-800">
                   Bước {index + 1}: {instruction.step}
                 </h3>
                 <div className="text-gray-600 mb-4 leading-relaxed">
                   {instruction?.description ? (
-                    instruction.description.split('\n').map((paragraph, pIndex) => (
-                      paragraph.trim() && (
-                        <p key={pIndex} className="mb-2 last:mb-0">
-                          {paragraph.trim()}
-                        </p>
-                      )
-                    ))
+                    instruction.description.split("\n").map(
+                      (paragraph, pIndex) =>
+                        paragraph.trim() && (
+                          <p key={pIndex} className="mb-2 last:mb-0">
+                            {paragraph.trim()}
+                          </p>
+                        )
+                    )
                   ) : (
                     <p></p>
                   )}
                 </div>
-                
                 {images.length > 0 && (
-                  <div className={`grid ${getImageLayout(images.length)} gap-4`}>
+                  <div
+                    className={`grid ${
+                      images.length === 1
+                        ? "grid-cols-1"
+                        : getImageLayout(images.length)
+                    } gap-4`}
+                  >
                     {images.map((image, imgIndex) => (
                       <div
                         key={imgIndex}
-                        className={`rounded-lg overflow-hidden shadow-md ${getImageStyle(images.length, imgIndex)}`}
+                        className={`rounded-lg overflow-hidden shadow-md ${
+                          images.length === 1
+                            ? "w-2/3"
+                            : getImageStyle(images.length, imgIndex)
+                        }`}
                       >
                         <img
                           src={image}
                           alt={`Bước ${index + 1} - Hình ${imgIndex + 1}`}
-                          className="w-full h-100 object-cover hover:scale-105 transition-transform duration-300"
+                          className="w-full h-[450px] object-cover hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     ))}

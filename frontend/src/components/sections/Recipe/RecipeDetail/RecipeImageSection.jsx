@@ -8,7 +8,7 @@ export default function RecipeImageSection({ recipe }) {
           <img
             src={recipe?.image?.[0] || "/placeholder.svg?height=400&width=600"}
             alt={recipe?.name || "Recipe Image"}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
           />
         </div>
       </div>
