@@ -388,9 +388,7 @@ const editRecipe = async (req, res) => {
         message: "Không tìm thấy công thức",
         error: "Công thức không tồn tại",
       });
-    }
-
-    // Process ingredients if provided
+    }    // Process ingredients if provided
     if (updates.ingredients && Array.isArray(updates.ingredients)) {
       const Ingredient = require('../models/ingredient');
       const processedIngredients = [];
@@ -446,6 +444,27 @@ const editRecipe = async (req, res) => {
       }
       
       updates.ingredients = processedIngredients;
+    }
+
+    // Process steps with Cloudinary image URLs if provided
+    if (updates.steps && Array.isArray(updates.steps)) {
+      const processedSteps = updates.steps.map((step, index) => {
+        const stepData = {
+          step: step.step || `Bước ${index + 1}`,
+          description: step.description || '',
+          time: step.time || null,
+          image: []
+        };
+
+        // Add step images from Cloudinary URLs
+        if (step.images && Array.isArray(step.images)) {
+          stepData.image = step.images; // step.images already contains Cloudinary URLs
+        }
+
+        return stepData;
+      });
+      
+      updates.steps = processedSteps;
     }
 
     if (updates.name) {

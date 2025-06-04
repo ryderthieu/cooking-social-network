@@ -388,8 +388,8 @@ const getAllFormattedCategories = async (req, res) => {
     const groupedCategories = categories.reduce((acc, category) => {
       if (!acc[category.type]) {
         acc[category.type] = [];
-      }
-      acc[category.type].push({
+      }      acc[category.type].push({
+        _id: category._id,
         name: category.name,
         slug: category.slug,
         count: category.recipeCount,

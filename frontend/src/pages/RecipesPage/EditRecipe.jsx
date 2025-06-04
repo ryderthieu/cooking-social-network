@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BreadCrumb from "@/components/common/BreadCrumb";
+import CategoryModal from "@/components/common/CategoryModal";
 import { getRecipeById, updateRecipe } from "@/services/recipeService";
 import { getAllFormattedCategories } from "@/services/categoryService";
 import {
@@ -29,15 +30,6 @@ export default function EditRecipeForm() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { uploadImage } = useCloudinary();
-
-  // Enhanced debug logs
-  console.log("=== EditRecipe Component Debug ===");
-  console.log("Component mounted at:", new Date().toISOString());
-  console.log("Recipe ID from params:", id);
-  console.log("Current user:", user);
-  console.log("Auth loading state:", authLoading);
-  console.log("User ID:", user?._id);
-  console.log("===================================");
 
   // State for form data
   const [recipeName, setRecipeName] = useState("");
@@ -60,7 +52,6 @@ export default function EditRecipeForm() {
   ]);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [categories, setCategories] = useState([]);
-  // const [loadingCategories, setLoadingCategories] = useState(true);
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,19 +74,10 @@ export default function EditRecipeForm() {
         console.log("Recipe response:", response);
         if (response.status === 200 && response.data.success) {
           const recipe = response.data.data;
-          console.log("Recipe data:", recipe);          // Check if current user is the author
-          console.log("=== AUTHOR CHECK DEBUG ===");
-          console.log("Recipe author:", recipe.author);
-          console.log("Recipe author type:", typeof recipe.author);
-          console.log("Current user:", user);
-          console.log("Current user ID:", user?._id);
-          console.log("Current user ID type:", typeof user?._id);
-          console.log("========================");
+          console.log("Recipe data:", recipe);          
           
           // Handle both populated and non-populated author
           const authorId = typeof recipe.author === 'object' ? recipe.author._id : recipe.author;
-          console.log("Author ID extracted:", authorId);
-          console.log("Comparison result:", authorId === user?._id);
           
           if (authorId !== user?._id) {
             console.log("❌ User is not author. Recipe author ID:", authorId, "Current user:", user?._id);
@@ -104,14 +86,7 @@ export default function EditRecipeForm() {
             return;
           } else {
             console.log("✅ User is the author, proceeding with edit form");
-          }          // Populate form with recipe data
-          console.log("=== POPULATING FORM DATA ===");
-          console.log("Recipe title/name:", recipe.title || recipe.name);
-          console.log("Recipe description:", recipe.description);
-          console.log("Recipe servings:", recipe.servings);          console.log("Recipe cookingTime:", recipe.cookingTime);
-          console.log("Recipe time:", recipe.time);
-          console.log("Recipe cookingTime type:", typeof recipe.cookingTime);
-          console.log("Recipe time type:", typeof recipe.time);
+          }          
           
           setRecipeName(recipe.title || recipe.name || "");
           setDescription(recipe.description || "");
@@ -121,12 +96,12 @@ export default function EditRecipeForm() {
           
           console.log("After setting state:");
           console.log("cookingTime state will be:", (recipe.time || recipe.cookingTime)?.toString() || "");
-          
-          // Set image
+            // Set image
           if (recipe.image) {
             const imageUrl = Array.isArray(recipe.image) ? recipe.image[0] : recipe.image;
             setImagePreview(imageUrl);
-          }          // Set ingredients
+            setImageFile(null); // Ensure no file is set initially for existing images
+          }// Set ingredients
           if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
             const formattedIngredients = recipe.ingredients.map((ing, index) => ({
               id: `ingredient-${index}`,
@@ -178,40 +153,22 @@ export default function EditRecipeForm() {
       } finally {
         setLoadingRecipe(false);
       }
-    };    console.log("=== useEffect Debug ===");
-    console.log("useEffect called at:", new Date().toISOString());
-    console.log("ID:", id);
-    console.log("User:", user);
-    console.log("Auth loading:", authLoading);
-    console.log("Conditions check:");
-    console.log("  - Has ID:", !!id);
-    console.log("  - Has User:", !!user);
-    console.log("  - Auth Still Loading:", authLoading);
-    
-    if (authLoading) {
-      console.log("Auth still loading, waiting...");
-      return;
-    }
+    };    
+
     
     if (id && user) {
-      console.log("✅ Both ID and user exist, loading recipe...");
       loadRecipe();
     } else {
-      console.log("❌ Missing ID or user. Taking action...");
-      console.log("Missing ID or user. ID:", id, "User:", user);
       if (!user) {
-        console.log("🚫 No user found, user needs to login - setting loading to false");
         setLoadingRecipe(false);
       } else if (!id) {
-        console.log("🔄 No recipe ID, redirecting to recipes page");
         navigate("/recipes");
       } else {
-        console.log("🤔 Unknown state, setting loading to false");
         setLoadingRecipe(false);
       }
     }
-    console.log("======================");
   }, [id, user, navigate, authLoading]);
+
   // Load categories
   useEffect(() => {
     const fetchCategories = async () => {
@@ -339,7 +296,6 @@ export default function EditRecipeForm() {
       return newCategories;
     });
   };
-
   // Handle image upload
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -350,10 +306,50 @@ export default function EditRecipeForm() {
       reader.readAsDataURL(file);
     }
   };
-
+  
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
+    // Reset file input
+    const fileInput = document.getElementById('image-upload');
+    if (fileInput) fileInput.value = '';
+  };
+
+  // Handle step image upload
+  const handleStepImageUpload = (stepIndex, files) => {
+    const fileArray = Array.from(files).slice(0, 4); // Limit to 4 images
+    const newSteps = [...steps];
+
+    if (!newSteps[stepIndex].images) {
+      newSteps[stepIndex].images = [];
+    }
+
+    // Limit total images to 4
+    const remainingSlots = 4 - (newSteps[stepIndex].images?.length || 0);
+    if (remainingSlots <= 0) {
+      toast.error("Tối đa 4 hình ảnh cho mỗi bước");
+      return;
+    }
+
+    const newFiles = fileArray.slice(0, remainingSlots);
+
+    newFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        newSteps[stepIndex].images.push({
+          file: file,
+          preview: e.target.result,
+        });
+        setSteps([...newSteps]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeStepImage = (stepIndex, imageIndex) => {
+    const newSteps = [...steps];
+    newSteps[stepIndex].images.splice(imageIndex, 1);
+    setSteps(newSteps);
   };
 
   // Handle form submission
@@ -394,28 +390,62 @@ export default function EditRecipeForm() {
       if (validSteps.length === 0) {
         toast.error("Vui lòng thêm ít nhất một bước thực hiện");
         return;
-      }
-
-      // Upload image if a new one is selected
-      let imageUrl = imagePreview;
+      }      // Upload image if a new one is selected
+      let imageUrl = null;
       if (imageFile) {
+        // Upload new image file
         const uploadResult = await uploadImage(imageFile);
         imageUrl = uploadResult.secure_url;
-      }      // Prepare recipe data
+      } else if (imagePreview && !imageFile) {
+        // Keep existing image if no new file is selected and preview exists
+        imageUrl = imagePreview;
+      }
+      // If imagePreview is null (image was removed), imageUrl will be null
+
+      // Upload step images to Cloudinary
+      const processedSteps = await Promise.all(
+        validSteps.map(async (step) => {
+          const processedImages = [];
+          
+          if (step.images && step.images.length > 0) {
+            for (const image of step.images) {
+              if (image.file) {
+                // Upload new image file to Cloudinary
+                try {
+                  const uploadResult = await uploadImage(image.file);
+                  processedImages.push(uploadResult.secure_url);
+                } catch (error) {
+                  console.error("Error uploading step image:", error);
+                  toast.error(`Lỗi tải ảnh bước: ${error.message}`);
+                }
+              } else if (typeof image === 'string') {
+                // Keep existing image URL
+                processedImages.push(image);
+              } else if (image.preview && !image.file) {
+                // Handle existing images that might be in preview format
+                processedImages.push(image.preview);
+              }
+            }
+          }
+
+          return {
+            step: step.summary.trim(), // Changed from 'summary' to 'step' to match backend model
+            description: step.detail.trim(), // Changed from 'detail' to 'description' to match backend model  
+            images: processedImages,
+          };
+        })
+      );      // Prepare recipe data
       const recipeData = {
         name: recipeName.trim(), // Changed from 'title' to 'name' to match backend model
         description: description.trim(),
-        image: imageUrl ? [imageUrl] : [],        ingredients: validIngredients.map((ing) => ({
+        image: imageUrl ? [imageUrl] : [], // Send empty array if no image
+        ingredients: validIngredients.map((ing) => ({
           name: ing.name.trim(),
           amount: parseFloat(ing.amount) || 1, // Changed default from 0 to 1 to avoid validation issues
           unit: ing.unit.trim(),
           ingredientId: ing.ingredientId,
         })),
-        steps: validSteps.map((step) => ({ // Changed from 'instructions' to 'steps' to match backend model
-          step: step.summary.trim(), // Changed from 'summary' to 'step' to match backend model
-          description: step.detail.trim(), // Changed from 'detail' to 'description' to match backend model  
-          images: step.images || [],
-        })),
+        steps: processedSteps, // Use processed steps with uploaded images
         time: parseInt(cookingTime), // Changed from 'cookingTime' to 'time' to match backend model
         servings: parseInt(servings) || 1,
         categories: selectedCategories,
@@ -508,7 +538,7 @@ export default function EditRecipeForm() {
                       <button
                         type="button"
                         onClick={removeImage}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors"
+                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 transition-colors z-[9]"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -545,7 +575,7 @@ export default function EditRecipeForm() {
             <div className="lg:col-span-2 space-y-6">
               <div>
                 <label className="block text-base font-medium text-gray-700 mb-2">
-                  Tên công thức *
+                  Tên công thức <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -555,11 +585,12 @@ export default function EditRecipeForm() {
                   placeholder="Nhập tên món ăn"
                   required
                 />
-              </div>              <div>
+              </div>              
+              <div>
                 <label className="block text-base font-medium text-gray-700 mb-2">
-                  Mô tả công thức *
-                </label>                <textarea
-                  key="edit-recipe-description"
+                  Mô tả công thức <span className="text-red-500">*</span>
+                </label>                
+                <textarea
                   value={description}
                   onChange={handleDescriptionChange}
                   rows="4"
@@ -602,7 +633,7 @@ export default function EditRecipeForm() {
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">
                     <Clock className="w-4 h-4 inline mr-1" />
-                    Thời gian nấu (phút) *
+                    Thời gian nấu (phút) <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="number"
@@ -672,56 +703,16 @@ export default function EditRecipeForm() {
                     className="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center transition-all duration-200"
                   >
                     <Plus className="w-4 h-4" />
-                  </button>
-                </div>
-
+                  </button>                </div>                
                 {/* Category Modal */}
-                {showCategoryModal && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg w-full max-w-2xl max-h-[80vh] overflow-y-auto">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-semibold text-gray-800">
-                          Chọn danh mục
-                        </h3>
-                        <button
-                          type="button"
-                          onClick={() => setShowCategoryModal(false)}
-                          className="text-gray-500 hover:text-gray-700"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        {categories.map((categoryGroup) => (
-                          <div key={categoryGroup.key}>
-                            <h4 className="font-medium text-gray-800 mb-3 border-b pb-2">
-                              {categoryGroup.name}
-                            </h4>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {categoryGroup.items.map((category) => (
-                                <button
-                                  key={category._id}
-                                  type="button"
-                                  className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                                    selectedCategories.some(
-                                      (id) => id === category._id
-                                    )
-                                      ? "bg-amber-500 text-white shadow-md"
-                                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                  }`}
-                                  onClick={() => toggleCategory(category)}
-                                >
-                                  {category.name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                <CategoryModal
+                  isOpen={showCategoryModal}
+                  onClose={() => setShowCategoryModal(false)}
+                  categories={categories}
+                  selectedCategories={selectedCategories}
+                  onToggleCategory={toggleCategory}
+                  onClearAll={() => setSelectedCategories([])}
+                />
               </div>
             </div>
           </div>
@@ -740,7 +731,7 @@ export default function EditRecipeForm() {
                 <div className="space-y-3">
                   {ingredients.map((ingredient, idx) => (
                     <div
-                      key={`ingredient-${idx}-${ingredient.name}`}
+                      key={`ingredient-${idx}`}
                       className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm border border-gray-100"
                     >
                       <div className="flex-1">
@@ -763,28 +754,32 @@ export default function EditRecipeForm() {
                             }`}
                             required
                           />
-                          
-                          {/* Ingredient suggestions dropdown */}
+                            {/* Ingredient suggestions dropdown */}
                           {ingredientSuggestions.length > 0 &&
                             activeIngredientIndex === idx && (
-                              <div className="absolute top-full left-0 right-0 z-10 bg-white border border-gray-300 rounded-b-md max-h-40 overflow-y-auto shadow-lg">
+                              <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-b-md max-h-40 overflow-y-auto shadow-lg">
                                 {ingredientSuggestions.map((suggestion) => (
                                   <button
                                     key={suggestion._id}
                                     type="button"
-                                    className="w-full text-left px-3 py-2 hover:bg-gray-100 transition-colors"
+                                    className="w-full text-left px-3 py-2 hover:bg-gray-100 transition-colors border-b border-gray-100 last:border-b-0"
                                     onClick={() =>
                                       handleSelectIngredient(suggestion, idx)
                                     }
                                   >
-                                    <div className="flex justify-between">
-                                      <span>{suggestion.name}</span>
+                                    <div className="flex justify-between items-center">
+                                      <span className="font-medium text-gray-800">{suggestion.name}</span>
                                       {suggestion.unit && (
-                                        <span className="text-gray-500 text-xs">
-                                          ({suggestion.unit})
+                                        <span className="text-gray-500 text-xs bg-gray-100 px-2 py-1 rounded">
+                                          {suggestion.unit}
                                         </span>
                                       )}
                                     </div>
+                                    {suggestion.nutrition && (
+                                      <div className="text-xs text-gray-500 mt-1">
+                                        {suggestion.nutrition.calories && `${suggestion.nutrition.calories} cal/100g`}
+                                      </div>
+                                    )}
                                   </button>
                                 ))}
                               </div>
@@ -899,7 +894,7 @@ export default function EditRecipeForm() {
                 <div className="space-y-4">
                   {steps.map((step, idx) => (
                     <div
-                      key={`step-${idx}-${step.summary}`}
+                      key={`step-${idx}`}
                       className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-yellow-400"
                     >
                       <div className="flex items-start gap-3">
@@ -916,8 +911,7 @@ export default function EditRecipeForm() {
                             }
                             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent font-medium"
                             required
-                          />
-                          <textarea
+                          />                          <textarea
                             placeholder="Mô tả chi tiết cách thực hiện..."
                             value={step.detail}
                             onChange={(e) =>
@@ -926,6 +920,55 @@ export default function EditRecipeForm() {
                             rows="3"
                             className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           />
+                          
+                          {/* Step Images */}
+                          <div className="mt-3">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Hình ảnh bước (tùy chọn)
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              {step.images &&
+                                step.images.map((image, imageIdx) => (
+                                  <div
+                                    key={imageIdx}
+                                    className="relative w-20 h-20"
+                                  >
+                                    <img
+                                      src={image.preview || image}
+                                      alt={`Step ${idx + 1} image ${imageIdx + 1}`}
+                                      className="w-full h-full object-cover rounded-md border border-gray-300"
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        removeStepImage(idx, imageIdx)
+                                      }
+                                      className="absolute -top-1 -right-1 p-1 bg-red-500 text-white rounded-full shadow-sm hover:bg-red-600 transition-colors"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                ))}
+
+                              {(!step.images || step.images.length < 4) && (
+                                <label className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors">
+                                  <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) =>
+                                      handleStepImageUpload(idx, e.target.files)
+                                    }
+                                    className="hidden"
+                                  />
+                                  <ImageIcon className="w-6 h-6 text-gray-400" />
+                                  <span className="text-xs text-gray-500 mt-1">
+                                    {step.images?.length || 0}/4
+                                  </span>
+                                </label>
+                              )}
+                            </div>
+                          </div>
                         </div>
                         <button
                           type="button"

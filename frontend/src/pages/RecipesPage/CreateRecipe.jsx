@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BreadCrumb from "@/components/common/BreadCrumb";
+import CategoryModal from "@/components/common/CategoryModal";
 import { createRecipe } from "@/services/recipeService";
 import { getAllFormattedCategories } from "@/services/categoryService";
 import {
@@ -598,97 +599,15 @@ export default function CreateRecipeForm() {
                     className="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center transition-all duration-200"
                   >
                     <Plus className="w-4 h-4" />
-                  </button>
-                </div>{" "}
-                {showCategoryModal && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center overflow-hidden">
-                    <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto border border-gray-50">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-medium text-gray-900">
-                          Tìm kiếm danh mục
-                        </h3>
-                        <button
-                          type="button"
-                          onClick={closeCategoryModal}
-                          className="p-2 text-gray-400 hover:text-gray-600 bg-gray-100 transition-colors rounded-full hover:bg-gray-200"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="mb-4 relative">
-                        <input
-                          type="text"
-                          placeholder="Tìm kiếm danh mục..."
-                          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                        />
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg
-                            className="h-5 w-5 text-gray-400"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        {categories.map((categoryGroup) => (
-                          <div key={categoryGroup.key}>
-                            <h4 className="font-medium text-gray-800 mb-3 border-b pb-2">
-                              {categoryGroup.name}
-                            </h4>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {categoryGroup.items.map((category) => (
-                                <button
-                                  key={category._id}
-                                  type="button"
-                                  className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                                    selectedCategories.some(
-                                      (id) => id === category._id
-                                    )
-                                      ? "bg-amber-500 text-white shadow-md"
-                                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                  }`}
-                                  onClick={() => {
-                                    toggleCategory(category);
-                                  }}
-                                >
-                                  {category.metadata?.icon && (
-                                    <span className="mr-1">
-                                      {category.metadata.icon}
-                                    </span>
-                                  )}
-                                  {category.name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>{" "}
-                      <div className="mt-6 flex justify-end gap-3">
-                        <button
-                          type="button"
-                          onClick={closeCategoryModal}
-                          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                        >
-                          Hủy
-                        </button>
-                        <button
-                          type="button"
-                          onClick={closeCategoryModal}
-                          className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium"
-                        >
-                          Áp dụng
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  </button>                </div>{" "}
+                <CategoryModal
+                  isOpen={showCategoryModal}
+                  onClose={closeCategoryModal}
+                  categories={categories}
+                  selectedCategories={selectedCategories}
+                  onToggleCategory={toggleCategory}
+                  onClearAll={() => setSelectedCategories([])}
+                />
               </div>
             </div>
           </div>{" "}
