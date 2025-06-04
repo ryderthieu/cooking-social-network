@@ -1,23 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { Clock, Heart, MoreVertical } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Clock, Heart, MoreVertical, Edit, Trash2 } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getUserById } from "../../../services/userService";
 import {
   toggleRecipeInFavorites,
   checkRecipeInFavorites,
 } from "../../../services/collectionService";
+import { deleteRecipe } from "../../../services/recipeService";
 import { useAuth } from "../../../context/AuthContext";
 import CollectionDropdown from "../../common/Modal/Recipe/CollectionDropdown";
+import DeleteRecipeModal from "../../common/Modal/Recipe/DeleteRecipeModal";
 import { toast } from "react-toastify";
 
-const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
+const SavedCard = ({ recipe, onRemove, showRemoveOption, onRecipeDeleted }) => {
   const [authorData, setAuthorData] = useState(null);
   const [isInFavorites, setIsInFavorites] = useState(false);
   const [showCollectionDropdown, setShowCollectionDropdown] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const isLoggedIn = !!user;
+
+  // Check if current user is the author of this recipe
+  const isAuthor = user && recipe.author && (
+    (typeof recipe.author === 'string' && recipe.author === user._id) ||
+    (typeof recipe.author === 'object' && recipe.author._id === user._id)
+  );
   // Get difficulty level (1-3)
   const getDifficultyLevel = () => {
     // First check if difficulty is directly on recipe object
@@ -123,7 +134,6 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
       toast.error("Không thể cập nhật yêu thích");
     }
   };
-
   const handleShowCollections = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -134,6 +144,45 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
     }
 
     setShowCollectionDropdown(true);
+  };
+
+  const handleEditRecipe = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/recipes/edit/${recipe._id || recipe.id}`);
+  };
+
+  const handleDeleteRecipe = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteRecipe = async () => {
+    try {
+      setIsDeleting(true);
+      const response = await deleteRecipe(recipe._id || recipe.id);
+      
+      if (response.status === 200 && response.data.success) {
+        toast.success("Xóa công thức thành công!");
+        setShowDeleteModal(false);
+        
+        // Call parent callback if provided
+        if (onRecipeDeleted) {
+          onRecipeDeleted(recipe._id || recipe.id);
+        }
+        
+        // Refresh the page or redirect
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error("Error deleting recipe:", error);
+      toast.error(
+        error.response?.data?.message || "Có lỗi xảy ra khi xóa công thức"
+      );
+    } finally {
+      setIsDeleting(false);
+    }
   };
   const handleCollectionSuccess = () => {
     // Refresh favorites status
@@ -250,11 +299,10 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
     }
 
     // Return max 2 categories
-    return allCategories.slice(0, 2);
+    return allCategories.slice(0, 1);
   };
   return (
-    <a
-      href={`/recipes/${recipe._id || recipe.id}`}
+    <div
       className="block group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-100 hover:border-gray-200 cursor-pointer"
     >
       {/* Recipe Image Container */}
@@ -272,10 +320,29 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
           }
           alt={getTitle()}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-        />{" "}
-        {/* Top action buttons - Only show when logged in */}{" "}
+        />    
+        {/* Top action buttons - Only show when logged in */}
         {isLoggedIn && (
           <div className="absolute top-4 right-4 z-20 flex gap-2">
+            {/* Edit/Delete buttons for recipe author */}
+            {isAuthor && (
+              <>                <button
+                  onClick={handleEditRecipe}
+                  className="p-2.5 bg-white/90 backdrop-blur-md rounded-full hover:bg-blue-50 hover:scale-110 transition-all duration-300 shadow-lg"
+                  title="Chỉnh sửa công thức"
+                >
+                  <Edit size={16} className="text-blue-600" />
+                </button>
+                <button
+                  onClick={handleDeleteRecipe}
+                  className="p-2.5 bg-white/90 backdrop-blur-md rounded-full hover:bg-red-50 hover:scale-110 transition-all duration-300 shadow-lg"
+                  title="Xóa công thức"
+                >
+                  <Trash2 size={16} className="text-red-600" />
+                </button>
+              </>
+            )}
+
             {/* Heart button for favorites */}
             <button
               onClick={
@@ -334,7 +401,7 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
               <MoreVertical size={16} className="text-gray-600" />
             </button>
           </div>
-        )}{" "}
+        )}
         {/* Recipe categories badges */}
         <div className="absolute top-4 left-4 z-20">
           <div className="flex flex-wrap gap-2">
@@ -376,8 +443,8 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
       </div>{" "}
       {/* Content Section */}
       <div className="p-6">
-        <div className="block group/link">
-          <h3 className="font-medium text-lg text-gray-900 line-clamp-2 mb-3 group-hover/link:text-orange-600 transition-colors duration-300 leading-tight">
+        <div className="block group">
+          <h3 className="font-medium text-lg text-gray-900 line-clamp-2 mb-3 group-hover:text-orange-600 transition-colors duration-300 leading-tight">
             {getTitle()}
           </h3>
         </div>{" "}
@@ -421,15 +488,23 @@ const SavedCard = ({ recipe, onRemove, showRemoveOption }) => {
         </div>
       </div>
       {/* Subtle border glow on hover */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-orange-300/10 to-yellow-300/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-      {/* Collection Dropdown */}
+      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-orange-300/10 to-yellow-300/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />      {/* Collection Dropdown */}
       <CollectionDropdown
         isOpen={showCollectionDropdown}
         onClose={() => setShowCollectionDropdown(false)}
         recipeId={recipe._id}
         onSuccess={handleCollectionSuccess}
       />
-    </a>
+
+      {/* Delete Recipe Modal */}
+      <DeleteRecipeModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeleteRecipe}
+        recipeName={getTitle()}
+        isDeleting={isDeleting}
+      />
+    </div>
   );
 };
 

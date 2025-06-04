@@ -95,16 +95,19 @@ export default function RecipeHeader({ recipe, onShare, onLike, isLiked }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-4">
-          <button
+        <div className="flex items-center gap-4">          <button
             onClick={onLike}
             className={`flex items-center justify-center w-10 h-10 rounded-full ${
               isLiked
-                ? "bg-red-500 text-white"
-                : "bg-gray-100 hover:bg-gray-200 text-gray-600"
+                ? "bg-gray-100  hover:bg-gray-200"
+                : "bg-gray-100 hover:text-red-500 hover:bg-gray-200"
             } transition-colors`}
           >
-            <Heart className="w-5 h-5" />
+            <Heart className={`w-5 h-5 ${
+              isLiked
+                ? "fill-red-500 text-red-500"
+                : "text-gray-600 hover:text-red-500"
+            } transition-colors`} />
           </button>
 
           <button

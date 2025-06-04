@@ -57,7 +57,8 @@ export default function RecipeDetail({ className }) {
         if (!objectIdRegex.test(id)) {
           setError("Invalid recipe ID");
           return;
-        }        const response = await getRecipeById(id);
+        }        
+        const response = await getRecipeById(id);
         const recipeData = response.data.data;
         setRecipe(recipeData);
         setError(null);

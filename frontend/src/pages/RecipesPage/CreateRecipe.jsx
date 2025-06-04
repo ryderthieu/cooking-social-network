@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Plus,
   Minus,
@@ -13,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BreadCrumb from "@/components/common/BreadCrumb";
+import CategoryModal from "@/components/common/CategoryModal";
 import { createRecipe } from "@/services/recipeService";
 import { getAllFormattedCategories } from "@/services/categoryService";
 import {
@@ -20,7 +19,8 @@ import {
   getIngredientUnits,
 } from "@/services/ingredientService";
 import { useNavigate } from "react-router-dom";
-import toast from "react-toastify";
+import { toast } from "react-toastify";
+import { useCloudinary } from "../../context/CloudinaryContext"
 
 // Helper function to generate unique IDs
 const generateUniqueId = () => `id_${Math.random().toString(36).substr(2, 9)}`;
@@ -39,23 +39,44 @@ export default function CreateRecipeForm() {
       unit: "",
       ingredientId: null,
     },
-  ]);
-  const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
+  ]);  const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
   const [activeIngredientIndex, setActiveIngredientIndex] = useState(-1);
   const [isSearching, setIsSearching] = useState(false);
-  const ingredientUnits = getIngredientUnits();
   const [steps, setSteps] = useState([
     { id: generateUniqueId(), summary: "", detail: "", time: "", images: [] },
   ]);
   const [selectedCategories, setSelectedCategories] = useState([]); // Khởi tạo là mảng rỗng
   const [categories, setCategories] = useState([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingCategories, setLoadingCategories] = useState(true); 
   const [imagePreview, setImagePreview] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [visibleCategoryCount] = useState(5);
-  const [ingredientSearchTimeout, setIngredientSearchTimeout] = useState(null);
+  const [visibleCategoryCount] = useState(5);  const [ingredientSearchTimeout, setIngredientSearchTimeout] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const { uploadImage } = useCloudinary();
+
+  // Tạo danh sách đơn vị động bao gồm cả đơn vị từ database
+  const getDynamicIngredientUnits = (currentIngredient) => {
+    const standardUnits = getIngredientUnits();
+    
+    // Nếu nguyên liệu có đơn vị từ database và không có trong danh sách chuẩn
+    if (currentIngredient?.unit && currentIngredient.ingredientId) {
+      const unitExists = standardUnits.some(unit => unit.value === currentIngredient.unit);
+      if (!unitExists) {
+        return [
+          { value: currentIngredient.unit, label: currentIngredient.unit },
+          ...standardUnits
+        ];
+      }
+    }
+    
+    return standardUnits;
+  };  
+  // Memoized handlers to prevent re-renders and focus loss
+  const handleDescriptionChange = useCallback((e) => {
+    setDescription(e.target.value);
+  }, []);
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -70,8 +91,7 @@ export default function CreateRecipeForm() {
             console.log("Fetched categories:", categoriesData);
             setCategories(
               categoriesData.filter(
-                (cat) =>
-                  cat && cat.key && cat.name && Array.isArray(cat.items)
+                (cat) => cat && cat.key && cat.name && Array.isArray(cat.items)
               )
             );
           }
@@ -85,16 +105,16 @@ export default function CreateRecipeForm() {
     };
 
     fetchCategories();
-  }, []); // Hàm tìm kiếm nguyên liệu từ API khi người dùng nhập tên
-  const handleSearchIngredient = async (value, idx) => {
-    if (value.length > 1) {
+  }, []);
+
+  const handleSearchIngredient = useCallback(async (value, idx) => {
+    if (value.length >= 1) {
       setIsSearching(true);
       setActiveIngredientIndex(idx);
       try {
         const response = await searchIngredients(value);
         if (response.data.success) {
           setIngredientSuggestions(response.data.data);
-          console.log("Found ingredients:", response.data.data);
         } else {
           setIngredientSuggestions([]);
         }
@@ -106,26 +126,27 @@ export default function CreateRecipeForm() {
       }
     } else {
       setIngredientSuggestions([]);
+      setActiveIngredientIndex(-1);
     }
-  };
+  }, []);
   // Xử lý khi người dùng chọn một nguyên liệu từ kết quả tìm kiếm
   const handleSelectIngredient = (ingredient, idx) => {
     const newIngredients = [...ingredients];
     newIngredients[idx].name = ingredient.name;
     newIngredients[idx].ingredientId = ingredient._id; // Lưu ID của nguyên liệu để gửi lên backend
 
-    // Nếu nguyên liệu từ database có unit, sử dụng nó
-    if (ingredient.unit) {
-      newIngredients[idx].unit = ingredient.unit;
-    }
+    // Luôn lấy đơn vị từ database - bắt buộc sử dụng đơn vị có sẵn
+    newIngredients[idx].unit = ingredient.unit || ""; // Sử dụng đơn vị từ DB, nếu không có thì để trống
 
     setIngredients(newIngredients);
     setIngredientSuggestions([]);
     setActiveIngredientIndex(-1);
 
     // Hiển thị thông báo thành công
-    toast.success(`Đã chọn nguyên liệu: ${ingredient.name}`);
+    const unitText = ingredient.unit ? ` (${ingredient.unit})` : "";
+    toast.success(`Đã chọn nguyên liệu: ${ingredient.name}${unitText}`);
   };
+
   // Xử lý thay đổi thông tin nguyên liệu
   const handleIngredientChange = (idx, field, value) => {
     const newIngredients = [...ingredients];
@@ -134,22 +155,31 @@ export default function CreateRecipeForm() {
 
     // Nếu field là name, thực hiện tìm kiếm với debounce để giảm số lượng API calls
     if (field === "name") {
+      // Clear existing timeout
       if (ingredientSearchTimeout) {
         clearTimeout(ingredientSearchTimeout);
       }
 
-      if (value.length > 1) {
-        // Set new timeout
+      // Reset ingredient ID when user changes name manually
+      if (newIngredients[idx].ingredientId) {
+        newIngredients[idx].ingredientId = null;
+        setIngredients(newIngredients);
+      }
+
+      if (value.length >= 1) {
+       // Set new timeout with appropriate delay
         const timeoutId = setTimeout(() => {
           handleSearchIngredient(value, idx);
-        }, 500); // Wait 500ms before searching
+        }, 200); 
 
         setIngredientSearchTimeout(timeoutId);
       } else {
         setIngredientSuggestions([]);
+        setActiveIngredientIndex(-1);
       }
     }
   };
+
   const addIngredient = () => {
     // Thêm nguyên liệu trống mới với cấu trúc đầy đủ
     setIngredients([
@@ -269,8 +299,8 @@ export default function CreateRecipeForm() {
   const removeImage = () => {
     setImagePreview(null);
     setImageFile(null);
-  };
-
+  };  
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -296,6 +326,38 @@ export default function CreateRecipeForm() {
         return;
       }
 
+      // Upload main recipe image to Cloudinary first
+      let mainImageUrl = null;
+      if (imageFile) {
+        toast.info("Đang tải ảnh chính lên...");
+        const uploadResult = await uploadImage(imageFile, "recipes");
+        mainImageUrl = uploadResult.secure_url;
+      }
+
+      // Upload step images to Cloudinary
+      const stepsData = [];
+      for (let i = 0; i < steps.length; i++) {
+        const step = steps[i];
+        const stepData = {
+          step: `${
+            step.summary ? step.summary.trim() + ": " : ""
+          }${step.detail.trim()}`,
+          time: step.time ? parseInt(step.time) : null,
+          images: [], // Store Cloudinary URLs
+        };
+
+        // Upload step images to Cloudinary
+        if (step.images && step.images.length > 0) {
+          toast.info(`Đang tải ảnh bước ${i + 1}...`);
+          for (const img of step.images) {
+            const uploadResult = await uploadImage(img.file, "recipes/steps");
+            stepData.images.push(uploadResult.secure_url);
+          }
+        }
+
+        stepsData.push(stepData);
+      }
+
       // Prepare recipe data
       const recipeData = {
         name: recipeName.trim(),
@@ -306,17 +368,11 @@ export default function CreateRecipeForm() {
           name: ing.name.trim(),
           quantity: parseFloat(ing.amount) || 1,
           unit: ing.unit || "",
-          ingredientId: ing.ingredientId || null, // Gửi ID nguyên liệu nếu có
+          ingredientId: ing.ingredientId || null,
         })),
-        steps: steps.map((step) => ({
-          step: `${
-            step.summary ? step.summary.trim() + ": " : ""
-          }${step.detail.trim()}`,
-          image: step.images ? step.images.map((img) => img.file) : [],
-          time: step.time ? parseInt(step.time) : null,
-        })),
-        categories: selectedCategories, // Already storing category IDs now
-        image: imageFile ? [imageFile] : [],
+        steps: stepsData,
+        categories: selectedCategories,
+        image: mainImageUrl ? [mainImageUrl] : [], // Send as array
       };
 
       console.log("Submitting recipe data:", recipeData);
@@ -416,24 +472,24 @@ export default function CreateRecipeForm() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-base"
                   required
                 />
-              </div>
-              <div>
+              </div>              <div>
                 <label
                   htmlFor="description"
                   className="block text-base font-medium text-gray-700 mb-2"
                 >
                   Mô tả món ăn
-                </label>
-                <textarea
+                </label>                <textarea
+                  key="recipe-description"
                   id="description"
                   value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  onChange={handleDescriptionChange}
                   placeholder="Mô tả ngắn gọn về món ăn của bạn..."
                   rows={3}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 resize-none"
                   required
                 />
               </div>
+
               {/* Quick Info */}{" "}
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -447,7 +503,7 @@ export default function CreateRecipeForm() {
                       onClick={() =>
                         setServings(Math.max(1, parseInt(servings) - 1))
                       }
-                      className="px-3 py-2 border border-gray-300 rounded-l-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200"
+                      className="px-3 py-4 border border-gray-300 rounded-l-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200"
                     >
                       <Minus className="w-4 h-4 text-gray-600" />
                     </button>
@@ -462,7 +518,7 @@ export default function CreateRecipeForm() {
                     <button
                       type="button"
                       onClick={() => setServings(parseInt(servings) + 1)}
-                      className="px-3 py-2 border border-gray-300 rounded-r-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200"
+                      className="px-3 py-4 border border-gray-300 rounded-r-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200"
                     >
                       <Plus className="w-4 h-4 text-gray-600" />
                     </button>
@@ -543,100 +599,19 @@ export default function CreateRecipeForm() {
                     className="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center transition-all duration-200"
                   >
                     <Plus className="w-4 h-4" />
-                  </button>
-                </div>{" "}
-                {showCategoryModal && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center overflow-hidden">
-                    <div className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto border border-gray-50">
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg font-medium text-gray-900">
-                          Tìm kiếm danh mục
-                        </h3>
-                        <button
-                          type="button"
-                          onClick={closeCategoryModal}
-                          className="p-2 text-gray-400 hover:text-gray-600 bg-gray-100 transition-colors rounded-full hover:bg-gray-200"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="mb-4 relative">
-                        <input
-                          type="text"
-                          placeholder="Tìm kiếm danh mục..."
-                          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none"
-                        />
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          <svg
-                            className="h-5 w-5 text-gray-400"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      </div>
-                      <div className="space-y-4">
-                        {categories.map((categoryGroup) => (
-                          <div key={categoryGroup.key}>
-                            <h4 className="font-medium text-gray-800 mb-3 border-b pb-2">
-                              {categoryGroup.name}
-                            </h4>
-                            <div className="flex flex-wrap gap-2 mb-4">
-                              {categoryGroup.items.map((category) => (
-                                <button
-                                  key={category._id}
-                                  type="button"
-                                  className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                                    selectedCategories.some(
-                                      (id) => id === category._id
-                                    )
-                                      ? "bg-amber-500 text-white shadow-md"
-                                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                                  }`}
-                                  onClick={() => {
-                                    toggleCategory(category);
-                                  }}
-                                >
-                                  {category.metadata?.icon && (
-                                    <span className="mr-1">
-                                      {category.metadata.icon}
-                                    </span>
-                                  )}
-                                  {category.name}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>{" "}
-                      <div className="mt-6 flex justify-end gap-3">
-                        <button
-                          type="button"
-                          onClick={closeCategoryModal}
-                          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                        >
-                          Hủy
-                        </button>
-                        <button
-                          type="button"
-                          onClick={closeCategoryModal}
-                          className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors font-medium"
-                        >
-                          Áp dụng
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
+                  </button>                </div>{" "}
+                <CategoryModal
+                  isOpen={showCategoryModal}
+                  onClose={closeCategoryModal}
+                  categories={categories}
+                  selectedCategories={selectedCategories}
+                  onToggleCategory={toggleCategory}
+                  onClearAll={() => setSelectedCategories([])}
+                />
               </div>
             </div>
           </div>{" "}
+
           {/* Content Sections */}
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Ingredients Section */}
@@ -650,7 +625,6 @@ export default function CreateRecipeForm() {
                   Nguyên liệu
                 </h3>
                 <div className="space-y-3">
-                  {" "}
                   {ingredients.map((ingredient, idx) => (
                     <div
                       key={`ingredient-${idx}-${ingredient.name}`}
@@ -670,14 +644,14 @@ export default function CreateRecipeForm() {
                                 e.target.value
                               )
                             }
-                            className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                            className={`w-full p-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
                               ingredient.ingredientId
                                 ? "border-green-500 bg-green-50"
                                 : "border-gray-300"
                             }`}
                             required
                           />
-                          {/* Hiển thị thông báo khi đã chọn từ database */}
+
                           {ingredient.ingredientId && (
                             <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                               <span className="text-green-600 text-xs font-medium flex items-center">
@@ -762,17 +736,21 @@ export default function CreateRecipeForm() {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           required
                         />
-                      </div>
-                      <div className="w-24">
+                      </div>                      <div className="w-24">
                         <select
                           value={ingredient.unit}
                           onChange={(e) =>
                             handleIngredientChange(idx, "unit", e.target.value)
                           }
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        >
+                          disabled={!!ingredient.ingredientId}
+                          className={`w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent ${
+                            ingredient.ingredientId
+                              ? "border-green-500 bg-green-50 text-gray-600 cursor-not-allowed"
+                              : "border-gray-300"
+                          }`}
+                          title={ingredient.ingredientId ? "Đơn vị được khóa cho nguyên liệu từ database" : ""}                        >
                           <option value="">Đơn vị</option>
-                          {ingredientUnits.map((unit) => (
+                          {getDynamicIngredientUnits(ingredient).map((unit) => (
                             <option key={unit.value} value={unit.value}>
                               {unit.label}
                             </option>

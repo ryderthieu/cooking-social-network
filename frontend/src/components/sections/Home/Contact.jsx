@@ -70,6 +70,7 @@ export default function Contact() {
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra. Vui lòng thử lại!");
+      console.error("Lỗi khi gửi email: ", error);
     } finally {
       setIsSubmitting(false);
     }

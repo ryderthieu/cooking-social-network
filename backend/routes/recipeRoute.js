@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const { authenticateJWT } = require("../middlewares/authMiddleware");
 const { 
     getAllRecipes, 
@@ -15,6 +16,22 @@ const {
 
 const router = express.Router();
 
+// Configure multer for file uploads
+const storage = multer.memoryStorage();
+const upload = multer({ 
+    storage: storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed'), false);
+        }
+    }
+});
+
 // READ
 router.get('/user/:userId', getRecipeByUserId);
 router.get('/my-recipes',authenticateJWT, getMyRecipes);
@@ -25,7 +42,7 @@ router.get('/:id/similar', getSimilarRecipes);
 router.get('/:id', getRecipeById);
 router.get('/', getAllRecipes);
 
-// CREATE
+// CREATE - Updated to handle JSON data with Cloudinary URLs (no file upload needed)
 router.post('/', authenticateJWT, addRecipe);
 
 // UPDATE

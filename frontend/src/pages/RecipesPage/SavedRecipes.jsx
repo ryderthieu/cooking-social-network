@@ -144,9 +144,19 @@ export default function SavedRecipes() {
 
   const handleCloseModal = () => {
     setShowModal(false);
-  };
-  const handleRemoveRecipe = async (recipeId) => {
+  };  const handleRemoveRecipe = async (recipeId) => {
     try {
+      // Check if current collection is "Công thức của tôi"
+      const activeCollection = collections.find((c) => c._id === activeTab);
+      const isMyRecipesCollection = activeCollection?.defaultType === "created";
+
+      if (isMyRecipesCollection) {
+        // For "Công thức của tôi", we don't actually remove from collection
+        // Instead, we show appropriate message or handle recipe deletion
+        toast.info("Không thể xóa công thức khỏi 'Công thức của tôi'. Bạn có thể xóa công thức bằng cách chỉnh sửa nó.");
+        return;
+      }
+
       const response = await removeRecipeFromCollection(activeTab, recipeId);
 
       if (response.success) {
@@ -307,7 +317,8 @@ export default function SavedRecipes() {
                             : "border-gray-300"
                         } bg-white`}
                       />
-                    )}{" "}
+                    )}
+
                     <span className="mt-2 text-base font-semibold">
                       {col.name}
                     </span>
@@ -321,7 +332,8 @@ export default function SavedRecipes() {
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold">
             {collections.find((c) => c._id === activeTab)?.name}
-          </h2>{" "}
+          </h2>
+
           {/* Options dropdown - show only for custom collections (not default "Công thức của tôi" or "Yêu thích") */}
           {(() => {
             const activeCollection = collections.find(
@@ -357,16 +369,23 @@ export default function SavedRecipes() {
           ) : error ? (
             <div className="col-span-full text-center py-12">
               <p className="text-red-500 text-lg">{error}</p>
-            </div>
+            </div>          
+            
           ) : getFilteredRecipes().length > 0 ? (
-            getFilteredRecipes().map((recipe) => (
-              <SavedCard
-                key={recipe._id}
-                recipe={recipe}
-                onRemove={() => handleRemoveRecipe(recipe._id)}
-                showRemoveOption={true}
-              />
-            ))
+            getFilteredRecipes().map((recipe) => {
+              const activeCollection = collections.find((c) => c._id === activeTab);
+              const isMyRecipesCollection = activeCollection?.defaultType === "created";
+              
+              return (
+                <SavedCard
+                  key={recipe._id}
+                  recipe={recipe}
+                  onRemove={() => handleRemoveRecipe(recipe._id)}
+                  showRemoveOption={!isMyRecipesCollection}
+                  onRecipeDeleted={() => loadCollectionRecipes(activeTab)}
+                />
+              );
+            })
           ) : (
             <div className="col-span-full text-center py-12">
               <div className="flex flex-col items-center space-y-4">
@@ -419,7 +438,8 @@ export default function SavedRecipes() {
             )
           );
         })()}
-      </div>{" "}
+      </div>
+
       {/* Add Collection Modal */}
       <AddCollectionModal
         showModal={showModal}
@@ -439,7 +459,8 @@ export default function SavedRecipes() {
         }}
         collection={selectedCollection}
         onUpdateCollection={handleUpdateCollection}
-      />{" "}
+      />
+
       {/* Change Collection Image Modal */}
       <ChangeCollectionImageModal
         showModal={showChangeImageModal}
