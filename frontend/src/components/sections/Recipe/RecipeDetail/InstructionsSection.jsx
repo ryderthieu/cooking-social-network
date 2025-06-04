@@ -44,11 +44,11 @@ export default function InstructionsSection({ recipe }) {
                 key={index}
                 className="border-l-4 border-orange-400 pl-6"
               >                <h3 className="font-semibold mb-3 text-lg text-gray-800">
-                  Bước {index + 1}
+                  Bước {index + 1}: {instruction.step}
                 </h3>
                 <div className="text-gray-600 mb-4 leading-relaxed">
-                  {instruction?.step ? (
-                    instruction.step.split('\n').map((paragraph, pIndex) => (
+                  {instruction?.description ? (
+                    instruction.description.split('\n').map((paragraph, pIndex) => (
                       paragraph.trim() && (
                         <p key={pIndex} className="mb-2 last:mb-0">
                           {paragraph.trim()}
@@ -56,7 +56,7 @@ export default function InstructionsSection({ recipe }) {
                       )
                     ))
                   ) : (
-                    <p>No instruction provided.</p>
+                    <p></p>
                   )}
                 </div>
                 

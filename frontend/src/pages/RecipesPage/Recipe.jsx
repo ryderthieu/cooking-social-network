@@ -13,7 +13,8 @@ const Recipes = () => {
   const { categoryType, item } = useParams();
   const location = useLocation();
   const [scrollY, setScrollY] = useState(0);
-  const [filteredPopularRecipes, setFilteredPopularRecipes] = useState([]);  const [filteredAllRecipes, setFilteredAllRecipes] = useState([]);
+  const [filteredPopularRecipes, setFilteredPopularRecipes] = useState([]);
+  const [filteredAllRecipes, setFilteredAllRecipes] = useState([]);
   const [visibleRecipes, setVisibleRecipes] = useState(8);
   const [error, setError] = useState(null);
   const [currentCategory, setCurrentCategory] = useState(null);
@@ -112,8 +113,8 @@ const Recipes = () => {
           } catch (categoryError) {
             console.warn("Failed to load category info:", categoryError);
             setCurrentCategory(null);
-          }        }
-
+          }
+        }
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Có lỗi xảy ra khi tải dữ liệu");
@@ -220,7 +221,8 @@ chúng tôi mang đến cho bạn những trải nghiệm ẩm thực đa dạng
         categoryDescription={categoryDescription}
         categoryType={categoryType}
         currentCategory={currentCategory}
-      />      <div className="mx-auto space-y-10 my-10">
+      />{" "}
+      <div className="mx-auto space-y-10 my-10">
         {/* Blog Section */}
         <BlogSection />
 

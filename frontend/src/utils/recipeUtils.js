@@ -127,8 +127,8 @@ const convertQuantityToMultiplier = (quantity, unit) => {
     // Spoon measurements
     'tbsp': quantity * 0.15, // 1 tbsp ≈ 15ml
     'tsp': quantity * 0.05, // 1 tsp ≈ 5ml
-    'muỗng canh': quantity * 0.15,
-    'muỗng cà phê': quantity * 0.05,
+    'thìa canh': quantity * 0.15,
+    'thìa cà phê': quantity * 0.05,
     
     // Piece measurements (approximate)
     'quả': quantity * 1.5, // Average fruit ≈ 150g

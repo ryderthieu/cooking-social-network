@@ -8,11 +8,14 @@ const recipeSchema = new Schema({
     description: {type: String},
     ingredients: [{
         ingredient: {type: Schema.Types.ObjectId, ref: 'Ingredient'}, // Liên kết với model Ingredient
-        quantity: {type: Number} // Số lượng nguyên liệu
+        quantity: {type: Number}, // Số lượng nguyên liệu
+        name: {type: String}, // Cached name for easier access
+        unit: {type: String} // Unit for this specific recipe usage
     }],
     steps: [{
        step: {type: String, required: true}, // Mô tả bước nấu
-       image: [{type: String}]   // Array of image links (tối đa 4 hình)
+       image: [{type: String}],  // Array of image links (tối đa 4 hình)
+       description: {type: String}
     }],
     image: [{type: String}],
     categories: [{

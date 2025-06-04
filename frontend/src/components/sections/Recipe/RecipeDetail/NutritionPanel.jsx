@@ -97,7 +97,7 @@ export default function NutritionPanel({ calculatedNutrition }) {
         
         <p className="text-xs text-gray-500 mt-4 italic">
           {calculatedNutrition 
-            ? "*Thông tin dinh dưỡng được tính toán từ dữ liệu nguyên liệu trong cơ sở dữ liệu."
+            ? "*Thông tin dinh dưỡng được tính toán từ các thành phần nguyên liệu có trong công thức."
             : "*Chưa thể tính toán thông tin dinh dưỡng."
           }
         </p>

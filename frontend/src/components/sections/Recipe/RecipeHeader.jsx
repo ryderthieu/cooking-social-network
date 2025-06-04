@@ -1,5 +1,5 @@
+import { Cafe, TrungThu } from "@/assets/Recipe/icons";
 import React from "react";
-import TrungThu from '../../../assets/Recipe/trungthu.png'
 
 const RecipeHeader = ({
   scrollY,
@@ -58,7 +58,7 @@ const RecipeHeader = ({
     const decorativeSchemes = {
       mealType: [
         {
-          src: "https://static.vecteezy.com/system/resources/previews/026/691/112/large_2x/coffee-cup-art-collection-ai-generated-free-png.png",
+          src: Cafe,
           alt: "Bread",
           className: "absolute top-0 right-[48px] w-[180px] rotate-[10deg] z-20",
         },

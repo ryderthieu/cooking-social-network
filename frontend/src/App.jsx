@@ -1,5 +1,5 @@
 import "./App.css";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import HomePage from "./pages/HomePage/index";
 import NewBlog from "./pages/BlogPage/NewBlog";
 import HighlightBlog from "./pages/BlogPage/HighlightBlog";
@@ -33,20 +33,18 @@ import PostDetail from "./pages/PostPage/PostDetail";
 import Recipes from "./pages/RecipesPage/Recipe";
 import RecipeCategories from "./pages/RecipesPage";
 import CreateRecipe from "./pages/RecipesPage/CreateRecipe";
+import EditRecipe from "./pages/RecipesPage/EditRecipe";
 import SavedRecipes from "./pages/RecipesPage/SavedRecipes";
 import ProfilePage from "./pages/ProfilePage";
 import HeaderLayout from "./components/layout/HeaderLayout";
 import ChatPage from "./pages/ChatPage";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 import RecipeDetail from "./pages/RecipesPage/RecipeDetail";
 
 import Loader from "./components/loader/Loader";
-import { useState, useEffect } from "react";
 
 function App() {
-  const { user } = useAuth();
-  const location = useLocation();
   // const [isLoading, setIsLoading] = useState(false);
 
   // useEffect(() => {
@@ -88,11 +86,13 @@ function App() {
     // },
     { path: "/account", element: <AccountPage /> },
     { path: "/profile/:userId", element: <ProfilePage /> },
+    
     { path: "/recipes", element: <RecipeCategories /> },
     { path: "/recipes/create", element: <CreateRecipe /> },
+    { path: "/recipes/edit/:id", element: <EditRecipe /> },
     { path: "/recipes/saved", element: <SavedRecipes /> },
-    { path: "/recipes/:categoryType/:item", element: <Recipes /> },
     { path: "/recipes/:id", element: <RecipeDetail /> },
+    { path: "/recipes/:categoryType/:item", element: <Recipes /> },
     // { path: "/posts/:id", element: <PostDetail />}
     { path: "/explore/*", element: <PostPage /> },
   ];
@@ -106,29 +106,29 @@ function App() {
     <>
       {/* {isLoading && <Loader />}
       {!isLoading && ( */}
-        <Routes>
-          {routes.map(({ path, element }) => (
-            <Route
-              key={path}
-              path={path}
-              element={<LayoutRoute element={element} />}
-            />
-          ))}
+      <Routes>
+        {routes.map(({ path, element }) => (
+          <Route
+            key={path}
+            path={path}
+            element={<LayoutRoute element={element} />}
+          />
+        ))}
 
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/posts/:id" element={<PostDetail />} />
-          <Route path="/chat" element={<ChatPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/posts/:id" element={<PostDetail />} />
+        <Route path="/chat" element={<ChatPage />} />
 
-          {headeronlyRoutes.map(({ path, element }) => (
-            <Route
-              key={path}
-              path={path}
-              element={<HeaderLayout>{element}</HeaderLayout>}
-            />
-          ))}
-        </Routes>
+        {headeronlyRoutes.map(({ path, element }) => (
+          <Route
+            key={path}
+            path={path}
+            element={<HeaderLayout>{element}</HeaderLayout>}
+          />
+        ))}
+      </Routes>
       {/* )} */}
     </>
   );

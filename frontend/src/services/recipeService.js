@@ -13,10 +13,19 @@ const recipeService = {
   getRecipeById: (id) => API.get(`${endpoint}/${id}`),
 
   // Create new recipe
-  createRecipe: (recipeData) => API.post(endpoint, recipeData),
+  createRecipe: (recipeData) => {
+    // If recipeData is FormData, set appropriate headers
+    const config = {};
+    if (recipeData instanceof FormData) {
+      config.headers = {
+        'Content-Type': 'multipart/form-data'
+      };
+    }
+    return API.post(endpoint, recipeData, config);
+  },
 
   // Update existing recipe
-  updateRecipe: (id, recipeData) => API.put(`${endpoint}/${id}`, recipeData),
+  updateRecipe: (id, recipeData) => API.patch(`${endpoint}/${id}`, recipeData),
 
   // Delete recipe
   deleteRecipe: (id) => API.delete(`${endpoint}/${id}`),

@@ -354,6 +354,14 @@ const removeRecipeFromCollection = async (req, res) => {
       });
     }
 
+    // Prevent removal from "Công thức của tôi" collection
+    if (collection.isDefault && collection.defaultType === "created") {
+      return res.status(400).json({
+        success: false,
+        message: "Không thể xóa công thức khỏi bộ sưu tập 'Công thức của tôi'. Bạn có thể xóa công thức bằng cách chỉnh sửa nó.",
+      });
+    }
+
     // Check if the recipe being removed is the one used for thumbnail
     const recipeToRemove = collection.recipes.find(
       (recipe) => recipe._id.toString() === recipeId
@@ -413,7 +421,9 @@ const removeRecipeFromCollection = async (req, res) => {
 const getCollectionRecipes = async (req, res) => {
   try {
     const { collectionId } = req.params;
-    const userId = req.user._id;    const collection = await Collection.findOne({
+    const userId = req.user._id;
+
+    const collection = await Collection.findOne({
       _id: collectionId,
       owner: userId,
     }).populate({
@@ -437,6 +447,17 @@ const getCollectionRecipes = async (req, res) => {
       });
     }
 
+    let recipes = collection.recipes;
+
+    // Special handling for "Công thức của tôi" collection
+    if (collection.isDefault && collection.defaultType === "created") {
+      // Get all recipes created by this user
+      recipes = await Recipe.find({ author: userId })
+        .populate("author", "firstName lastName avatar")
+        .populate("categories", "name type slug image")
+        .sort({ createdAt: -1 });
+    }
+
     res.status(200).json({
       success: true,
       data: {
@@ -445,8 +466,10 @@ const getCollectionRecipes = async (req, res) => {
           name: collection.name,
           description: collection.description,
           thumbnail: collection.thumbnail,
+          defaultType: collection.defaultType,
+          isDefault: collection.isDefault,
         },
-        recipes: collection.recipes,
+        recipes: recipes,
       },
     });
   } catch (error) {

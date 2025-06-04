@@ -223,8 +223,10 @@ const searchRecipe = async (req, res) => {
 // ✅ POST: Thêm công thức
 const addRecipe = async (req, res) => {
   try {
-    const { name, ingredients, steps, image, categories, utensils, time } =
-      req.body;
+    console.log('Request body:', req.body);
+    
+    // Extract fields from JSON request body (no longer FormData)
+    const { name, description, servings, time, categories, ingredients, steps, image } = req.body;
 
     if (!name) {
       return res.status(400).json({
@@ -234,7 +236,12 @@ const addRecipe = async (req, res) => {
       });
     }
 
-    if (!Array.isArray(ingredients) || ingredients.length === 0) {
+    // Validate data structures (already parsed from frontend)
+    let parsedIngredients = ingredients || [];
+    let parsedSteps = steps || [];
+    let parsedCategories = categories || [];
+
+    if (!Array.isArray(parsedIngredients) || parsedIngredients.length === 0) {
       return res.status(400).json({
         success: false,
         message: "Nguyên liệu là bắt buộc",
@@ -242,7 +249,7 @@ const addRecipe = async (req, res) => {
       });
     }
 
-    if (!Array.isArray(steps) || steps.length === 0) {
+    if (!Array.isArray(parsedSteps) || parsedSteps.length === 0) {
       return res.status(400).json({
         success: false,
         message: "Cần phải có bước làm",
@@ -250,17 +257,89 @@ const addRecipe = async (req, res) => {
       });
     }
 
+    // Get image URLs from request body (already uploaded to Cloudinary)
+    const mainImageUrls = Array.isArray(image) ? image : (image ? [image] : []);
+    console.log('Main image URLs received:', mainImageUrls);
+
+    // Process ingredients - match with database ingredients
+    const Ingredient = require('../models/ingredient');
+    const processedIngredients = [];
+
+    for (const ing of parsedIngredients) {
+      let ingredientRecord = null;
+      
+      // If ingredientId is provided, use it
+      if (ing.ingredientId) {
+        try {
+          ingredientRecord = await Ingredient.findById(ing.ingredientId);
+        } catch (error) {
+          console.warn(`Invalid ingredient ID: ${ing.ingredientId}`);
+        }
+      }
+      
+      // If no ingredient found and no ID provided, search by name
+      if (!ingredientRecord && ing.name) {
+        ingredientRecord = await Ingredient.findOne({
+          name: { $regex: new RegExp(`^${ing.name.trim()}$`, 'i') }
+        });
+      }
+      
+      // If still no ingredient found, create a new one
+      if (!ingredientRecord && ing.name) {
+        try {
+          const slugify = require('slugify');
+          ingredientRecord = new Ingredient({
+            name: ing.name.trim(),
+            slug: slugify(ing.name.trim(), { lower: true, locale: 'vi' }),
+            unit: ing.unit || '',
+          });
+          await ingredientRecord.save();
+          console.log(`Created new ingredient: ${ing.name}`);
+        } catch (createError) {
+          console.error('Error creating ingredient:', createError);
+          return res.status(500).json({
+            success: false,
+            message: "Lỗi tạo nguyên liệu mới",
+            error: `Không thể tạo nguyên liệu: ${ing.name}`
+          });
+        }
+      }      if (ingredientRecord) {
+        processedIngredients.push({
+          ingredient: ingredientRecord._id,
+          quantity: parseFloat(ing.amount || ing.quantity) || 1, // Handle both amount and quantity
+          name: ingredientRecord.name, // Add name for easier access
+          unit: ing.unit || ingredientRecord.unit || ''
+        });
+      }
+    }    // Process steps with Cloudinary image URLs
+    const processedSteps = parsedSteps.map((step, index) => {
+      const stepData = {
+        step: step.summary || step.step || `Bước ${index + 1}`, // Use summary or fallback
+        description: step.detail || step.description || '', // Add description field
+        time: step.time || null,
+        image: []
+      };
+
+      // Add step images from Cloudinary URLs
+      if (step.images && Array.isArray(step.images)) {
+        stepData.image = step.images; // step.images already contains Cloudinary URLs
+      }
+
+      return stepData;
+    });
+
     const slug = slugify(name, { lower: true, locale: "vi" });
 
     const recipe = new Recipe({
-      name,
+      name: name.trim(),
       slug,
-      ingredients,
-      steps,
-      image,
-      categories,
-      utensils,
-      time,
+      description: description?.trim() || '',
+      servings: parseInt(servings) || 1,
+      time: parseInt(time) || 30,
+      ingredients: processedIngredients,
+      steps: processedSteps,
+      image: mainImageUrls, // Use Cloudinary URLs
+      categories: parsedCategories || [],
       author: req.user ? req.user._id : null,
     });
 
@@ -279,7 +358,6 @@ const addRecipe = async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error adding recipe: ", error);
-
     res.status(500).json({
       success: false,
       message: "Server error",
@@ -311,6 +389,65 @@ const editRecipe = async (req, res) => {
         error: "Công thức không tồn tại",
       });
     }
+
+    // Process ingredients if provided
+    if (updates.ingredients && Array.isArray(updates.ingredients)) {
+      const Ingredient = require('../models/ingredient');
+      const processedIngredients = [];
+
+      for (const ing of updates.ingredients) {
+        let ingredientRecord = null;
+        
+        // If ingredientId is provided, use it
+        if (ing.ingredientId) {
+          try {
+            ingredientRecord = await Ingredient.findById(ing.ingredientId);
+          } catch (error) {
+            console.warn(`Invalid ingredient ID: ${ing.ingredientId}`);
+          }
+        }
+        
+        // If no ingredient found and no ID provided, search by name
+        if (!ingredientRecord && ing.name) {
+          ingredientRecord = await Ingredient.findOne({
+            name: { $regex: new RegExp(`^${ing.name.trim()}$`, 'i') }
+          });
+        }
+        
+        // If still no ingredient found, create a new one
+        if (!ingredientRecord && ing.name) {
+          try {
+            const slugify = require('slugify');
+            ingredientRecord = new Ingredient({
+              name: ing.name.trim(),
+              slug: slugify(ing.name.trim(), { lower: true, locale: 'vi' }),
+              unit: ing.unit || '',
+            });
+            await ingredientRecord.save();
+            console.log(`Created new ingredient: ${ing.name}`);
+          } catch (createError) {
+            console.error('Error creating ingredient:', createError);
+            return res.status(500).json({
+              success: false,
+              message: "Lỗi tạo nguyên liệu mới",
+              error: `Không thể tạo nguyên liệu: ${ing.name}`
+            });
+          }
+        }
+
+        if (ingredientRecord) {
+          processedIngredients.push({
+            ingredient: ingredientRecord._id,
+            quantity: parseFloat(ing.amount || ing.quantity) || 1,
+            name: ingredientRecord.name,
+            unit: ing.unit || ingredientRecord.unit || ''
+          });
+        }
+      }
+      
+      updates.ingredients = processedIngredients;
+    }
+
     if (updates.name) {
       updates.slug = slugify(updates.name, { lower: true, locale: "vi" });
     }
