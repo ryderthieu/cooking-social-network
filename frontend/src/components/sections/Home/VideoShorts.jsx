@@ -11,11 +11,13 @@ const VideoShorts = () => {
   const [showControls, setShowControls] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [videoTime, setVideoTime] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
   const videoRef = useRef(null);
   const timerRef = useRef(null);
   const navigate = useNavigate();
 
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
+  const isAuthenticated = !!user;
 
   // Hàm xử lý khi nhấn đăng nhập
   const handleLogin = () => {
@@ -69,6 +71,13 @@ const VideoShorts = () => {
     }
   };
 
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
   // Kiểm tra trạng thái like/dislike từ server khi component mount
   useEffect(() => {
     // Nếu đã đăng nhập, lấy thông tin tương tác của người dùng với video này
@@ -81,7 +90,7 @@ const VideoShorts = () => {
       //   })
       //   .catch(error => console.error("Error fetching interaction status:", error));
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -93,13 +102,16 @@ const VideoShorts = () => {
     // Theo dõi thời gian video đã phát
     const handleTimeUpdate = () => {
       setVideoTime(video.currentTime);
+      
+      console.log("Video time:", video.currentTime, "isAuthenticated:", isAuthenticated);
 
-      // Nếu chưa đăng nhập và đã xem được 12 giây
+      // Nếu chưa đăng nhập và đã xem được 10 giây
       if (
-        isAuthenticated === false &&
-        video.currentTime >= 12 &&
+        !isAuthenticated &&
+        video.currentTime >= 10 &&
         !showLoginModal
       ) {
+        console.log("Dừng video vì chưa đăng nhập và đã xem 10 giây");
         video.pause();
         setIsPlaying(false);
         setShowLoginModal(true);
@@ -117,6 +129,20 @@ const VideoShorts = () => {
     };
   }, [isAuthenticated, showLoginModal]);
 
+  // Effect riêng để kiểm tra khi user thay đổi
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    // Nếu người dùng chưa đăng nhập và video đã phát quá 10 giây
+    if (!isAuthenticated && video.currentTime >= 10 && !showLoginModal) {
+      console.log("Dừng video vì chưa đăng nhập và đã xem 10 giây (effect)");
+      video.pause();
+      setIsPlaying(false);
+      setShowLoginModal(true);
+    }
+  }, [user, isAuthenticated, showLoginModal]);
+
   return (
     <div className="mt-[100px]">
       <div className="flex flex-row gap-6">
@@ -133,6 +159,7 @@ const VideoShorts = () => {
               poster={GaNuong}
               className="w-full object-contain h-[600px] rounded-lg shadow-lg bg-black"
               onClick={togglePlayPause}
+              muted={isMuted}
               loop
             />
 
@@ -218,6 +245,50 @@ const VideoShorts = () => {
 
             {/* Interaction buttons on right side */}
             <div className="absolute right-3 top-1/3 flex flex-col items-center">
+              {/* Mute/Unmute button */}
+              <button
+                onClick={toggleMute}
+                className={`w-9 h-9 flex items-center justify-center ${
+                  isMuted ? "bg-red-500" : "bg-black/30"
+                } rounded-full transition-colors hover:bg-red-500/70 mb-3`}
+              >
+                {isMuted ? (
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-5 h-5 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                    />
+                  </svg>
+                )}
+              </button>
+
               <button
                 onClick={handleLike}
                 className={`w-9 h-9 flex items-center justify-center ${
@@ -318,7 +389,7 @@ const VideoShorts = () => {
                     Đăng nhập để tiếp tục xem
                   </h3>
                   <p className="text-sm text-gray-600 mt-2">
-                    Để xem toàn bộ video và tương tác, vui lòng đăng nhập hoặc
+                    Để xem toàn bộ video và có thể thích, bình luận, vui lòng đăng nhập hoặc
                     đăng ký tài khoản.
                   </p>
                   <div className="mt-6 flex flex-col gap-3">
