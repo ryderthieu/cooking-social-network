@@ -167,9 +167,17 @@ export default function SavedRecipes() {
       toast.error("Không thể xóa công thức");
     }
   };
-
   // Collection options handlers
   const handleEditCollection = (collection) => {
+    console.log("Attempting to edit collection:", collection);
+    console.log("Is default collection:", collection.isDefault, collection.defaultType);
+    
+    // Double check if this is a default collection
+    if (collection.isDefault && (collection.defaultType === "favorites" || collection.defaultType === "created")) {
+      toast.error("Không thể chỉnh sửa bộ sưu tập mặc định");
+      return;
+    }
+    
     setSelectedCollection(collection);
     setShowEditModal(true);
   };
@@ -182,8 +190,7 @@ export default function SavedRecipes() {
   const handleDeleteCollection = (collection) => {
     setSelectedCollection(collection);
     setShowDeleteModal(true);
-  };
-  const handleUpdateCollection = async (updatedData) => {
+  };  const handleUpdateCollection = async (updatedData) => {
     try {
       const response = await updateCollection(
         selectedCollection._id,
@@ -197,7 +204,9 @@ export default function SavedRecipes() {
       }
     } catch (error) {
       console.error("Error updating collection:", error);
-      toast.error("Không thể cập nhật bộ sưu tập");
+      // Display specific error message from backend
+      const errorMessage = error.message || error.response?.data?.message || "Không thể cập nhật bộ sưu tập";
+      toast.error(errorMessage);
     }
   };
   const handleUpdateCollectionImage = async (collectionId, imageUrl) => {
@@ -323,9 +332,8 @@ export default function SavedRecipes() {
               </div>
             );
           })}
-        </div>
-        {/* Collection Title */}
-        <div className="flex items-center justify-between mb-6">
+        </div>        {/* Collection Title */}
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold">
             {collections.find((c) => c._id === activeTab)?.name}
           </h2>
@@ -356,6 +364,20 @@ export default function SavedRecipes() {
             ) : null;
           })()}
         </div>
+
+        {/* Collection Description */}
+        {(() => {
+          const activeCollection = collections.find((c) => c._id === activeTab);
+          const description = activeCollection?.description;
+          
+          return description && description.trim() !== "" ? (
+            <div className="mb-6">
+              <p className="text-gray-600 text-base leading-relaxed bg-gray-50 p-4 rounded-lg border-l-4 border-orange-300">
+                {description}
+              </p>
+            </div>
+          ) : null;
+        })()}
         {/* Recipe Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           { getFilteredRecipes().length > 0 ? (

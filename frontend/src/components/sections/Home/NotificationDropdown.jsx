@@ -10,7 +10,7 @@ import {
   markAllAsRead,
 } from "@/services/notificationService";
 
-export default function NotificationDropdown() {
+export default function NotificationDropdown({ onOpen }) {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
   const [notifications, setNotifications] = useState([]);
@@ -194,19 +194,35 @@ export default function NotificationDropdown() {
   return (
     <div ref={dropdownRef} className="relative inline-block text-left">
       <button
-        onClick={() => setOpen(!open)}
-        className="relative p-2 rounded-full hover:bg-gray-100 border border-gray-600 hover:border-gray-700 transition-colors duration-200"
+        onClick={() => {
+          setOpen(!open);
+          if (!open && onOpen) {
+            onOpen();
+          }
+        }}
+        className={`relative p-2 rounded-full border transition-all duration-200 ${
+          open 
+            ? "bg-[#FF6363] border-[#FF6363] shadow-lg" 
+            : "hover:bg-gray-100 border-gray-600 hover:border-gray-700"
+        }`}
       >
-        <Bell className="w-6 h-6 text-gray-600" strokeWidth={1.5} />
+        <Bell 
+          className={`size-5 transition-colors duration-200 ${
+            open ? "text-white" : "text-gray-600"
+          }`} 
+          strokeWidth={1.5} 
+        />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs">
+          <span className={`absolute top-0 right-0 w-5 h-5 rounded-full flex items-center justify-center text-white text-xs transition-all duration-200 ${
+            open ? "bg-white text-[#FF6363] shadow-md" : "bg-red-500"
+          }`}>
             {unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-7 w-96 bg-white border border-gray-200 rounded-xl shadow-xl z-50">
+        <div className="absolute -right-[175px] mt-7 w-96 bg-white border border-gray-200 rounded-xl shadow-xl z-50">
           <div className="p-4 border-b border-gray-100 font-semibold text-gray-800 flex justify-between items-center">
             <span className="text-[16px]">Thông báo</span>
             {unreadCount > 0 && (

@@ -7,7 +7,7 @@ import { getUserConversations } from "@/services/conversationService";
 import { MessageCircleMore } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
-const MessageDropdown = () => {
+const MessageDropdown = ({ onOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [conversations, setConversations] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -199,12 +199,28 @@ const MessageDropdown = () => {
     <div className="relative" ref={dropdownRef}>
       {/* Message Icon Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 hover:bg-gray-100 rounded-full border border-gray-600 hover:border-gray-700 focus:outline-none transition-colors duration-200"
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen && onOpen) {
+            onOpen();
+          }
+        }}
+        className={`relative p-2 rounded-full border transition-all duration-200 ${
+          isOpen 
+            ? "bg-[#FF6363] border-[#FF6363] shadow-lg" 
+            : "hover:bg-gray-100 border-gray-600 hover:border-gray-700"
+        }`}
       >
-        <MessageCircleMore className="w-6 h-6 text-gray-600" strokeWidth={1.5} />
+        <MessageCircleMore 
+          className={`size-5 transition-colors duration-200 ${
+            isOpen ? "text-white" : "text-gray-600"
+          }`} 
+          strokeWidth={1.5} 
+        />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+          <span className={`absolute -top-1 -right-1 rounded-full h-5 w-5 flex items-center justify-center text-xs transition-all duration-200 ${
+            isOpen ? "bg-rose-500 text-[#f8e4e4] shadow-md" : "bg-red-500 text-white"
+          }`}>
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
@@ -212,7 +228,7 @@ const MessageDropdown = () => {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute right-0 w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 mt-7">
+        <div className="absolute -right-[120px] w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 mt-7">
           {/* Header */}
           <div className="p-4 border-b border-gray-100">
             <div className="flex items-center justify-between">

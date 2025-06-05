@@ -19,7 +19,7 @@ export default function ChangeCollectionImageModal({
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file && file.type.startsWith("image/")) {
       setSelectedFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -27,21 +27,21 @@ export default function ChangeCollectionImageModal({
       };
       reader.readAsDataURL(file);
     }
-  };  const handleSubmit = async () => {
+  };
+  const handleSubmit = async () => {
     if (!selectedFile) return;
-    
+
     try {
       setUploading(true);
       console.log("Starting upload to Cloudinary...");
-      
+
       // Upload ảnh lên Cloudinary trước
       const uploadResult = await uploadImage(selectedFile, "collections");
       console.log("Cloudinary upload result:", uploadResult);
-      
+
       // Sau đó update collection với URL mới
       console.log("Updating collection with URL:", uploadResult.secure_url);
       await onUpdateImage(collection._id, uploadResult.secure_url);
-      
     } catch (error) {
       console.error("Error in handleSubmit:", error);
       // Không đóng modal nếu có lỗi
@@ -54,23 +54,23 @@ export default function ChangeCollectionImageModal({
     setPreviewImage(null);
     setSelectedFile(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white rounded-2xl px-6 py-8 w-full max-w-md mx-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-xl font-semibold text-gray-900">
             Đổi ảnh bộ sưu tập
           </h3>
           <button
             onClick={handleClose}
             disabled={isLoading}
-            className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+            className="text-gray-400 bg-transparent p-2 rounded-full hover:text-gray-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
           >
             <X size={20} />
           </button>
@@ -82,18 +82,18 @@ export default function ChangeCollectionImageModal({
             <p className="text-sm text-gray-600 mb-4">
               Chọn ảnh mới cho bộ sưu tập "{collection?.name}"
             </p>
-            
+
             {/* Current/Preview Image */}
             <div className="w-32 h-32 mx-auto mb-4 rounded-full overflow-hidden border-4 border-gray-200">
               {previewImage ? (
-                <img 
-                  src={previewImage} 
-                  alt="Preview" 
+                <img
+                  src={previewImage}
+                  alt="Preview"
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <img 
-                  src={collection?.thumbnail} 
+                <img
+                  src={collection?.thumbnail}
                   alt={collection?.name}
                   className="w-full h-full object-cover"
                 />
@@ -108,7 +108,7 @@ export default function ChangeCollectionImageModal({
               onChange={handleFileSelect}
               className="hidden"
             />
-            
+
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
@@ -134,7 +134,8 @@ export default function ChangeCollectionImageModal({
             className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             Hủy
-          </button>          <button
+          </button>
+          <button
             onClick={handleSubmit}
             disabled={uploading || isLoading || !selectedFile}
             className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"

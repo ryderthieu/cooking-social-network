@@ -63,25 +63,33 @@ const Header = () => {
     fetchCategories();
   }, []);
 
+  // Function to close all dropdowns
+  const closeAllDropdowns = () => {
+    setIsExploreOpen(false);
+    setIsSupportOpen(false);
+    setIsSearchOpen(false);
+    setIsDropdownOpen(false);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       const target = event.target;
 
       const isInsideNav = navRef.current?.contains(target);
-      const isInsideDropdown = dropdownRef.current?.contains(target);
       const isInsideSearch = searchRef.current?.contains(target);
+      const isInsideDropdown = dropdownRef.current?.contains(target);
 
       if (!isInsideNav) {
         setIsExploreOpen(false);
         setIsSupportOpen(false);
       }
 
-      if (!isInsideDropdown) {
-        setIsDropdownOpen(false);
-      }
-
       if (!isInsideSearch) {
         setIsSearchOpen(false);
+      }
+
+      if (!isInsideDropdown) {
+        setIsDropdownOpen(false);
       }
     };
 
@@ -117,9 +125,7 @@ const Header = () => {
         <a
           href="/"
           onClick={() => {
-            setIsExploreOpen(false);
-            setIsSearchOpen(false);
-            setIsSupportOpen(false);
+            closeAllDropdowns();
           }}
           className={`flex cursor-pointer relative items-center transition-all duration-300 ${
             active == 0 ? "text-[#FF6363]" : "text-[#211E2E]"
@@ -133,8 +139,11 @@ const Header = () => {
 <div
   onClick={() => {
     setIsExploreOpen(!isExploreOpen);
-    setIsSearchOpen(false);
-    setIsSupportOpen(false);
+    if (!isExploreOpen) {
+      setIsSearchOpen(false);
+      setIsSupportOpen(false);
+      setIsDropdownOpen(false);
+    }
   }}
   className={`flex cursor-pointer relative items-center ${
     active == 1 ? "text-[#FF6363]" : "text-[#211E2E]"
@@ -229,9 +238,7 @@ const Header = () => {
         <a
           href="/explore"
           onClick={() => {
-            setIsExploreOpen(false);
-            setIsSearchOpen(false);
-            setIsSupportOpen(false);
+            closeAllDropdowns();
           }}
           className={`flex cursor-pointer relative items-center ${
             active == 2 ? "text-[#FF6363]" : "text-[#211E2E]"
@@ -246,9 +253,7 @@ const Header = () => {
         <a
           href="/about"
           onClick={() => {
-            setIsExploreOpen(false);
-            setIsSearchOpen(false);
-            setIsSupportOpen(false);
+            closeAllDropdowns();
           }}
           className={`flex cursor-pointer relative items-center ${
             active == 3 ? "text-[#FF6363]" : "text-[#211E2E]"
@@ -263,8 +268,11 @@ const Header = () => {
         <div
           onClick={() => {
             setIsSupportOpen(!isSupportOpen);
-            setIsSearchOpen(false);
-            setIsExploreOpen(false);
+            if (!isSupportOpen) {
+              setIsSearchOpen(false);
+              setIsExploreOpen(false);
+              setIsDropdownOpen(false);
+            }
           }}
           className={`flex cursor-pointer relative items-center ${
             active == 4 ? "text-[#FF6363]" : "text-[#211E2E]"
@@ -330,7 +338,7 @@ const Header = () => {
             {/* Expandable Search */}
             <div
               className={`flex items-center transition-all duration-300 ease-in-out ${
-                isSearchOpen ? "w-[300px]" : "w-10"
+                isSearchOpen ? "w-[250px]" : "w-10"
               }`}
               ref={searchRef}
             >
@@ -360,91 +368,159 @@ const Header = () => {
                     </div>
                   )} */}
                   <div
-                    onClick={() => setIsSearchOpen(false)}
-                    className="p-1 hover:bg-gray-200 rounded-full transition-colors cursor-pointer ml-2"
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      setSearchQuery("");
+                    }}
+                    className="p-1 hover:bg-gray-200 rounded-full transition-colors cursor-pointer"
                   >
-                    <FaTimes className="w-4 h-4 text-gray-500" />
+                    <FaTimes className="size-[14px] text-gray-500" />
                   </div>
                 </div>
               ) : (
                 <div
                   className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
-                  onClick={() => setIsSearchOpen(true)}
+                  onClick={() => {
+                    setIsSearchOpen(true);
+                    setIsExploreOpen(false);
+                    setIsSupportOpen(false);
+                    setIsDropdownOpen(false);
+                  }}
                 >
-                  <IoSearchOutline className="w-6 h-6 text-slate-700" />
+                  <IoSearchOutline className="size-5 text-slate-700" />
                 </div>
               )}
             </div>
 
             {/* Notifications */}
             <div>
-              <NotificationDropdown />
+              <NotificationDropdown 
+                onOpen={() => {
+                  setIsDropdownOpen(false);
+                  setIsExploreOpen(false);
+                  setIsSupportOpen(false);
+                  setIsSearchOpen(false);
+                }}
+              />
             </div>
 
             {/* Messages */}
             <div>
-              <MessageDropdown />
+              <MessageDropdown 
+                onOpen={() => {
+                  setIsDropdownOpen(false);
+                  setIsExploreOpen(false);
+                  setIsSupportOpen(false);
+                  setIsSearchOpen(false);
+                }}
+              />
             </div>
 
             <a href="/recipes/saved">
               <div className="rounded-full p-2 hover:bg-gray-100 transition-colors duration-200 cursor-pointer border border-gray-600 hover:border-gray-700">
-                <Bookmark className="w-6 h-6 text-gray-600" strokeWidth={1.5} />
+                <Bookmark className="size-5 text-gray-600" strokeWidth={1.5} />
               </div>
             </a>
 
             {/* User Avatar */}
             <div
-              className="relative cursor-pointer"
-              onClick={() => setIsDropdownOpen((prev) => !prev)}
+              className="relative cursor-pointer group"
+              onClick={() => {
+                setIsDropdownOpen(!isDropdownOpen);
+                if (!isDropdownOpen) {
+                  setIsExploreOpen(false);
+                  setIsSupportOpen(false);
+                  setIsSearchOpen(false);
+                }
+              }}
             >
-              <div className="flex items-center gap-4">
-                <img
-                  src={
-                    user.avatar ||
-                    "https://randomuser.me/api/portraits/men/32.jpg"
-                  }
-                  className="w-10 h-10 rounded-full object-cover border-2 border-[#FFB800]"
-                />
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-[20px] h-[20px] bg-[#E2E5E9] rounded-full flex items-center justify-center text-[12px]">
-                <FaChevronDown
-                  className={`text-center text-white transition-transform duration-200 ${
-                    isDropdownOpen ? "rotate-180" : ""
-                  }`}
-                />
+              <div className="flex items-center p-2 rounded-full hover:bg-gray-50 transition-all duration-300 ease-in-out">
+                <div className="relative">
+                  <img
+                    src={
+                      user.avatar ||
+                      "https://randomuser.me/api/portraits/men/32.jpg"
+                    }
+                    alt={user.name || "User avatar"}
+                    className="w-10 h-10 rounded-full object-cover border-2 border-[#FFB800] shadow-md transition-all duration-300 group-hover:border-[#FF6363] group-hover:shadow-lg group-hover:scale-105"
+                  />
+                  {/* Online status indicator - moved to top-right */}
+                  <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
+                  {/* Chevron icon - bottom-right like Facebook */}
+                  <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-gradient-to-br from-[#FF6363] to-[#FFB800] border-2 border-white rounded-full flex items-center justify-center shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:scale-110">
+                    <FaChevronDown className="w-2 h-2 text-white drop-shadow-sm" />
+                  </div>
+                </div>
               </div>
             </div>
 
             {isDropdownOpen && (
-              <div className="absolute top-[80px] right-[100px] bg-white rounded-b-lg w-[200px] shadow-2xl z-10 overflow-hidden">
-                <div className="p-4">
+              <div 
+                className="absolute top-[95px] right-[110px] bg-white rounded-xl w-[250px] shadow-lg border border-gray-100 z-10 overflow-hidden backdrop-blur-sm"
+              >
+                {/* User info header */}
+                <div className="px-4 py-3  border-b border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={
+                        user.avatar ||
+                        "https://randomuser.me/api/portraits/men/32.jpg"
+                      }
+                      alt={user.name || "User avatar"}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-[#FFB800]"
+                    />
+                    <div>
+                      <p className="font-semibold text-gray-800 text-sm leading-tight">
+                        {user.name || "Người dùng"}
+                      </p>
+                      <p className="text-xs text-gray-500 leading-tight">
+                        {user.email || "user@example.com"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-2">
                   {/* Trang cá nhân */}
                   <a
                     href={`/profile/${user._id}`}
-                    className="block text-[#04043F] font-medium text-[16px] py-2 px-4 rounded-lg hover:bg-[#f9f9f9] hover:text-[#FF6363] transition-all duration-200"
+                    className="flex items-center gap-3 text-[#04043F] font-medium text-[15px] py-3 px-3 rounded-lg hover:bg-gradient-to-r hover:from-[#FF6363]/10 hover:to-[#FFB800]/10 hover:text-[#FF6363] transition-all duration-200 group"
                   >
-                    Trang cá nhân
+                    <svg className="w-4 h-4 text-gray-500 group-hover:text-[#FF6363] transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>Trang cá nhân</span>
                   </a>
+                  
                   {/* Tài khoản */}
                   <div
                     onClick={() => navigate("/account")}
-                    className="block text-[#04043F] font-medium text-[16px] py-2 px-4 rounded-lg cursor-pointer hover:bg-[#f9f9f9] hover:text-[#FF6363] transition-all duration-200"
+                    className="flex items-center gap-3 text-[#04043F] font-medium text-[15px] py-3 px-3 rounded-lg cursor-pointer hover:bg-gradient-to-r hover:from-[#FF6363]/10 hover:to-[#FFB800]/10 hover:text-[#FF6363] transition-all duration-200 group"
                   >
-                    Tài khoản
+                    <svg className="w-4 h-4 text-gray-500 group-hover:text-[#FF6363] transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span>Cài đặt tài khoản</span>
                   </div>
-                  {/* Đường kẻ ngăn cách */}
-                  <div className="border-t-[1px] border-[#FBDCB0] my-2"></div>
+                  
+                  {/* Divider */}
+                  <div className="border-t border-gray-200 my-2 mx-2"></div>
+                  
                   {/* Đăng xuất */}
-                  <p
+                  <div
                     onClick={() => {
                       logout();
                       navigate("/login");
-                      setIsDropdownOpen(false);
+                      closeAllDropdowns();
                     }}
-                    className="block text-[#FF6363] font-medium text-[16px] py-2 px-4 rounded-lg cursor-pointer hover:bg-[#fcecec] hover:text-red-600 transition-all duration-200"
+                    className="flex items-center gap-3 text-[#FF6363] font-medium text-[15px] py-3 px-3 rounded-lg cursor-pointer hover:bg-red-50 hover:text-red-600 transition-all duration-200 group"
                   >
-                    Đăng xuất
-                  </p>
+                    <svg className="w-4 h-4 text-[#FF6363] group-hover:text-red-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span>Đăng xuất</span>
+                  </div>
                 </div>
               </div>
             )}

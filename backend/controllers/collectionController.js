@@ -537,7 +537,7 @@ const toggleRecipeInFavorites = async (req, res) => {
     if (!favoriteCollection) {
       favoriteCollection = new Collection({
         name: "Yêu thích",
-        description: "Bộ sưu tập các công thức yêu thích của bạn",
+        description: "Bộ sưu tập các công thức yêu thích",
         owner: userId,
         isDefault: true,
         defaultType: "favorites",
@@ -628,7 +628,7 @@ const initializeDefaultCollections = async (userId) => {
     const defaultCollections = [
       {
         name: "Yêu thích",
-        description: "Những công thức tôi yêu thích",
+        description: "Những công thức yêu thích",
         owner: userId,
         isDefault: true,
         defaultType: "favorites",
@@ -636,7 +636,7 @@ const initializeDefaultCollections = async (userId) => {
       },
       {
         name: "Đã xem",
-        description: "Những công thức tôi đã xem gần đây",
+        description: "Những công thức đã xem gần đây",
         owner: userId,
         isDefault: true,
         defaultType: "viewed",
@@ -644,7 +644,7 @@ const initializeDefaultCollections = async (userId) => {
       },
       {
         name: "Công thức của tôi",
-        description: "Những công thức do tôi tạo",
+        description: "Những công thức đã tạo",
         owner: userId,
         isDefault: true,
         defaultType: "created",        thumbnail: userAvatar,
@@ -684,7 +684,7 @@ const addRecipeToMyRecipes = async (userId, recipeId) => {
 
       myRecipesCollection = new Collection({
         name: "Công thức của tôi",
-        description: "Những công thức do tôi tạo",
+        description: "Những công thức đã tạo",
         owner: userId,
         isDefault: true,
         defaultType: "created",

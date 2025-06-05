@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BreadCrumb from "@/components/common/BreadCrumb";
-import CategoryModal from "@/components/common/CategoryModal";
+import CategoryModal from "@/components/common/Modal/Recipe/CategoryModal";
 import { getRecipeById, updateRecipe } from "@/services/recipeService";
 import { getAllFormattedCategories } from "@/services/categoryService";
 import {
