@@ -45,7 +45,7 @@ const PostPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F5F1E8]  py-10 px-2 lg:px-8">
-      <div className="max-w-7xl mx-auto flex gap-8 relative">
+      <div className="max-w-7xl mx-auto flex gap-5 relative">
         <LeftSidebar
           activeTab={currentPath.includes("/explore/posts") ? "posts" : "reels"}
           onAdd={() => setShowCreateModal(true)}
@@ -61,7 +61,7 @@ const PostPage = () => {
         </div>
 
         <div className="w-80 flex-shrink-0 hidden lg:block">
-          <div className="sticky top-24">
+          <div className="sticky top-28">
             <RightSidebar />
           </div>
         </div>

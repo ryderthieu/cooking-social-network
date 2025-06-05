@@ -177,7 +177,7 @@ export const PostCard = ({
     const imageMedia = post.media?.filter((m) => m.type === "image") || [];
 
     return (
-        <div className="bg-white rounded-3xl shadow-xl p-6 mb-8 transition-all duration-500 hover:shadow-2xl hover:border-[#FFB800]/30 group backdrop-blur-sm">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-8 transition-all duration-500 hover:border-[#FFB800]/30 group backdrop-blur-sm">
             {/* Header với Avatar và Menu */}
             <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-4">

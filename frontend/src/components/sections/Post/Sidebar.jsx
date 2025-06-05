@@ -37,8 +37,8 @@ export const LeftSidebar = ({
   };
   return (
     <>
-      <aside className="hidden lg:block w-72 pr-4 space-y-6 sticky top-24 h-fit">
-        <div className="bg-white rounded-2xl shadow p-6 mb-2">
+      <aside className="hidden lg:block w-72 pr-4 space-y-6 sticky top-28 h-fit">
+        <div className="bg-white rounded-2xl p-6 mb-2">
           {/* Profile Section */}
           {user && (
             <div className="flex items-center gap-4 mb-6">
@@ -166,8 +166,8 @@ export const RightSidebar = () => {
   };
 
   return (
-    <aside className="hidden lg:block w-72 pl-4 space-y-6 sticky top-24 h-fit">
-      <div className="bg-white rounded-2xl shadow p-6 mb-2">
+    <aside className="hidden lg:block w-[320px] pl-4 space-y-6 sticky h-fit">
+      <div className="bg-white rounded-2xl  p-6 mb-2">
         <div className="flex items-center mb-4 text-[#FF6363] font-bold text-lg">
           <FaUserFriends className="mr-2" /> Gợi ý theo dõi
         </div>
@@ -216,7 +216,7 @@ export const RightSidebar = () => {
         )}
       </div>
 
-      <div className="bg-white rounded-2xl shadow p-6">
+      <div className="bg-white rounded-2xl p-6">
         <div className="flex items-center mb-4 text-[#FF6363] font-bold text-lg">
           <FaFire className="mr-2" /> Món ăn hot
         </div>
@@ -228,14 +228,14 @@ export const RightSidebar = () => {
               <li key={dish._id} className="flex items-center gap-3">
                 <Link 
                   to={`/recipes/${dish._id}`} 
-                  className="flex flex-row gap-2 items-center hover:scale-105 transition-transform duration-200 w-full"
+                  className="flex flex-row gap-2 items-center hover:scale-[1.01] transition-transform duration-200 w-full"
                 >
                   <img
                     src={dish.image}
                     alt={dish.name}
                     className="w-10 h-10 rounded object-cover border border-[#FF6363]"
                   />
-                  <span className="text-gray-700 font-medium text-sm line-clamp-2 hover:text-[#FFB800] transition-colors cursor-pointer">
+                  <span className="text-gray-700 font-medium text-sm line-clamp-2 transition-colors cursor-pointer">
                     {dish.name}
                   </span>
                 </Link>
