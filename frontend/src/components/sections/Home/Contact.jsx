@@ -119,13 +119,8 @@ export default function Contact() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/50 relative overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-orange-200/20 to-amber-200/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-amber-200/15 to-orange-200/15 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-orange-100/10 to-amber-100/10 rounded-full blur-3xl"></div>
-      </div>
+    <div className="relative overflow-hidden">
+
 
       <div className="relative z-10 mx-auto px-[120px] py-10">
         {/* Header */}
