@@ -12,40 +12,30 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { PostCard } from "../../components/common/Post";
 import { ReelCardReview } from "../../components/common/ReelCard";
 import SharePopup from "../../components/common/SharePopup";
-import postsService from "../../services/postService"; // Assuming default export
-import recipeService from "../../services/recipeService"; // Assuming default export
+import postsService from "../../services/postService"; 
+import recipeService from "../../services/recipeService"; 
 import { searchUsers } from "../../services/userService";
 import { searchVideos } from "../../services/videoService";
-import { getAllFormattedCategories } from "../../services/categoryService";
 import UserCard from "../../components/common/UserCard";
 import SavedCard from "@/components/sections/Recipe/SavedCard";
 import { useSocket } from "../../context/SocketContext";
 
 const SearchPage = () => {
-  const [searchQuery, setSearchQuery] = useState(""); // From URL, drives API calls
-  const [pageSearchQuery, setPageSearchQuery] = useState(""); // For the input on this page
+  const [searchQuery, setSearchQuery] = useState(""); 
+  const [pageSearchQuery, setPageSearchQuery] = useState(""); 
   const [activeFilter, setActiveFilter] = useState("posts");
   const [isFilterOpen, setIsFilterOpen] = useState(true);
   const [sharePopup, setSharePopup] = useState({ open: false, postId: null });
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { sendNotification } = useSocket();
 
   // Sub-filter state
   const [postSort, setPostSort] = useState("recent");
   const [videoSort, setVideoSort] = useState("recent");
-  const [recipeMealType, setRecipeMealType] = useState("all");
-  const [recipeCuisine, setRecipeCuisine] = useState("all");
-  const [recipeOccasions, setRecipeOccasions] = useState("all");
-  const [recipeDietaryPreferences, setRecipeDietaryPreferences] = useState("all");
-  const [recipeMainIngredients, setRecipeMainIngredients] = useState("all");
-  const [recipeCookingMethod, setRecipeCookingMethod] = useState("all");
   const [recipeTime, setRecipeTime] = useState("all");
   const [recipeDifficulty, setRecipeDifficulty] = useState("all");
-
-  // Categories state
-  const [categories, setCategories] = useState([]);
-  const [loadingCategories, setLoadingCategories] = useState(false);
 
   // Results state
   const [postResult, setPostResult] = useState([]);
@@ -70,29 +60,9 @@ const SearchPage = () => {
     // Sync sub-filters from URL or set to default
     setPostSort(params.get("postSort") || "recent");
     setVideoSort(params.get("videoSort") || "recent");
-    setRecipeCategory(params.get("recipeCategory") || "all");
     setRecipeTime(params.get("recipeTime") || "all");
     setRecipeDifficulty(params.get("recipeDifficulty") || "all");
   }, [location.search]);
-
-  // Load categories on component mount
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoadingCategories(true);
-        const response = await getAllFormattedCategories();
-        if (response.data?.success) {
-          setCategories(response.data.data || []);
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      } finally {
-        setLoadingCategories(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
 
   // Effect to fetch data when searchQuery or filters change
   useEffect(() => {
@@ -112,16 +82,17 @@ const SearchPage = () => {
 
       try {
         switch (activeFilter) {
-          case "posts":
+          case "posts": {
             // Note: postsService.search might need adjustment if it expects an object for params
             // For now, assuming it takes keyword and potentially other options if backend supports
-            const postData = await postsService.search(searchQuery);
+            const postData = await postsService.search(searchQuery, postSort);
             console.log(postData.data.posts);
             setPostResult(
               Array.isArray(postData?.data.posts) ? postData.data.posts : []
             );
             break;
-          case "videos":
+          }
+          case "videos": {
             const videoData = await searchVideos(searchQuery); // searchVideos returns { success: true, data: response.data }
             console.log(videoData);
             setReelResult(
@@ -130,43 +101,18 @@ const SearchPage = () => {
                 : []
             );
             break;
+          }
           case "recipes": {
             const recipeParams = { keyword: searchQuery };
             
-            // Map selected category to appropriate parameter based on category type
-            if (recipeCategory !== "all") {
-              // Find the selected category in categories list to get its type
-              let selectedCategory = null;
-              categories.forEach((categoryGroup) => {
-                const foundCategory = categoryGroup.items?.find((item) => 
-                  (item.slug === recipeCategory) || (item.name === recipeCategory)
-                );
-                if (foundCategory) {
-                  selectedCategory = { ...foundCategory, type: categoryGroup.key };
-                }
-              });
-
-              if (selectedCategory) {
-                // Map category type to the correct API parameter
-                const categoryTypeMap = {
-                  mealType: 'mealType',
-                  cuisine: 'cuisine', 
-                  occasions: 'occasions',
-                  dietaryPreferences: 'dietaryPreferences',
-                  mainIngredients: 'mainIngredients',
-                  cookingMethod: 'cookingMethod'
-                };
-                
-                const paramName = categoryTypeMap[selectedCategory.type];
-                if (paramName) {
-                  recipeParams[paramName] = selectedCategory.name;
-                }
-              }
+            if (recipeTime !== "all") {
+              recipeParams.time = recipeTime;
             }
             
-            if (recipeTime !== "all") recipeParams.time = recipeTime;
-            if (recipeDifficulty !== "all")
+            if (recipeDifficulty !== "all") {
               recipeParams.difficulty = recipeDifficulty;
+            }
+
             const recipeData = await recipeService.searchRecipes(recipeParams);
             console.log(recipeData);
             setRecipeResult(
@@ -205,10 +151,8 @@ const SearchPage = () => {
     activeFilter,
     postSort,
     videoSort,
-    recipeCategory,
     recipeTime,
     recipeDifficulty,
-    categories,
   ]);
 
   const updateUrlParams = (newParams) => {
@@ -242,14 +186,6 @@ const SearchPage = () => {
 
   const handleVideoSortChange = (newSort) => {
     updateUrlParams({ videoSort: newSort, filter: "videos", q: searchQuery });
-  };
-
-  const handleRecipeCategoryChange = (e) => {
-    updateUrlParams({
-      recipeCategory: e.target.value,
-      filter: "recipes",
-      q: searchQuery,
-    });
   };
 
   const handleRecipeTimeChange = (e) => {
@@ -366,45 +302,35 @@ const SearchPage = () => {
     }
     if (activeFilter === "recipes") {
       return (
-        <div className="mt-3 space-y-2 pl-2">
-          <select
-            value={recipeCategory}
-            onChange={handleRecipeCategoryChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm outline-none focus:border-gray-200 mb-2"
-          >
-            <option value="all">Danh mục</option>
-            {loadingCategories ? (
-              <option disabled>Đang tải...</option>
-            ) : (
-              categories.map((categoryGroup) => 
-                categoryGroup.items?.map((item) => (
-                  <option key={item._id} value={item.slug || item.name}>
-                    {item.name}
-                  </option>
-                ))
-              ).flat()
-            )}
-          </select>
-          <select
-            value={recipeTime}
-            onChange={handleRecipeTimeChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm outline-none focus:border-gray-200 mb-2"
-          >
-            <option value="all">Thời gian</option>
-            <option value="<30">Dưới 30 phút</option>
-            <option value="30-60">30-60 phút</option>
-            <option value=">60">Trên 60 phút</option>
-          </select>
-          <select
-            value={recipeDifficulty}
-            onChange={handleRecipeDifficultyChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm outline-none focus:border-gray-200"
-          >
-            <option value="all">Độ khó</option>
-            <option value="easy">Dễ</option>
-            <option value="medium">Trung bình</option>
-            <option value="hard">Khó</option>
-          </select>
+        <div className="mt-3 space-y-4 pl-2">
+          {/* Time Filter */}
+          <div className="space-y-2">
+           
+            <select
+              value={recipeTime}
+              onChange={handleRecipeTimeChange}
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm outline-none focus:border-orange-500 bg-white hover:border-orange-300 transition-colors"
+            >
+              <option value="all">Thời gian nấu</option>
+              <option value="<30">Dưới 30 phút</option>
+              <option value="30-60">30-60 phút</option>
+              <option value=">60">Trên 60 phút</option>
+            </select>
+          </div>
+          
+          {/* Difficulty Filter */}
+          <div className="space-y-2">
+            <select
+              value={recipeDifficulty}
+              onChange={handleRecipeDifficultyChange}
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm outline-none focus:border-orange-500 bg-white hover:border-orange-300 transition-colors"
+            >
+              <option value="all">Độ khó</option>
+              <option value="easy">Dễ</option>
+              <option value="medium">Trung bình</option>
+              <option value="hard">Khó</option>
+            </select>
+          </div>
         </div>
       );
     }
